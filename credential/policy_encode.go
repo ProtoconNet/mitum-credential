@@ -5,7 +5,6 @@ import (
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/encoder"
 	"github.com/ProtoconNet/mitum2/util/hint"
-	"github.com/holiman/uint256"
 )
 
 func (po *Policy) unpack(enc encoder.Encoder, ht hint.Hint, bts, bhs []string, ccount uint64) error {
@@ -15,13 +14,11 @@ func (po *Policy) unpack(enc encoder.Encoder, ht hint.Hint, bts, bhs []string, c
 
 	templates := make([]Uint256, len(bts))
 	for i := range bts {
-		t, err := uint256.FromHex(bts[i])
+		t, err := NewUint256FromString(bts[i])
 		if err != nil {
 			return e(err, "")
 		}
-		templates[i] = Uint256{
-			n: *t,
-		}
+		templates[i] = t
 	}
 	po.templates = templates
 

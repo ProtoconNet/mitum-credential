@@ -102,6 +102,67 @@ func StateKeyDesign(ca base.Address, crid extensioncurrency.ContractID) string {
 	return fmt.Sprintf("%s%s", StateKeyCredentialPrefix(ca, crid), DesignSuffix)
 }
 
+var (
+	TemplateStateValueHint = hint.MustNewHint("mitum-credential-template-state-value-v0.0.1")
+	TemplateSuffix         = ":credential-template"
+)
+
+type TemplateStateValue struct {
+	hint.BaseHinter
+	Template Template
+}
+
+func NewTemplateStateValue(template Template) TemplateStateValue {
+	return TemplateStateValue{
+		BaseHinter: hint.NewBaseHinter(TemplateStateValueHint),
+		Template:   template,
+	}
+}
+
+func (sv TemplateStateValue) Hint() hint.Hint {
+	return sv.BaseHinter.Hint()
+}
+
+func (sv TemplateStateValue) IsValid([]byte) error {
+	e := util.ErrInvalid.Errorf("invalid TemplateStateValue")
+
+	if err := sv.BaseHinter.IsValid(TemplateStateValueHint.Type().Bytes()); err != nil {
+		return e.Wrap(err)
+	}
+
+	if err := sv.Template.IsValid(nil); err != nil {
+		return e.Wrap(err)
+	}
+
+	return nil
+}
+
+func (sv TemplateStateValue) HashBytes() []byte {
+	return sv.Template.Bytes()
+}
+
+func StateKeyTemplate(ca base.Address, creditID extensioncurrency.ContractID, templateID Uint256) string {
+	return fmt.Sprintf("%s-%s%s", StateKeyCredentialPrefix(ca, creditID), templateID.String(), TemplateSuffix)
+}
+
+func IsStateTemplateKey(key string) bool {
+	return strings.HasPrefix(key, CredentialPrefix) && strings.HasSuffix(key, TemplateSuffix)
+}
+
+func StateTemplateValue(st base.State) (Template, error) {
+	v := st.Value()
+	if v == nil {
+		return Template{}, util.ErrNotFound.Errorf("template not found in State")
+	}
+
+	t, ok := v.(TemplateStateValue)
+	if !ok {
+		return Template{}, errors.Errorf("invalid template value found, %T", v)
+	}
+
+	return t.Template, nil
+}
+
 func checkExistsState(
 	key string,
 	getState base.GetStateFunc,
