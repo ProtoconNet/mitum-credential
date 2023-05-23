@@ -16,10 +16,11 @@ type Design struct {
 	policy   Policy
 }
 
-func NewDesign(creditID extensioncurrency.ContractID) Design {
+func NewDesign(creditID extensioncurrency.ContractID, policy Policy) Design {
 	return Design{
 		BaseHinter: hint.NewBaseHinter(DesignHint),
 		creditID:   creditID,
+		policy:     policy,
 	}
 }
 
@@ -36,7 +37,10 @@ func (de Design) IsValid([]byte) error {
 }
 
 func (de Design) Bytes() []byte {
-	return de.creditID.Bytes()
+	return util.ConcatBytesSlice(
+		de.creditID.Bytes(),
+		de.policy.Bytes(),
+	)
 }
 
 func (de Design) CreditID() extensioncurrency.ContractID {

@@ -175,6 +175,7 @@ func POperationProcessorsMap(ctx context.Context) (context.Context, error) {
 	opr.SetProcessor(mitumcurrency.SuffrageInflationHint, currency.NewSuffrageInflationProcessor(params.Threshold()))
 	opr.SetProcessor(currency.CreateContractAccountsHint, currency.NewCreateContractAccountsProcessor())
 	opr.SetProcessor(currency.WithdrawsHint, currency.NewWithdrawsProcessor())
+	opr.SetProcessor(credential.CreateCredentialServiceHint, credential.NewCreateCredentialServiceProcessor())
 
 	_ = set.Add(mitumcurrency.CreateAccountsHint, func(height base.Height) (base.OperationProcessor, error) {
 		return opr.New(
@@ -240,6 +241,15 @@ func POperationProcessorsMap(ctx context.Context) (context.Context, error) {
 	})
 
 	_ = set.Add(currency.WithdrawsHint, func(height base.Height) (base.OperationProcessor, error) {
+		return opr.New(
+			height,
+			db.State,
+			nil,
+			nil,
+		)
+	})
+
+	_ = set.Add(credential.CreateCredentialServiceHint, func(height base.Height) (base.OperationProcessor, error) {
 		return opr.New(
 			height,
 			db.State,

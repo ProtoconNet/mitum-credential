@@ -1,6 +1,7 @@
 package cmds
 
 import (
+	"github.com/ProtoconNet/mitum-credential/credential"
 	"github.com/ProtoconNet/mitum-currency-extension/v2/currency"
 	"github.com/ProtoconNet/mitum-currency-extension/v2/digest"
 	mitumcurrency "github.com/ProtoconNet/mitum-currency/v2/currency"
@@ -53,6 +54,11 @@ var hinters = []encoder.DecodeDetail{
 	{Hint: currency.ContractAccountStateValueHint, Instance: currency.ContractAccountStateValue{}},
 	{Hint: currency.CurrencyDesignStateValueHint, Instance: currency.CurrencyDesignStateValue{}},
 
+	{Hint: credential.DesignHint, Instance: credential.Design{}},
+	{Hint: credential.DesignStateValueHint, Instance: credential.DesignStateValue{}},
+	{Hint: credential.PolicyHint, Instance: credential.Policy{}},
+	{Hint: credential.CreateCredentialServiceHint, Instance: credential.CreateCredentialService{}},
+
 	{Hint: digestisaac.ManifestHint, Instance: digestisaac.Manifest{}},
 	{Hint: digest.AccountValueHint, Instance: digest.AccountValue{}},
 	{Hint: digest.OperationValueHint, Instance: digest.OperationValue{}},
@@ -78,6 +84,8 @@ var supportedProposalOperationFactHinters = []encoder.DecodeDetail{
 	{Hint: currency.CurrencyPolicyUpdaterFactHint, Instance: currency.CurrencyPolicyUpdaterFact{}},
 	{Hint: currency.CreateContractAccountsFactHint, Instance: currency.CreateContractAccountsFact{}},
 	{Hint: currency.WithdrawsFactHint, Instance: currency.WithdrawsFact{}},
+
+	{Hint: credential.CreateCredentialServiceFactHint, Instance: credential.CreateCredentialServiceFact{}},
 
 	{Hint: isaacoperation.GenesisNetworkPolicyFactHint, Instance: isaacoperation.GenesisNetworkPolicyFact{}},
 	{Hint: isaacoperation.SuffrageCandidateFactHint, Instance: isaacoperation.SuffrageCandidateFact{}},
