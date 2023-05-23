@@ -10,8 +10,6 @@ var TemplateHint = hint.MustNewHint("mitum-credential-template-v0.0.1")
 
 type Template struct {
 	hint.BaseHinter
-	util.Byter
-	util.IsValider
 	templateID     Uint256
 	templateName   string
 	serviceDate    Date
