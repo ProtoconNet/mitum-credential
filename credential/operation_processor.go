@@ -27,9 +27,9 @@ type GetLastBlockFunc func() (base.BlockMap, bool, error)
 type DuplicationType string
 
 const (
-	DuplicationTypeSender      DuplicationType = "sender"
-	DuplicationTypeCurrency    DuplicationType = "currency"
-	DuplicationTypeContractSTO DuplicationType = "contract-sto"
+	DuplicationTypeSender             DuplicationType = "sender"
+	DuplicationTypeCurrency           DuplicationType = "currency"
+	DuplicationTypeContractCredential DuplicationType = "contract-credential"
 )
 
 type OperationProcessor struct {
@@ -48,7 +48,7 @@ func NewOperationProcessor() *OperationProcessor {
 	m := sync.Map{}
 	return &OperationProcessor{
 		Logging: logging.NewLogging(func(c zerolog.Context) zerolog.Context {
-			return c.Str("module", "mitum-sto-operations-processor")
+			return c.Str("module", "mitum-credential-operations-processor")
 		}),
 		processorHintSet:     hint.NewCompatibleSet(),
 		fee:                  map[currency.CurrencyID]currency.Big{},
