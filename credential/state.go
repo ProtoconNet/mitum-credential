@@ -13,9 +13,9 @@ import (
 )
 
 var (
-	CredentialPrefix     = "credentialservice:"
-	DesignStateValueHint = hint.MustNewHint("mitum-credential-design-state-value-v0.0.1")
-	DesignSuffix         = ":design"
+	CredentialServicePrefix = "credentialservice:"
+	DesignStateValueHint    = hint.MustNewHint("mitum-credential-design-state-value-v0.0.1")
+	DesignSuffix            = ":design"
 )
 
 type StateValueMerger struct {
@@ -42,8 +42,8 @@ func NewStateMergeValue(key string, stv base.StateValue) base.StateMergeValue {
 	)
 }
 
-func StateKeyCredentialPrefix(ca base.Address, creditID extensioncurrency.ContractID) string {
-	return fmt.Sprintf("%s%s:%s", CredentialPrefix, ca.String(), creditID)
+func StateKeyCredentialServicePrefix(ca base.Address, creditID extensioncurrency.ContractID) string {
+	return fmt.Sprintf("%s%s:%s", CredentialServicePrefix, ca.String(), creditID)
 }
 
 type DesignStateValue struct {
@@ -58,26 +58,26 @@ func NewDesignStateValue(design Design) DesignStateValue {
 	}
 }
 
-func (sd DesignStateValue) Hint() hint.Hint {
-	return sd.BaseHinter.Hint()
+func (hd DesignStateValue) Hint() hint.Hint {
+	return hd.BaseHinter.Hint()
 }
 
-func (sd DesignStateValue) IsValid([]byte) error {
+func (hd DesignStateValue) IsValid([]byte) error {
 	e := util.ErrInvalid.Errorf("invalid DesignStateValue")
 
-	if err := sd.BaseHinter.IsValid(DesignStateValueHint.Type().Bytes()); err != nil {
+	if err := hd.BaseHinter.IsValid(DesignStateValueHint.Type().Bytes()); err != nil {
 		return e.Wrap(err)
 	}
 
-	if err := sd.Design.IsValid(nil); err != nil {
+	if err := hd.Design.IsValid(nil); err != nil {
 		return e.Wrap(err)
 	}
 
 	return nil
 }
 
-func (sd DesignStateValue) HashBytes() []byte {
-	return sd.Design.Bytes()
+func (hd DesignStateValue) HashBytes() []byte {
+	return hd.Design.Bytes()
 }
 
 func StateDesignValue(st base.State) (Design, error) {
@@ -95,11 +95,11 @@ func StateDesignValue(st base.State) (Design, error) {
 }
 
 func IsStateDesignKey(key string) bool {
-	return strings.HasPrefix(key, CredentialPrefix) && strings.HasSuffix(key, DesignSuffix)
+	return strings.HasPrefix(key, CredentialServicePrefix) && strings.HasSuffix(key, DesignSuffix)
 }
 
 func StateKeyDesign(ca base.Address, crid extensioncurrency.ContractID) string {
-	return fmt.Sprintf("%s%s", StateKeyCredentialPrefix(ca, crid), DesignSuffix)
+	return fmt.Sprintf("%s%s", StateKeyCredentialServicePrefix(ca, crid), DesignSuffix)
 }
 
 var (
@@ -142,11 +142,11 @@ func (sv TemplateStateValue) HashBytes() []byte {
 }
 
 func StateKeyTemplate(ca base.Address, creditID extensioncurrency.ContractID, templateID Uint256) string {
-	return fmt.Sprintf("%s-%s%s", StateKeyCredentialPrefix(ca, creditID), templateID.String(), TemplateSuffix)
+	return fmt.Sprintf("%s-%s%s", StateKeyCredentialServicePrefix(ca, creditID), templateID.String(), TemplateSuffix)
 }
 
 func IsStateTemplateKey(key string) bool {
-	return strings.HasPrefix(key, CredentialPrefix) && strings.HasSuffix(key, TemplateSuffix)
+	return strings.HasPrefix(key, CredentialServicePrefix) && strings.HasSuffix(key, TemplateSuffix)
 }
 
 func StateTemplateValue(st base.State) (Template, error) {
@@ -161,6 +161,124 @@ func StateTemplateValue(st base.State) (Template, error) {
 	}
 
 	return t.Template, nil
+}
+
+var (
+	CredentialStateValueHint = hint.MustNewHint("mitum-credential-credential-state-value-v0.0.1")
+	CredentialSuffix         = ":credential"
+)
+
+type CredentialStateValue struct {
+	hint.BaseHinter
+	Credential Credential
+}
+
+func NewCredentialStateValue(credential Credential) CredentialStateValue {
+	return CredentialStateValue{
+		BaseHinter: hint.NewBaseHinter(CredentialStateValueHint),
+		Credential: credential,
+	}
+}
+
+func (sv CredentialStateValue) Hint() hint.Hint {
+	return sv.BaseHinter.Hint()
+}
+
+func (sv CredentialStateValue) IsValid([]byte) error {
+	e := util.ErrInvalid.Errorf("invalid CredentialStateValue")
+
+	if err := sv.BaseHinter.IsValid(CredentialStateValueHint.Type().Bytes()); err != nil {
+		return e.Wrap(err)
+	}
+
+	if err := sv.Credential.IsValid(nil); err != nil {
+		return e.Wrap(err)
+	}
+
+	return nil
+}
+
+func (sv CredentialStateValue) HashBytes() []byte {
+	return sv.Credential.Bytes()
+}
+
+func StateKeyCredential(ca base.Address, creditID extensioncurrency.ContractID, ha base.Address, templateID Uint256, id string) string {
+	return fmt.Sprintf("%s-%s-%s-%s%s", StateKeyCredentialServicePrefix(ca, creditID), ha.String(), templateID.String(), id, CredentialSuffix)
+}
+
+func IsStateCredentialKey(key string) bool {
+	return strings.HasPrefix(key, CredentialServicePrefix) && strings.HasSuffix(key, CredentialSuffix)
+}
+
+func StateCredentialValue(st base.State) (Credential, error) {
+	v := st.Value()
+	if v == nil {
+		return Credential{}, util.ErrNotFound.Errorf("crednetial not found in State")
+	}
+
+	c, ok := v.(CredentialStateValue)
+	if !ok {
+		return Credential{}, errors.Errorf("invalid credential value found, %T", v)
+	}
+
+	return c.Credential, nil
+}
+
+var (
+	HolderDIDStateValueHint = hint.MustNewHint("mitum-credential-holder-did-state-value-v0.0.1")
+	HolderDIDSuffix         = ":holder-did"
+)
+
+type HolderDIDStateValue struct {
+	hint.BaseHinter
+	did string
+}
+
+func NewHolderDIDStateValue(did string) HolderDIDStateValue {
+	return HolderDIDStateValue{
+		BaseHinter: hint.NewBaseHinter(HolderDIDStateValueHint),
+		did:        did,
+	}
+}
+
+func (hd HolderDIDStateValue) Hint() hint.Hint {
+	return hd.BaseHinter.Hint()
+}
+
+func (hd HolderDIDStateValue) IsValid([]byte) error {
+	e := util.ErrInvalid.Errorf("invalid credential HolderDIDStateValue")
+
+	if err := hd.BaseHinter.IsValid(HolderDIDStateValueHint.Type().Bytes()); err != nil {
+		return e.Wrap(err)
+	}
+
+	return nil
+}
+
+func (hd HolderDIDStateValue) HashBytes() []byte {
+	return []byte(hd.did)
+}
+
+func StateHolderDIDValue(st base.State) (*string, error) {
+	v := st.Value()
+	if v == nil {
+		return nil, util.ErrNotFound.Errorf("holder did not found in State")
+	}
+
+	d, ok := v.(HolderDIDStateValue)
+	if !ok {
+		return nil, errors.Errorf("invalid holder did value found, %T", v)
+	}
+
+	return &d.did, nil
+}
+
+func IsStateHolderDIDKey(key string) bool {
+	return strings.HasPrefix(key, CredentialServicePrefix) && strings.HasSuffix(key, HolderDIDSuffix)
+}
+
+func StateKeyHolderDID(ca base.Address, creditID extensioncurrency.ContractID, ha base.Address) string {
+	return fmt.Sprintf("%s:%s%s", StateKeyCredentialServicePrefix(ca, creditID), ha.String(), HolderDIDSuffix)
 }
 
 func checkExistsState(
