@@ -57,6 +57,11 @@ var hinters = []encoder.DecodeDetail{
 	{Hint: credential.DesignHint, Instance: credential.Design{}},
 	{Hint: credential.DesignStateValueHint, Instance: credential.DesignStateValue{}},
 	{Hint: credential.PolicyHint, Instance: credential.Policy{}},
+	{Hint: credential.CredentialHint, Instance: credential.Credential{}},
+	{Hint: credential.CredentialStateValueHint, Instance: credential.CredentialStateValue{}},
+	{Hint: credential.HolderDIDStateValueHint, Instance: credential.HolderDIDStateValue{}},
+	{Hint: credential.TemplateHint, Instance: credential.Template{}},
+	{Hint: credential.TemplateStateValueHint, Instance: credential.TemplateStateValue{}},
 	{Hint: credential.CreateCredentialServiceHint, Instance: credential.CreateCredentialService{}},
 
 	{Hint: digestisaac.ManifestHint, Instance: digestisaac.Manifest{}},
