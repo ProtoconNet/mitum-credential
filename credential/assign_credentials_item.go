@@ -12,21 +12,21 @@ var AssignCredentialsItemHint = hint.MustNewHint("mitum-credential-assign-creden
 
 type AssignCredentialsItem struct {
 	hint.BaseHinter
-	contract   base.Address
-	creditID   extensioncurrency.ContractID
-	holder     base.Address
-	templateID Uint256
-	id         string
-	value      string
-	validfrom  Uint256
-	validuntil Uint256
-	did        string
-	currency   currency.CurrencyID
+	contract            base.Address
+	credentialServiceID extensioncurrency.ContractID
+	holder              base.Address
+	templateID          Uint256
+	id                  string
+	value               string
+	validfrom           Uint256
+	validuntil          Uint256
+	did                 string
+	currency            currency.CurrencyID
 }
 
 func NewAssignCredentialsItem(
 	contract base.Address,
-	creditID extensioncurrency.ContractID,
+	credentialServiceID extensioncurrency.ContractID,
 	holder base.Address,
 	templateID Uint256,
 	id string,
@@ -37,24 +37,24 @@ func NewAssignCredentialsItem(
 	currency currency.CurrencyID,
 ) AssignCredentialsItem {
 	return AssignCredentialsItem{
-		BaseHinter: hint.NewBaseHinter(AssignCredentialsItemHint),
-		contract:   contract,
-		creditID:   creditID,
-		holder:     holder,
-		templateID: templateID,
-		id:         id,
-		value:      value,
-		validfrom:  validfrom,
-		validuntil: validuntil,
-		did:        did,
-		currency:   currency,
+		BaseHinter:          hint.NewBaseHinter(AssignCredentialsItemHint),
+		contract:            contract,
+		credentialServiceID: credentialServiceID,
+		holder:              holder,
+		templateID:          templateID,
+		id:                  id,
+		value:               value,
+		validfrom:           validfrom,
+		validuntil:          validuntil,
+		did:                 did,
+		currency:            currency,
 	}
 }
 
 func (it AssignCredentialsItem) Bytes() []byte {
 	return util.ConcatBytesSlice(
 		it.contract.Bytes(),
-		it.creditID.Bytes(),
+		it.credentialServiceID.Bytes(),
 		it.holder.Bytes(),
 		it.templateID.Bytes(),
 		[]byte(it.id),
@@ -69,7 +69,7 @@ func (it AssignCredentialsItem) Bytes() []byte {
 func (it AssignCredentialsItem) IsValid([]byte) error {
 	if err := util.CheckIsValiders(nil, false,
 		it.BaseHinter,
-		it.creditID,
+		it.credentialServiceID,
 		it.contract,
 		it.holder,
 		it.templateID,
@@ -103,8 +103,8 @@ func (it AssignCredentialsItem) IsValid([]byte) error {
 	return nil
 }
 
-func (it AssignCredentialsItem) Credential() extensioncurrency.ContractID {
-	return it.creditID
+func (it AssignCredentialsItem) CredentialServiceID() extensioncurrency.ContractID {
+	return it.credentialServiceID
 }
 
 func (it AssignCredentialsItem) Contract() base.Address {

@@ -13,23 +13,23 @@ import (
 func (fact CreateCredentialServiceFact) MarshalBSON() ([]byte, error) {
 	return bsonenc.Marshal(
 		bson.M{
-			"_hint":    fact.Hint().String(),
-			"sender":   fact.sender,
-			"contract": fact.contract,
-			"creditid": fact.creditID,
-			"currency": fact.currency,
-			"hash":     fact.BaseFact.Hash().String(),
-			"token":    fact.BaseFact.Token(),
+			"_hint":                 fact.Hint().String(),
+			"sender":                fact.sender,
+			"contract":              fact.contract,
+			"credential_service_id": fact.credentialServiceID,
+			"currency":              fact.currency,
+			"hash":                  fact.BaseFact.Hash().String(),
+			"token":                 fact.BaseFact.Token(),
 		},
 	)
 }
 
 type CreateCredentialServiceFactBSONUnmarshaler struct {
-	Hint         string `bson:"_hint"`
-	Sender       string `bson:"sender"`
-	Contract     string `bson:"contract"`
-	CredentialID string `bson:"creditid"`
-	Currency     string `bson:"currency"`
+	Hint                string `bson:"_hint"`
+	Sender              string `bson:"sender"`
+	Contract            string `bson:"contract"`
+	CredentialServiceID string `bson:"credential_service_id"`
+	Currency            string `bson:"currency"`
 }
 
 func (fact *CreateCredentialServiceFact) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
@@ -55,7 +55,7 @@ func (fact *CreateCredentialServiceFact) DecodeBSON(b []byte, enc *bsonenc.Encod
 	}
 	fact.BaseHinter = hint.NewBaseHinter(ht)
 
-	return fact.unpack(enc, uf.Sender, uf.Contract, uf.CredentialID, uf.Currency)
+	return fact.unpack(enc, uf.Sender, uf.Contract, uf.CredentialServiceID, uf.Currency)
 }
 
 func (op CreateCredentialService) MarshalBSON() ([]byte, error) {

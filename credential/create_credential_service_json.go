@@ -10,10 +10,10 @@ import (
 
 type CreateCredentialServiceFactJSONMarshaler struct {
 	base.BaseFactJSONMarshaler
-	Owner        base.Address                 `json:"sender"`
-	Contract     base.Address                 `json:"contract"`
-	CredentialID extensioncurrency.ContractID `json:"creditid"`
-	Currency     currency.CurrencyID          `json:"currency"`
+	Owner               base.Address                 `json:"sender"`
+	Contract            base.Address                 `json:"contract"`
+	CredentialServiceID extensioncurrency.ContractID `json:"credential_service_id"`
+	Currency            currency.CurrencyID          `json:"currency"`
 }
 
 func (fact CreateCredentialServiceFact) MarshalJSON() ([]byte, error) {
@@ -21,17 +21,17 @@ func (fact CreateCredentialServiceFact) MarshalJSON() ([]byte, error) {
 		BaseFactJSONMarshaler: fact.BaseFact.JSONMarshaler(),
 		Owner:                 fact.sender,
 		Contract:              fact.contract,
-		CredentialID:          fact.creditID,
+		CredentialServiceID:   fact.credentialServiceID,
 		Currency:              fact.currency,
 	})
 }
 
 type CreateCredentialServiceFactJSONUnMarshaler struct {
 	base.BaseFactJSONUnmarshaler
-	Owner        string `json:"sender"`
-	Contract     string `json:"contract"`
-	CredentialID string `json:"creditid"`
-	Currency     string `json:"currency"`
+	Owner               string `json:"sender"`
+	Contract            string `json:"contract"`
+	CredentialServiceID string `json:"credential_service_id"`
+	Currency            string `json:"currency"`
 }
 
 func (fact *CreateCredentialServiceFact) DecodeJSON(b []byte, enc *jsonenc.Encoder) error {
@@ -44,7 +44,7 @@ func (fact *CreateCredentialServiceFact) DecodeJSON(b []byte, enc *jsonenc.Encod
 
 	fact.BaseFact.SetJSONUnmarshaler(uf.BaseFactJSONUnmarshaler)
 
-	return fact.unpack(enc, uf.Owner, uf.Contract, uf.CredentialID, uf.Currency)
+	return fact.unpack(enc, uf.Owner, uf.Contract, uf.CredentialServiceID, uf.Currency)
 }
 
 type CreateCredentialServiceMarshaler struct {

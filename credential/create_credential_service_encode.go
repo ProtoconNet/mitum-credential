@@ -8,7 +8,7 @@ import (
 	"github.com/ProtoconNet/mitum2/util/encoder"
 )
 
-func (fact *CreateCredentialServiceFact) unpack(enc encoder.Encoder, sa, ca, creditid string, cid string) error {
+func (fact *CreateCredentialServiceFact) unpack(enc encoder.Encoder, sa, ca, csid string, cid string) error {
 	e := util.StringErrorFunc("failed to unmarshal CreateCredentialServiceFact")
 
 	switch a, err := base.DecodeAddress(sa, enc); {
@@ -25,7 +25,7 @@ func (fact *CreateCredentialServiceFact) unpack(enc encoder.Encoder, sa, ca, cre
 		fact.contract = a
 	}
 
-	fact.creditID = extensioncurrency.ContractID(creditid)
+	fact.credentialServiceID = extensioncurrency.ContractID(csid)
 	fact.currency = currency.CurrencyID(cid)
 
 	return nil

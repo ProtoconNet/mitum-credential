@@ -86,8 +86,8 @@ func (opp *CreateCredentialServiceProcessor) PreProcess(
 		return nil, base.NewBaseOperationProcessReasonError("not contract account owner, %q", fact.sender), nil
 	}
 
-	if err := checkNotExistsState(StateKeyDesign(fact.Contract(), fact.Credential()), getStateFunc); err != nil {
-		return nil, base.NewBaseOperationProcessReasonError("credential service already exists, %s-%s: %w", fact.Contract(), fact.Credential(), err), nil
+	if err := checkNotExistsState(StateKeyDesign(fact.Contract(), fact.CredentialServiceID()), getStateFunc); err != nil {
+		return nil, base.NewBaseOperationProcessReasonError("credential service already exists, %s-%s: %w", fact.Contract(), fact.CredentialServiceID(), err), nil
 	}
 
 	if err := checkFactSignsByState(fact.Sender(), op.Signs(), getStateFunc); err != nil {
@@ -113,18 +113,18 @@ func (opp *CreateCredentialServiceProcessor) Process(
 
 	policy := NewPolicy(templates, holders, 0)
 	if err := policy.IsValid(nil); err != nil {
-		return nil, base.NewBaseOperationProcessReasonError("invalid credential policy, %s-%s: %w", fact.Contract(), fact.Credential(), err), nil
+		return nil, base.NewBaseOperationProcessReasonError("invalid credential policy, %s-%s: %w", fact.Contract(), fact.CredentialServiceID(), err), nil
 	}
 
-	design := NewDesign(fact.Credential(), policy)
+	design := NewDesign(fact.CredentialServiceID(), policy)
 	if err := design.IsValid(nil); err != nil {
-		return nil, base.NewBaseOperationProcessReasonError("invalid credential design, %s-%s: %w", fact.Contract(), fact.Credential(), err), nil
+		return nil, base.NewBaseOperationProcessReasonError("invalid credential design, %s-%s: %w", fact.Contract(), fact.CredentialServiceID(), err), nil
 	}
 
 	sts := make([]base.StateMergeValue, 2)
 
 	sts[0] = NewStateMergeValue(
-		StateKeyDesign(fact.Contract(), fact.Credential()),
+		StateKeyDesign(fact.Contract(), fact.CredentialServiceID()),
 		NewDesignStateValue(design),
 	)
 

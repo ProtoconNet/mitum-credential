@@ -11,21 +11,21 @@ import (
 
 type DesignJSONMarshaler struct {
 	hint.BaseHinter
-	Credential extensioncurrency.ContractID `json:"creditid"`
+	Credential extensioncurrency.ContractID `json:"credential_service_id"`
 	Policy     Policy                       `json:"policy"`
 }
 
 func (de Design) MarshalJSON() ([]byte, error) {
 	return util.MarshalJSON(DesignJSONMarshaler{
 		BaseHinter: de.BaseHinter,
-		Credential: de.creditID,
+		Credential: de.credentialServiceID,
 		Policy:     de.policy,
 	})
 }
 
 type DesignJSONUnmarshaler struct {
 	Hint       hint.Hint       `json:"_hint"`
-	Credential string          `json:"creditid"`
+	Credential string          `json:"credential_service_id"`
 	Policy     json.RawMessage `json:"policy"`
 }
 

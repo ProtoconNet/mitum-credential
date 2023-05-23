@@ -11,7 +11,7 @@ func (de *Design) unpack(enc encoder.Encoder, ht hint.Hint, credit string, bpo [
 	e := util.StringErrorFunc("failed to decode bson of Design")
 
 	de.BaseHinter = hint.NewBaseHinter(ht)
-	de.creditID = extensioncurrency.ContractID(credit)
+	de.credentialServiceID = extensioncurrency.ContractID(credit)
 
 	if hinter, err := enc.Decode(bpo); err != nil {
 		return e(err, "")

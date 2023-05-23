@@ -42,8 +42,8 @@ func NewStateMergeValue(key string, stv base.StateValue) base.StateMergeValue {
 	)
 }
 
-func StateKeyCredentialServicePrefix(ca base.Address, creditID extensioncurrency.ContractID) string {
-	return fmt.Sprintf("%s%s:%s", CredentialServicePrefix, ca.String(), creditID)
+func StateKeyCredentialServicePrefix(ca base.Address, credentialServiceID extensioncurrency.ContractID) string {
+	return fmt.Sprintf("%s%s:%s", CredentialServicePrefix, ca.String(), credentialServiceID)
 }
 
 type DesignStateValue struct {
@@ -141,8 +141,8 @@ func (sv TemplateStateValue) HashBytes() []byte {
 	return sv.Template.Bytes()
 }
 
-func StateKeyTemplate(ca base.Address, creditID extensioncurrency.ContractID, templateID Uint256) string {
-	return fmt.Sprintf("%s-%s%s", StateKeyCredentialServicePrefix(ca, creditID), templateID.String(), TemplateSuffix)
+func StateKeyTemplate(ca base.Address, credentialServiceID extensioncurrency.ContractID, templateID Uint256) string {
+	return fmt.Sprintf("%s-%s%s", StateKeyCredentialServicePrefix(ca, credentialServiceID), templateID.String(), TemplateSuffix)
 }
 
 func IsStateTemplateKey(key string) bool {
@@ -202,8 +202,8 @@ func (sv CredentialStateValue) HashBytes() []byte {
 	return sv.Credential.Bytes()
 }
 
-func StateKeyCredential(ca base.Address, creditID extensioncurrency.ContractID, ha base.Address, templateID Uint256, id string) string {
-	return fmt.Sprintf("%s-%s-%s-%s%s", StateKeyCredentialServicePrefix(ca, creditID), ha.String(), templateID.String(), id, CredentialSuffix)
+func StateKeyCredential(ca base.Address, credentialServiceID extensioncurrency.ContractID, ha base.Address, templateID Uint256, id string) string {
+	return fmt.Sprintf("%s-%s-%s-%s%s", StateKeyCredentialServicePrefix(ca, credentialServiceID), ha.String(), templateID.String(), id, CredentialSuffix)
 }
 
 func IsStateCredentialKey(key string) bool {
@@ -277,8 +277,8 @@ func IsStateHolderDIDKey(key string) bool {
 	return strings.HasPrefix(key, CredentialServicePrefix) && strings.HasSuffix(key, HolderDIDSuffix)
 }
 
-func StateKeyHolderDID(ca base.Address, creditID extensioncurrency.ContractID, ha base.Address) string {
-	return fmt.Sprintf("%s:%s%s", StateKeyCredentialServicePrefix(ca, creditID), ha.String(), HolderDIDSuffix)
+func StateKeyHolderDID(ca base.Address, credentialServiceID extensioncurrency.ContractID, ha base.Address) string {
+	return fmt.Sprintf("%s:%s%s", StateKeyCredentialServicePrefix(ca, credentialServiceID), ha.String(), HolderDIDSuffix)
 }
 
 func checkExistsState(

@@ -11,16 +11,16 @@ import (
 func (de Design) MarshalBSON() ([]byte, error) {
 	return bsonenc.Marshal(
 		bson.M{
-			"_hint":    de.Hint().String(),
-			"creditid": de.creditID,
-			"policy":   de.policy,
+			"_hint":                 de.Hint().String(),
+			"credential_service_id": de.credentialServiceID,
+			"policy":                de.policy,
 		},
 	)
 }
 
 type DesignBSONUnmarshaler struct {
 	Hint       string   `bson:"_hint"`
-	Credential string   `bson:"creditid"`
+	Credential string   `bson:"credential_service_id"`
 	Policy     bson.Raw `bson:"policy"`
 }
 
