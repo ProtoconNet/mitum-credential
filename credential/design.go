@@ -6,9 +6,7 @@ import (
 	"github.com/ProtoconNet/mitum2/util/hint"
 )
 
-var (
-	DesignHint = hint.MustNewHint("mitum-credential-design-v0.0.1")
-)
+var DesignHint = hint.MustNewHint("mitum-credential-design-v0.0.1")
 
 type Design struct {
 	hint.BaseHinter

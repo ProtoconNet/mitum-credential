@@ -6,9 +6,7 @@ import (
 	"github.com/ProtoconNet/mitum2/util/hint"
 )
 
-var (
-	PolicyHint = hint.MustNewHint("mitum-credential-policy-v0.0.1")
-)
+var PolicyHint = hint.MustNewHint("mitum-credential-policy-v0.0.1")
 
 type Policy struct {
 	hint.BaseHinter
