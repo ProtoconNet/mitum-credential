@@ -12,6 +12,7 @@ type OperationCommand struct {
 	CreateContractAccount   extensioncurrencycmds.CreateContractAccountCommand `cmd:"" name:"create-contract-account" help:"create new contract account"`
 	Withdraw                extensioncurrencycmds.WithdrawCommand              `cmd:"" name:"withdraw" help:"withdraw amounts from target contract account"`
 	CreateCredentialService CreateCredentialServiceCommand                     `cmd:"" name:"create-credential-service" help:"register credential service to contract account"`
+	AddTemplate             AddTemplateCommand                                 `cmd:"" name:"add-template" help:"add template to credential service"`
 	CurrencyRegister        currencycmds.CurrencyRegisterCommand               `cmd:"" name:"currency-register" help:"register new currency"`
 	CurrencyPolicyUpdater   currencycmds.CurrencyPolicyUpdaterCommand          `cmd:"" name:"currency-policy-updater" help:"update currency policy"`
 	SuffrageInflation       currencycmds.SuffrageInflationCommand              `cmd:"" name:"suffrage-inflation" help:"suffrage inflation operation"`
@@ -28,6 +29,7 @@ func NewOperationCommand() OperationCommand {
 		CreateContractAccount:   extensioncurrencycmds.NewCreateContractAccountCommand(),
 		Withdraw:                extensioncurrencycmds.NewWithdrawCommand(),
 		CreateCredentialService: NewCreateCredentialServiceCommand(),
+		AddTemplate:             NewAddTemplateCommand(),
 		CurrencyRegister:        currencycmds.NewCurrencyRegisterCommand(),
 		CurrencyPolicyUpdater:   currencycmds.NewCurrencyPolicyUpdaterCommand(),
 		SuffrageInflation:       currencycmds.NewSuffrageInflationCommand(),
