@@ -6,16 +6,51 @@ import (
 	"github.com/ProtoconNet/mitum2/util/hint"
 )
 
+var HolderHint = hint.MustNewHint("mitum-credential-holder-v0.0.1")
+
+type Holder struct {
+	hint.BaseHinter
+	address         base.Address
+	credentialCount uint64
+}
+
+func NewHolder(address base.Address, count uint64) Holder {
+	return Holder{
+		BaseHinter:      hint.NewBaseHinter(HolderHint),
+		address:         address,
+		credentialCount: count,
+	}
+}
+
+func (h Holder) Bytes() []byte {
+	return util.ConcatBytesSlice(
+		h.address.Bytes(),
+		util.Uint64ToBytes(h.credentialCount),
+	)
+}
+
+func (h Holder) IsValid([]byte) error {
+	return h.address.IsValid(nil)
+}
+
+func (h Holder) Address() base.Address {
+	return h.address
+}
+
+func (h Holder) CredentialCount() uint64 {
+	return h.credentialCount
+}
+
 var PolicyHint = hint.MustNewHint("mitum-credential-policy-v0.0.1")
 
 type Policy struct {
 	hint.BaseHinter
 	templates       []Uint256
-	holders         []base.Address
+	holders         []Holder
 	credentialCount uint64
 }
 
-func NewPolicy(templates []Uint256, holders []base.Address, credentialCount uint64) Policy {
+func NewPolicy(templates []Uint256, holders []Holder, credentialCount uint64) Policy {
 	return Policy{
 		BaseHinter:      hint.NewBaseHinter(PolicyHint),
 		templates:       templates,
@@ -68,7 +103,7 @@ func (po Policy) Templates() []Uint256 {
 	return po.templates
 }
 
-func (po Policy) Holders() []base.Address {
+func (po Policy) Holders() []Holder {
 	return po.holders
 }
 

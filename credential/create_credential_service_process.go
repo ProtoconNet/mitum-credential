@@ -113,7 +113,7 @@ func (opp *CreateCredentialServiceProcessor) Process(
 	}
 
 	templates := []Uint256{}
-	holders := []base.Address{}
+	holders := []Holder{}
 
 	policy := NewPolicy(templates, holders, 0)
 	if err := policy.IsValid(nil); err != nil {

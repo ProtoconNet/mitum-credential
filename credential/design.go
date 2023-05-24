@@ -41,7 +41,7 @@ func (de Design) Bytes() []byte {
 	)
 }
 
-func (de Design) CreditID() extensioncurrency.ContractID {
+func (de Design) CredentialServiceID() extensioncurrency.ContractID {
 	return de.credentialServiceID
 }
 

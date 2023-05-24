@@ -22,7 +22,7 @@ func (po Policy) MarshalBSON() ([]byte, error) {
 type PolicyBSONUnmarshaler struct {
 	Hint            string   `bson:"_hint"`
 	Templates       []string `bson:"templates"`
-	Holders         []string `bson:"holders"`
+	Holders         bson.Raw `bson:"holders"`
 	CredentialCount uint64   `bson:"credential_count"`
 }
 
