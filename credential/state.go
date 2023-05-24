@@ -202,8 +202,8 @@ func (sv CredentialStateValue) HashBytes() []byte {
 	return sv.Credential.Bytes()
 }
 
-func StateKeyCredential(ca base.Address, credentialServiceID extensioncurrency.ContractID, ha base.Address, templateID Uint256, id string) string {
-	return fmt.Sprintf("%s-%s-%s-%s%s", StateKeyCredentialServicePrefix(ca, credentialServiceID), ha.String(), templateID.String(), id, CredentialSuffix)
+func StateKeyCredential(ca base.Address, credentialServiceID extensioncurrency.ContractID, templateID Uint256, id string) string {
+	return fmt.Sprintf("%s-%s-%s%s", StateKeyCredentialServicePrefix(ca, credentialServiceID), templateID.String(), id, CredentialSuffix)
 }
 
 func IsStateCredentialKey(key string) bool {
