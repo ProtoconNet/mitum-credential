@@ -16,26 +16,26 @@ var (
 
 type CreateCredentialServiceFact struct {
 	base.BaseFact
-	sender   base.Address
-	contract base.Address
-	creditID extensioncurrency.ContractID
-	currency currency.CurrencyID
+	sender              base.Address
+	contract            base.Address
+	credentialServiceID extensioncurrency.ContractID
+	currency            currency.CurrencyID
 }
 
 func NewCreateCredentialServiceFact(
 	token []byte,
 	sender base.Address,
 	contract base.Address,
-	creditID extensioncurrency.ContractID,
+	credentialServiceID extensioncurrency.ContractID,
 	currency currency.CurrencyID,
 ) CreateCredentialServiceFact {
 	bf := base.NewBaseFact(CreateCredentialServiceFactHint, token)
 	fact := CreateCredentialServiceFact{
-		BaseFact: bf,
-		sender:   sender,
-		contract: contract,
-		creditID: creditID,
-		currency: currency,
+		BaseFact:            bf,
+		sender:              sender,
+		contract:            contract,
+		credentialServiceID: credentialServiceID,
+		currency:            currency,
 	}
 	fact.SetHash(fact.GenerateHash())
 
@@ -55,7 +55,7 @@ func (fact CreateCredentialServiceFact) Bytes() []byte {
 		fact.Token(),
 		fact.sender.Bytes(),
 		fact.contract.Bytes(),
-		fact.creditID.Bytes(),
+		fact.credentialServiceID.Bytes(),
 		fact.currency.Bytes(),
 	)
 }
@@ -69,7 +69,7 @@ func (fact CreateCredentialServiceFact) IsValid(b []byte) error {
 		return err
 	}
 
-	if err := util.CheckIsValiders(nil, false, fact.sender, fact.creditID, fact.contract, fact.currency); err != nil {
+	if err := util.CheckIsValiders(nil, false, fact.sender, fact.credentialServiceID, fact.contract, fact.currency); err != nil {
 		return err
 	}
 
@@ -92,8 +92,8 @@ func (fact CreateCredentialServiceFact) Contract() base.Address {
 	return fact.contract
 }
 
-func (fact CreateCredentialServiceFact) Credential() extensioncurrency.ContractID {
-	return fact.creditID
+func (fact CreateCredentialServiceFact) CredentialServiceID() extensioncurrency.ContractID {
+	return fact.credentialServiceID
 }
 
 func (fact CreateCredentialServiceFact) Currency() currency.CurrencyID {

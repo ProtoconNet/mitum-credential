@@ -16,27 +16,27 @@ var (
 
 type AddTemplateFact struct {
 	base.BaseFact
-	sender         base.Address
-	contract       base.Address
-	creditID       extensioncurrency.ContractID
-	templateID     Uint256
-	templateName   string
-	serviceDate    Date
-	expirationDate Date
-	templateShare  Bool
-	multiAudit     Bool
-	displayName    string
-	subjectKey     string
-	description    string
-	creator        base.Address
-	currency       currency.CurrencyID
+	sender              base.Address
+	contract            base.Address
+	credentialServiceID extensioncurrency.ContractID
+	templateID          Uint256
+	templateName        string
+	serviceDate         Date
+	expirationDate      Date
+	templateShare       Bool
+	multiAudit          Bool
+	displayName         string
+	subjectKey          string
+	description         string
+	creator             base.Address
+	currency            currency.CurrencyID
 }
 
 func NewAddTemplateFact(
 	token []byte,
 	sender base.Address,
 	contract base.Address,
-	creditID extensioncurrency.ContractID,
+	credentialServiceID extensioncurrency.ContractID,
 	templateID Uint256,
 	templateName string,
 	serviceDate Date,
@@ -51,21 +51,21 @@ func NewAddTemplateFact(
 ) AddTemplateFact {
 	bf := base.NewBaseFact(AddTemplateFactHint, token)
 	fact := AddTemplateFact{
-		BaseFact:       bf,
-		sender:         sender,
-		contract:       contract,
-		creditID:       creditID,
-		templateID:     templateID,
-		templateName:   templateName,
-		serviceDate:    serviceDate,
-		expirationDate: expirationDate,
-		templateShare:  templateShare,
-		multiAudit:     multiAudit,
-		displayName:    displayName,
-		subjectKey:     subjectKey,
-		description:    description,
-		creator:        creator,
-		currency:       currency,
+		BaseFact:            bf,
+		sender:              sender,
+		contract:            contract,
+		credentialServiceID: credentialServiceID,
+		templateID:          templateID,
+		templateName:        templateName,
+		serviceDate:         serviceDate,
+		expirationDate:      expirationDate,
+		templateShare:       templateShare,
+		multiAudit:          multiAudit,
+		displayName:         displayName,
+		subjectKey:          subjectKey,
+		description:         description,
+		creator:             creator,
+		currency:            currency,
 	}
 	fact.SetHash(fact.GenerateHash())
 
@@ -85,7 +85,7 @@ func (fact AddTemplateFact) Bytes() []byte {
 		fact.Token(),
 		fact.sender.Bytes(),
 		fact.contract.Bytes(),
-		fact.creditID.Bytes(),
+		fact.credentialServiceID.Bytes(),
 		fact.templateID.Bytes(),
 		[]byte(fact.templateName),
 		fact.serviceDate.Bytes(),
@@ -109,7 +109,7 @@ func (fact AddTemplateFact) IsValid(b []byte) error {
 		fact.BaseHinter,
 		fact.sender,
 		fact.contract,
-		fact.creditID,
+		fact.credentialServiceID,
 		fact.templateID,
 		fact.serviceDate,
 		fact.expirationDate,
@@ -171,8 +171,8 @@ func (fact AddTemplateFact) Contract() base.Address {
 	return fact.contract
 }
 
-func (fact AddTemplateFact) Credential() extensioncurrency.ContractID {
-	return fact.creditID
+func (fact AddTemplateFact) CredentialServiceID() extensioncurrency.ContractID {
+	return fact.credentialServiceID
 }
 
 func (fact AddTemplateFact) Uint256() Uint256 {

@@ -211,6 +211,13 @@ func (opr *OperationProcessor) checkDuplication(op base.Operation) error {
 		}
 		did = fact.Sender().String()
 		didtype = DuplicationTypeSender
+	case CreateCredentialService:
+		fact, ok := t.Fact().(CreateCredentialServiceFact)
+		if !ok {
+			return errors.Errorf("expected CreateCredentialServiceFact, not %T", t.Fact())
+		}
+		did = fact.Sender().String()
+		didtype = DuplicationTypeSender
 	case extensioncurrency.CurrencyRegister:
 		fact, ok := t.Fact().(extensioncurrency.CurrencyRegisterFact)
 		if !ok {
@@ -302,7 +309,8 @@ func (opr *OperationProcessor) getNewProcessor(op base.Operation) (base.Operatio
 		extensioncurrency.Withdraws,
 		extensioncurrency.CurrencyRegister,
 		extensioncurrency.CurrencyPolicyUpdater,
-		currency.SuffrageInflation:
+		currency.SuffrageInflation,
+		CreateCredentialService:
 		return nil, false, errors.Errorf("%T needs SetProcessor", t)
 	default:
 		return nil, false, nil

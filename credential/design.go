@@ -6,27 +6,26 @@ import (
 	"github.com/ProtoconNet/mitum2/util/hint"
 )
 
-var (
-	DesignHint = hint.MustNewHint("mitum-credential-design-v0.0.1")
-)
+var DesignHint = hint.MustNewHint("mitum-credential-design-v0.0.1")
 
 type Design struct {
 	hint.BaseHinter
-	creditID extensioncurrency.ContractID
-	policy   Policy
+	credentialServiceID extensioncurrency.ContractID
+	policy              Policy
 }
 
-func NewDesign(creditID extensioncurrency.ContractID) Design {
+func NewDesign(credentialServiceID extensioncurrency.ContractID, policy Policy) Design {
 	return Design{
-		BaseHinter: hint.NewBaseHinter(DesignHint),
-		creditID:   creditID,
+		BaseHinter:          hint.NewBaseHinter(DesignHint),
+		credentialServiceID: credentialServiceID,
+		policy:              policy,
 	}
 }
 
 func (de Design) IsValid([]byte) error {
 	if err := util.CheckIsValiders(nil, false,
 		de.BaseHinter,
-		de.creditID,
+		de.credentialServiceID,
 		de.policy,
 	); err != nil {
 		return util.ErrInvalid.Errorf("invalid Design: %w", err)
@@ -36,11 +35,14 @@ func (de Design) IsValid([]byte) error {
 }
 
 func (de Design) Bytes() []byte {
-	return de.creditID.Bytes()
+	return util.ConcatBytesSlice(
+		de.credentialServiceID.Bytes(),
+		de.policy.Bytes(),
+	)
 }
 
 func (de Design) CreditID() extensioncurrency.ContractID {
-	return de.creditID
+	return de.credentialServiceID
 }
 
 func (de Design) Policy() Policy {
