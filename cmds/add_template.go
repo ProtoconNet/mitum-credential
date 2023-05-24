@@ -13,26 +13,26 @@ import (
 type AddTemplateCommand struct {
 	baseCommand
 	OperationFlags
-	Sender         AddressFlag    `arg:"" name:"sender" help:"sender address" required:"true"`
-	Contract       AddressFlag    `arg:"" name:"contract" help:"contract address of credential" required:"true"`
-	Credential     ContractIDFlag `arg:"" name:"credential-id" help:"credential id" required:"true"`
-	TemplateID     string         `arg:"" name:"template-id" help:"template id" required:"true"`
-	TemplateName   string         `arg:"" name:"template-name" help:"template name"  required:"true"`
-	ServiceDate    string         `arg:"" name:"service-date" help:"service date; yyyy-MM-dd" required:"true"`
-	ExpirationDate string         `arg:"" name:"expiration-date" help:"expiration date; yyyy-MM-dd" required:"true"`
-	TemplateShare  bool           `arg:"" name:"template-share" help:"template share; true | false" required:"true"`
-	MultiAudit     bool           `arg:"" name:"multi-audit" help:"multi audit; true | false" required:"true"`
-	DisplayName    string         `arg:"" name:"display-name" help:"display name" required:"true"`
-	SubjectKey     string         `arg:"" name:"subject-key" help:"subject key" required:"true"`
-	Description    string         `arg:"" name:"description" help:"description"  required:"true"`
-	Creator        AddressFlag    `arg:"" name:"creator" help:"creator address"  required:"true"`
-	Currency       CurrencyIDFlag `arg:"" name:"currency-id" help:"currency id" required:"true"`
-	sender         base.Address
-	contract       base.Address
-	tid            credential.Uint256
-	service        credential.Date
-	expiration     credential.Date
-	creator        base.Address
+	Sender            AddressFlag    `arg:"" name:"sender" help:"sender address" required:"true"`
+	Contract          AddressFlag    `arg:"" name:"contract" help:"contract address of credential" required:"true"`
+	CredentialService ContractIDFlag `arg:"" name:"credential-service-id" help:"credential id" required:"true"`
+	TemplateID        string         `arg:"" name:"template-id" help:"template id" required:"true"`
+	TemplateName      string         `arg:"" name:"template-name" help:"template name"  required:"true"`
+	ServiceDate       string         `arg:"" name:"service-date" help:"service date; yyyy-MM-dd" required:"true"`
+	ExpirationDate    string         `arg:"" name:"expiration-date" help:"expiration date; yyyy-MM-dd" required:"true"`
+	TemplateShare     bool           `arg:"" name:"template-share" help:"template share; true | false" required:"true"`
+	MultiAudit        bool           `arg:"" name:"multi-audit" help:"multi audit; true | false" required:"true"`
+	DisplayName       string         `arg:"" name:"display-name" help:"display name" required:"true"`
+	SubjectKey        string         `arg:"" name:"subject-key" help:"subject key" required:"true"`
+	Description       string         `arg:"" name:"description" help:"description"  required:"true"`
+	Creator           AddressFlag    `arg:"" name:"creator" help:"creator address"  required:"true"`
+	Currency          CurrencyIDFlag `arg:"" name:"currency-id" help:"currency id" required:"true"`
+	sender            base.Address
+	contract          base.Address
+	tid               credential.Uint256
+	service           credential.Date
+	expiration        credential.Date
+	creator           base.Address
 }
 
 func NewAddTemplateCommand() AddTemplateCommand {
@@ -113,7 +113,7 @@ func (cmd *AddTemplateCommand) createOperation() (base.Operation, error) { // no
 		[]byte(cmd.Token),
 		cmd.sender,
 		cmd.contract,
-		cmd.Credential.ID,
+		cmd.CredentialService.ID,
 		cmd.tid,
 		cmd.TemplateName,
 		cmd.service,

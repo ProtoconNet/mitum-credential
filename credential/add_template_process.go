@@ -72,9 +72,21 @@ func (opp *AddTemplateProcessor) PreProcess(
 		return nil, base.NewBaseOperationProcessReasonError("sender not found, %q: %w", fact.Sender(), err), nil
 	}
 
-	st, err := existsState(extensioncurrency.StateKeyContractAccount(fact.Sender()), "key of contract account", getStateFunc)
-	if err != nil {
+	if err := checkNotExistsState(extensioncurrency.StateKeyContractAccount(fact.Sender()), getStateFunc); err != nil {
 		return nil, base.NewBaseOperationProcessReasonError("contract account cannot add template, %q: %w", fact.Sender(), err), nil
+	}
+
+	if err := checkExistsState(currency.StateKeyAccount(fact.Creator()), getStateFunc); err != nil {
+		return nil, base.NewBaseOperationProcessReasonError("creator not found, %q: %w", fact.Sender(), err), nil
+	}
+
+	if err := checkNotExistsState(extensioncurrency.StateKeyContractAccount(fact.Creator()), getStateFunc); err != nil {
+		return nil, base.NewBaseOperationProcessReasonError("contract account cannot be creator, %q: %w", fact.Creator(), err), nil
+	}
+
+	st, err := existsState(extensioncurrency.StateKeyContractAccount(fact.Contract()), "key of contract account", getStateFunc)
+	if err != nil {
+		return nil, base.NewBaseOperationProcessReasonError("contract account not found, %q: %w", fact.Contract(), err), nil
 	}
 
 	ca, err := extensioncurrency.StateContractAccountValue(st)
