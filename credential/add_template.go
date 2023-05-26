@@ -175,7 +175,7 @@ func (fact AddTemplateFact) CredentialServiceID() extensioncurrency.ContractID {
 	return fact.credentialServiceID
 }
 
-func (fact AddTemplateFact) Uint256() Uint256 {
+func (fact AddTemplateFact) TemplateID() Uint256 {
 	return fact.templateID
 }
 

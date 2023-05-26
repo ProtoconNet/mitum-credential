@@ -1,13 +1,12 @@
 package credential
 
 import (
-	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/encoder"
 	"github.com/ProtoconNet/mitum2/util/hint"
 )
 
-func (po *Policy) unpack(enc encoder.Encoder, ht hint.Hint, bts, bhs []string, ccount uint64) error {
+func (po *Policy) unpack(enc encoder.Encoder, ht hint.Hint, bts []string, bhd []byte, ccount uint64) error {
 	e := util.StringErrorFunc("failed to decode bson of Policy")
 
 	po.BaseHinter = hint.NewBaseHinter(ht)
@@ -22,13 +21,19 @@ func (po *Policy) unpack(enc encoder.Encoder, ht hint.Hint, bts, bhs []string, c
 	}
 	po.templates = templates
 
-	holders := make([]base.Address, len(bhs))
-	for i := range bhs {
-		a, err := base.DecodeAddress(bhs[i], enc)
-		if err != nil {
-			return e(err, "")
+	hds, err := enc.DecodeSlice(bhd)
+	if err != nil {
+		return e(err, "")
+	}
+
+	holders := make([]Holder, len(hds))
+	for i := range hds {
+		j, ok := hds[i].(Holder)
+		if !ok {
+			return e(util.ErrWrongType.Errorf("expected Holder, not %T", hds[i]), "")
 		}
-		holders[i] = a
+
+		holders[i] = j
 	}
 	po.holders = holders
 

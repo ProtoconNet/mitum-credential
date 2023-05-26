@@ -1,7 +1,8 @@
 package credential
 
 import (
-	"github.com/ProtoconNet/mitum2/base"
+	"encoding/json"
+
 	"github.com/ProtoconNet/mitum2/util"
 	jsonenc "github.com/ProtoconNet/mitum2/util/encoder/json"
 	"github.com/ProtoconNet/mitum2/util/hint"
@@ -9,9 +10,9 @@ import (
 
 type PolicyJSONMarshaler struct {
 	hint.BaseHinter
-	Templates       []Uint256      `json:"templates"`
-	Holders         []base.Address `json:"holders"`
-	CredentialCount uint64         `json:"credential_count"`
+	Templates       []Uint256 `json:"templates"`
+	Holders         []Holder  `json:"holders"`
+	CredentialCount uint64    `json:"credential_count"`
 }
 
 func (po Policy) MarshalJSON() ([]byte, error) {
@@ -24,10 +25,10 @@ func (po Policy) MarshalJSON() ([]byte, error) {
 }
 
 type PolicyJSONUnmarshaler struct {
-	Hint            hint.Hint `json:"_hint"`
-	Templates       []string  `json:"templates"`
-	Holders         []string  `json:"holders"`
-	CredentialCount uint64    `json:"credential_count"`
+	Hint            hint.Hint       `json:"_hint"`
+	Templates       []string        `json:"templates"`
+	Holders         json.RawMessage `json:"holders"`
+	CredentialCount uint64          `json:"credential_count"`
 }
 
 func (po *Policy) DecodeJSON(b []byte, enc *jsonenc.Encoder) error {

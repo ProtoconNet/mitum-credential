@@ -63,6 +63,7 @@ var hinters = []encoder.DecodeDetail{
 	{Hint: credential.TemplateHint, Instance: credential.Template{}},
 	{Hint: credential.TemplateStateValueHint, Instance: credential.TemplateStateValue{}},
 	{Hint: credential.CreateCredentialServiceHint, Instance: credential.CreateCredentialService{}},
+	{Hint: credential.AddTemplateHint, Instance: credential.AddTemplate{}},
 
 	{Hint: digestisaac.ManifestHint, Instance: digestisaac.Manifest{}},
 	{Hint: digest.AccountValueHint, Instance: digest.AccountValue{}},
@@ -91,6 +92,7 @@ var supportedProposalOperationFactHinters = []encoder.DecodeDetail{
 	{Hint: currency.WithdrawsFactHint, Instance: currency.WithdrawsFact{}},
 
 	{Hint: credential.CreateCredentialServiceFactHint, Instance: credential.CreateCredentialServiceFact{}},
+	{Hint: credential.AddTemplateFactHint, Instance: credential.AddTemplateFact{}},
 
 	{Hint: isaacoperation.GenesisNetworkPolicyFactHint, Instance: isaacoperation.GenesisNetworkPolicyFact{}},
 	{Hint: isaacoperation.SuffrageCandidateFactHint, Instance: isaacoperation.SuffrageCandidateFact{}},

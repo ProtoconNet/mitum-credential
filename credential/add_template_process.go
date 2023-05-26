@@ -11,35 +11,35 @@ import (
 	"github.com/pkg/errors"
 )
 
-var createCredentialServiceProcessorPool = sync.Pool{
+var addTemplateProcessorPool = sync.Pool{
 	New: func() interface{} {
-		return new(CreateCredentialServiceProcessor)
+		return new(AddTemplateProcessor)
 	},
 }
 
-func (CreateCredentialService) Process(
+func (AddTemplate) Process(
 	ctx context.Context, getStateFunc base.GetStateFunc,
 ) ([]base.StateMergeValue, base.OperationProcessReasonError, error) {
 	return nil, nil, nil
 }
 
-type CreateCredentialServiceProcessor struct {
+type AddTemplateProcessor struct {
 	*base.BaseOperationProcessor
 }
 
-func NewCreateCredentialServiceProcessor() extensioncurrency.GetNewProcessor {
+func NewAddTemplateProcessor() extensioncurrency.GetNewProcessor {
 	return func(
 		height base.Height,
 		getStateFunc base.GetStateFunc,
 		newPreProcessConstraintFunc base.NewOperationProcessorProcessFunc,
 		newProcessConstraintFunc base.NewOperationProcessorProcessFunc,
 	) (base.OperationProcessor, error) {
-		e := util.StringErrorFunc("failed to create new CreateCredentialServiceProcessor")
+		e := util.StringErrorFunc("failed to create new AddTemplateProcessor")
 
-		nopp := createCredentialServiceProcessorPool.Get()
-		opp, ok := nopp.(*CreateCredentialServiceProcessor)
+		nopp := addTemplateProcessorPool.Get()
+		opp, ok := nopp.(*AddTemplateProcessor)
 		if !ok {
-			return nil, errors.Errorf("expected CreateCredentialServiceProcessor, not %T", nopp)
+			return nil, errors.Errorf("expected AddTemplateProcessor, not %T", nopp)
 		}
 
 		b, err := base.NewBaseOperationProcessor(
@@ -54,14 +54,14 @@ func NewCreateCredentialServiceProcessor() extensioncurrency.GetNewProcessor {
 	}
 }
 
-func (opp *CreateCredentialServiceProcessor) PreProcess(
+func (opp *AddTemplateProcessor) PreProcess(
 	ctx context.Context, op base.Operation, getStateFunc base.GetStateFunc,
 ) (context.Context, base.OperationProcessReasonError, error) {
-	e := util.StringErrorFunc("failed to preprocess CreateCredentialService")
+	e := util.StringErrorFunc("failed to preprocess AddTemplate")
 
-	fact, ok := op.Fact().(CreateCredentialServiceFact)
+	fact, ok := op.Fact().(AddTemplateFact)
 	if !ok {
-		return ctx, nil, e(nil, "not CreateCredentialServiceFact, %T", op.Fact())
+		return ctx, nil, e(nil, "not AddTemplateFact, %T", op.Fact())
 	}
 
 	if err := fact.IsValid(nil); err != nil {
@@ -73,7 +73,15 @@ func (opp *CreateCredentialServiceProcessor) PreProcess(
 	}
 
 	if err := checkNotExistsState(extensioncurrency.StateKeyContractAccount(fact.Sender()), getStateFunc); err != nil {
-		return nil, base.NewBaseOperationProcessReasonError("contract account cannot create credential service, %q: %w", fact.Sender(), err), nil
+		return nil, base.NewBaseOperationProcessReasonError("contract account cannot add template, %q: %w", fact.Sender(), err), nil
+	}
+
+	if err := checkExistsState(currency.StateKeyAccount(fact.Creator()), getStateFunc); err != nil {
+		return nil, base.NewBaseOperationProcessReasonError("creator not found, %q: %w", fact.Sender(), err), nil
+	}
+
+	if err := checkNotExistsState(extensioncurrency.StateKeyContractAccount(fact.Creator()), getStateFunc); err != nil {
+		return nil, base.NewBaseOperationProcessReasonError("contract account cannot be creator, %q: %w", fact.Creator(), err), nil
 	}
 
 	st, err := existsState(extensioncurrency.StateKeyContractAccount(fact.Contract()), "key of contract account", getStateFunc)
@@ -90,8 +98,21 @@ func (opp *CreateCredentialServiceProcessor) PreProcess(
 		return nil, base.NewBaseOperationProcessReasonError("not contract account owner, %q", fact.sender), nil
 	}
 
-	if err := checkNotExistsState(StateKeyDesign(fact.Contract(), fact.CredentialServiceID()), getStateFunc); err != nil {
-		return nil, base.NewBaseOperationProcessReasonError("credential service already exists, %s-%s: %w", fact.Contract(), fact.CredentialServiceID(), err), nil
+	st, err = existsState(StateKeyDesign(fact.Contract(), fact.CredentialServiceID()), "key of design", getStateFunc)
+	if err != nil {
+		return nil, base.NewBaseOperationProcessReasonError("credential service not found, %s-%s: %w", fact.Contract(), fact.CredentialServiceID(), err), nil
+	}
+
+	design, err := StateDesignValue(st)
+	if err != nil {
+		return nil, base.NewBaseOperationProcessReasonError("credential service value not found, %s-%s: %w", fact.Contract(), fact.CredentialServiceID(), err), nil
+	}
+
+	for _, t := range design.Policy().Templates() {
+		ft := fact.TemplateID().n
+		if t.n.Cmp(&ft) == 0 {
+			return nil, base.NewBaseOperationProcessReasonError("already registered template, %q, %s-%s", fact.TemplateID(), fact.Contract(), fact.CredentialServiceID()), nil
+		}
 	}
 
 	if err := checkFactSignsByState(fact.Sender(), op.Signs(), getStateFunc); err != nil {
@@ -101,35 +122,67 @@ func (opp *CreateCredentialServiceProcessor) PreProcess(
 	return ctx, nil, nil
 }
 
-func (opp *CreateCredentialServiceProcessor) Process(
+func (opp *AddTemplateProcessor) Process(
 	ctx context.Context, op base.Operation, getStateFunc base.GetStateFunc) (
 	[]base.StateMergeValue, base.OperationProcessReasonError, error,
 ) {
-	e := util.StringErrorFunc("failed to process CreateCredentialService")
+	e := util.StringErrorFunc("failed to process AddTemplate")
 
-	fact, ok := op.Fact().(CreateCredentialServiceFact)
+	fact, ok := op.Fact().(AddTemplateFact)
 	if !ok {
-		return nil, nil, e(nil, "expected CreateCredentialServiceFact, not %T", op.Fact())
+		return nil, nil, e(nil, "expected AddTemplateFact, not %T", op.Fact())
 	}
 
-	templates := []Uint256{}
-	holders := []Holder{}
+	st, err := existsState(StateKeyDesign(fact.Contract(), fact.CredentialServiceID()), "key of design", getStateFunc)
+	if err != nil {
+		return nil, base.NewBaseOperationProcessReasonError("credential service not found, %s-%s: %w", fact.Contract(), fact.CredentialServiceID(), err), nil
+	}
 
-	policy := NewPolicy(templates, holders, 0)
+	design, err := StateDesignValue(st)
+	if err != nil {
+		return nil, base.NewBaseOperationProcessReasonError("credential service value not found, %s-%s: %w", fact.Contract(), fact.CredentialServiceID(), err), nil
+	}
+
+	templates := design.Policy().Templates()
+
+	for _, t := range templates {
+		ft := fact.TemplateID().n
+		if t.n.Cmp(&ft) == 0 {
+			return nil, base.NewBaseOperationProcessReasonError("already registered template, %q, %s-%s", fact.TemplateID(), fact.Contract(), fact.CredentialServiceID()), nil
+		}
+	}
+
+	templates = append(templates, fact.templateID)
+
+	policy := NewPolicy(templates, design.Policy().Holders(), design.Policy().CredentialCount())
 	if err := policy.IsValid(nil); err != nil {
 		return nil, base.NewBaseOperationProcessReasonError("invalid credential policy, %s-%s: %w", fact.Contract(), fact.CredentialServiceID(), err), nil
 	}
 
-	design := NewDesign(fact.CredentialServiceID(), policy)
+	design = NewDesign(fact.CredentialServiceID(), policy)
 	if err := design.IsValid(nil); err != nil {
 		return nil, base.NewBaseOperationProcessReasonError("invalid credential design, %s-%s: %w", fact.Contract(), fact.CredentialServiceID(), err), nil
 	}
 
-	sts := make([]base.StateMergeValue, 2)
+	template := NewTemplate(
+		fact.TemplateID(), fact.TemplateName(), fact.ServiceDate(), fact.ExpirationDate(),
+		fact.TemplateShare(), fact.MultiAudit(), fact.DisplayName(), fact.SubjectKey(),
+		fact.Description(), fact.Creator(),
+	)
+	if err := template.IsValid(nil); err != nil {
+		return nil, base.NewBaseOperationProcessReasonError("invalid template, %q: %w", fact.TemplateID(), err), nil
+	}
+
+	sts := make([]base.StateMergeValue, 3)
 
 	sts[0] = NewStateMergeValue(
 		StateKeyDesign(fact.Contract(), fact.CredentialServiceID()),
 		NewDesignStateValue(design),
+	)
+
+	sts[1] = NewStateMergeValue(
+		StateKeyTemplate(fact.Contract(), fact.CredentialServiceID(), fact.TemplateID()),
+		NewTemplateStateValue(template),
 	)
 
 	currencyPolicy, err := existsCurrencyPolicy(fact.Currency(), getStateFunc)
@@ -142,7 +195,7 @@ func (opp *CreateCredentialServiceProcessor) Process(
 		return nil, base.NewBaseOperationProcessReasonError("failed to check fee of currency, %q: %w", fact.Currency(), err), nil
 	}
 
-	st, err := existsState(currency.StateKeyBalance(fact.Sender(), fact.Currency()), "key of sender balance", getStateFunc)
+	st, err = existsState(currency.StateKeyBalance(fact.Sender(), fact.Currency()), "key of sender balance", getStateFunc)
 	if err != nil {
 		return nil, base.NewBaseOperationProcessReasonError("sender balance not found, %q: %w", fact.Sender(), err), nil
 	}
@@ -159,7 +212,7 @@ func (opp *CreateCredentialServiceProcessor) Process(
 	if !ok {
 		return nil, base.NewBaseOperationProcessReasonError("expected BalanceStateValue, not %T", sb.Value()), nil
 	}
-	sts[1] = currency.NewBalanceStateMergeValue(
+	sts[2] = currency.NewBalanceStateMergeValue(
 		sb.Key(),
 		currency.NewBalanceStateValue(v.Amount.WithBig(v.Amount.Big().Sub(fee))),
 	)
@@ -167,8 +220,8 @@ func (opp *CreateCredentialServiceProcessor) Process(
 	return sts, nil, nil
 }
 
-func (opp *CreateCredentialServiceProcessor) Close() error {
-	createCredentialServiceProcessorPool.Put(opp)
+func (opp *AddTemplateProcessor) Close() error {
+	addTemplateProcessorPool.Put(opp)
 
 	return nil
 }
