@@ -1,6 +1,8 @@
 package credential
 
 import (
+	"fmt"
+
 	"github.com/ProtoconNet/mitum-currency/v2/currency"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
@@ -83,8 +85,10 @@ func (fact RevokeCredentialsFact) IsValid(b []byte) error {
 			return util.ErrInvalid.Errorf("contract address is same with sender, %q", fact.sender)
 		}
 
-		if _, found := founds[it.ID()]; found {
-			return util.ErrInvalid.Errorf("duplicate id found, %s", it.ID())
+		k := fmt.Sprintf("%s-%s-%s", it.contract, it.credentialServiceID, it.id)
+
+		if _, found := founds[k]; found {
+			return util.ErrInvalid.Errorf("duplicate credential id found, %s", k)
 		}
 
 		founds[it.ID()] = struct{}{}
