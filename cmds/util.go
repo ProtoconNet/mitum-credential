@@ -177,6 +177,8 @@ func POperationProcessorsMap(ctx context.Context) (context.Context, error) {
 	opr.SetProcessor(currency.WithdrawsHint, currency.NewWithdrawsProcessor())
 	opr.SetProcessor(credential.CreateCredentialServiceHint, credential.NewCreateCredentialServiceProcessor())
 	opr.SetProcessor(credential.AddTemplateHint, credential.NewAddTemplateProcessor())
+	opr.SetProcessor(credential.AssignCredentialsHint, credential.NewAssignCredentialsProcessor())
+	opr.SetProcessor(credential.RevokeCredentialsHint, credential.NewRevokeCredentialsProcessor())
 
 	_ = set.Add(mitumcurrency.CreateAccountsHint, func(height base.Height) (base.OperationProcessor, error) {
 		return opr.New(
@@ -260,6 +262,24 @@ func POperationProcessorsMap(ctx context.Context) (context.Context, error) {
 	})
 
 	_ = set.Add(credential.AddTemplateHint, func(height base.Height) (base.OperationProcessor, error) {
+		return opr.New(
+			height,
+			db.State,
+			nil,
+			nil,
+		)
+	})
+
+	_ = set.Add(credential.AssignCredentialsHint, func(height base.Height) (base.OperationProcessor, error) {
+		return opr.New(
+			height,
+			db.State,
+			nil,
+			nil,
+		)
+	})
+
+	_ = set.Add(credential.RevokeCredentialsHint, func(height base.Height) (base.OperationProcessor, error) {
 		return opr.New(
 			height,
 			db.State,

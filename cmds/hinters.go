@@ -64,6 +64,10 @@ var hinters = []encoder.DecodeDetail{
 	{Hint: credential.TemplateStateValueHint, Instance: credential.TemplateStateValue{}},
 	{Hint: credential.CreateCredentialServiceHint, Instance: credential.CreateCredentialService{}},
 	{Hint: credential.AddTemplateHint, Instance: credential.AddTemplate{}},
+	{Hint: credential.AssignCredentialsItemHint, Instance: credential.AssignCredentialsItem{}},
+	{Hint: credential.AssignCredentialsHint, Instance: credential.AssignCredentials{}},
+	{Hint: credential.RevokeCredentialsItemHint, Instance: credential.RevokeCredentialsItem{}},
+	{Hint: credential.RevokeCredentialsHint, Instance: credential.RevokeCredentials{}},
 
 	{Hint: digestisaac.ManifestHint, Instance: digestisaac.Manifest{}},
 	{Hint: digest.AccountValueHint, Instance: digest.AccountValue{}},
@@ -93,6 +97,8 @@ var supportedProposalOperationFactHinters = []encoder.DecodeDetail{
 
 	{Hint: credential.CreateCredentialServiceFactHint, Instance: credential.CreateCredentialServiceFact{}},
 	{Hint: credential.AddTemplateFactHint, Instance: credential.AddTemplateFact{}},
+	{Hint: credential.AssignCredentialsFactHint, Instance: credential.AssignCredentialsFact{}},
+	{Hint: credential.RevokeCredentialsFactHint, Instance: credential.RevokeCredentialsFact{}},
 
 	{Hint: isaacoperation.GenesisNetworkPolicyFactHint, Instance: isaacoperation.GenesisNetworkPolicyFact{}},
 	{Hint: isaacoperation.SuffrageCandidateFactHint, Instance: isaacoperation.SuffrageCandidateFact{}},
