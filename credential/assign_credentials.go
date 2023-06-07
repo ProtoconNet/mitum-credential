@@ -3,7 +3,7 @@ package credential
 import (
 	"fmt"
 
-	"github.com/ProtoconNet/mitum-currency/v2/currency"
+	currencybase "github.com/ProtoconNet/mitum-currency/v3/base"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
@@ -13,7 +13,7 @@ import (
 type CredentialItem interface {
 	util.Byter
 	util.IsValider
-	Currency() currency.CurrencyID
+	Currency() currencybase.CurrencyID
 }
 
 var (
@@ -67,7 +67,7 @@ func (fact AssignCredentialsFact) IsValid(b []byte) error {
 		return err
 	}
 
-	if err := currency.IsValidOperationFact(fact, b); err != nil {
+	if err := currencybase.IsValidOperationFact(fact, b); err != nil {
 		return err
 	}
 
@@ -133,11 +133,11 @@ func (fact AssignCredentialsFact) Addresses() ([]base.Address, error) {
 }
 
 type AssignCredentials struct {
-	currency.BaseOperation
+	currencybase.BaseOperation
 }
 
 func NewAssignCredentials(fact AssignCredentialsFact) (AssignCredentials, error) {
-	return AssignCredentials{BaseOperation: currency.NewBaseOperation(AssignCredentialsHint, fact)}, nil
+	return AssignCredentials{BaseOperation: currencybase.NewBaseOperation(AssignCredentialsHint, fact)}, nil
 }
 
 func (op *AssignCredentials) HashSign(priv base.Privatekey, networkID base.NetworkID) error {

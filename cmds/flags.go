@@ -11,12 +11,11 @@ import (
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util/encoder"
 
-	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/v2/currency"
-	"github.com/ProtoconNet/mitum-currency/v2/currency"
+	currencybase "github.com/ProtoconNet/mitum-currency/v3/base"
 )
 
 type KeyFlag struct {
-	Key currency.BaseAccountKey
+	Key currencybase.BaseAccountKey
 }
 
 func (v *KeyFlag) UnmarshalText(b []byte) error {
@@ -47,7 +46,7 @@ func (v *KeyFlag) UnmarshalText(b []byte) error {
 		weight = uint(i)
 	}
 
-	if k, err := currency.NewBaseAccountKey(pk, weight); err != nil {
+	if k, err := currencybase.NewBaseAccountKey(pk, weight); err != nil {
 		return err
 	} else if err := k.IsValid(nil); err != nil {
 		return errors.Wrap(err, "invalid key string")
@@ -149,11 +148,11 @@ func (v *AddressFlag) Encode(enc encoder.Encoder) (base.Address, error) {
 }
 
 type BigFlag struct {
-	currency.Big
+	currencybase.Big
 }
 
 func (v *BigFlag) UnmarshalText(b []byte) error {
-	if a, err := currency.NewBigFromString(string(b)); err != nil {
+	if a, err := currencybase.NewBigFromString(string(b)); err != nil {
 		return errors.Wrapf(err, "invalid big string, %q", string(b))
 	} else if err := a.IsValid(nil); err != nil {
 		return err
@@ -165,11 +164,11 @@ func (v *BigFlag) UnmarshalText(b []byte) error {
 }
 
 type CurrencyIDFlag struct {
-	CID currency.CurrencyID
+	CID currencybase.CurrencyID
 }
 
 func (v *CurrencyIDFlag) UnmarshalText(b []byte) error {
-	cid := currency.CurrencyID(string(b))
+	cid := currencybase.CurrencyID(string(b))
 	if err := cid.IsValid(nil); err != nil {
 		return err
 	}
@@ -183,11 +182,11 @@ func (v *CurrencyIDFlag) String() string {
 }
 
 type ContractIDFlag struct {
-	ID extensioncurrency.ContractID
+	ID currencybase.ContractID
 }
 
 func (v *ContractIDFlag) UnmarshalText(b []byte) error {
-	id := extensioncurrency.ContractID(string(b))
+	id := currencybase.ContractID(string(b))
 	if err := id.IsValid(nil); err != nil {
 		return err
 	}
@@ -201,8 +200,8 @@ func (v *ContractIDFlag) String() string {
 }
 
 type CurrencyAmountFlag struct {
-	CID currency.CurrencyID
-	Big currency.Big
+	CID currencybase.CurrencyID
+	Big currencybase.Big
 }
 
 func (v *CurrencyAmountFlag) UnmarshalText(b []byte) error {
@@ -213,13 +212,13 @@ func (v *CurrencyAmountFlag) UnmarshalText(b []byte) error {
 
 	a, c := l[0], l[1]
 
-	cid := currency.CurrencyID(a)
+	cid := currencybase.CurrencyID(a)
 	if err := cid.IsValid(nil); err != nil {
 		return err
 	}
 	v.CID = cid
 
-	if a, err := currency.NewBigFromString(c); err != nil {
+	if a, err := currencybase.NewBigFromString(c); err != nil {
 		return errors.Wrapf(err, "invalid big string, %q", string(b))
 	} else if err := a.IsValid(nil); err != nil {
 		return err

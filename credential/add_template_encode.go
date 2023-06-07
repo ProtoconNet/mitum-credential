@@ -1,8 +1,7 @@
 package credential
 
 import (
-	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/v2/currency"
-	"github.com/ProtoconNet/mitum-currency/v2/currency"
+	currencybase "github.com/ProtoconNet/mitum-currency/v3/base"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/encoder"
@@ -15,7 +14,7 @@ func (fact *AddTemplateFact) unpack(enc encoder.Encoder,
 ) error {
 	e := util.StringErrorFunc("failed to unmarshal AddTemplateFact")
 
-	fact.credentialServiceID = extensioncurrency.ContractID(csid)
+	fact.credentialServiceID = currencybase.ContractID(csid)
 	fact.templateName = tname
 	fact.serviceDate = Date(sd)
 	fact.expirationDate = Date(ed)
@@ -24,7 +23,7 @@ func (fact *AddTemplateFact) unpack(enc encoder.Encoder,
 	fact.displayName = dn
 	fact.subjectKey = sk
 	fact.description = desc
-	fact.currency = currency.CurrencyID(cid)
+	fact.currency = currencybase.CurrencyID(cid)
 
 	templateid, err := NewUint256FromString(tid)
 	if err != nil {

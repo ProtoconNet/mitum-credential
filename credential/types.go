@@ -4,7 +4,7 @@ import (
 	"regexp"
 	"time"
 
-	"github.com/ProtoconNet/mitum-currency/v2/currency"
+	"github.com/ProtoconNet/mitum-currency/v3/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/holiman/uint256"
 	"github.com/pkg/errors"
@@ -15,7 +15,7 @@ type Uint256 struct {
 }
 
 func NewUint256FromString(s string) (Uint256, error) {
-	b, err := currency.NewBigFromString(s)
+	b, err := base.NewBigFromString(s)
 	if err != nil {
 		return Uint256{}, err
 	}

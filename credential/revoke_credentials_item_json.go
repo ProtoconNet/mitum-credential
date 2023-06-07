@@ -1,8 +1,7 @@
 package credential
 
 import (
-	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/v2/currency"
-	"github.com/ProtoconNet/mitum-currency/v2/currency"
+	currencybase "github.com/ProtoconNet/mitum-currency/v3/base"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	jsonenc "github.com/ProtoconNet/mitum2/util/encoder/json"
@@ -11,12 +10,12 @@ import (
 
 type RevokeCredentialsItemJSONMarshaler struct {
 	hint.BaseHinter
-	Contract          base.Address                 `json:"contract"`
-	CredentialService extensioncurrency.ContractID `json:"credential_service_id"`
-	Holder            base.Address                 `json:"holder"`
-	TemplateID        Uint256                      `json:"template_id"`
-	ID                string                       `json:"id"`
-	Currency          currency.CurrencyID          `json:"currency"`
+	Contract          base.Address            `json:"contract"`
+	CredentialService currencybase.ContractID `json:"credential_service_id"`
+	Holder            base.Address            `json:"holder"`
+	TemplateID        Uint256                 `json:"template_id"`
+	ID                string                  `json:"id"`
+	Currency          currencybase.CurrencyID `json:"currency"`
 }
 
 func (it RevokeCredentialsItem) MarshalJSON() ([]byte, error) {

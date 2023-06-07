@@ -1,8 +1,7 @@
 package credential
 
 import (
-	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/v2/currency"
-	"github.com/ProtoconNet/mitum-currency/v2/currency"
+	currencybase "github.com/ProtoconNet/mitum-currency/v3/base"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
@@ -18,16 +17,16 @@ type CreateCredentialServiceFact struct {
 	base.BaseFact
 	sender              base.Address
 	contract            base.Address
-	credentialServiceID extensioncurrency.ContractID
-	currency            currency.CurrencyID
+	credentialServiceID currencybase.ContractID
+	currency            currencybase.CurrencyID
 }
 
 func NewCreateCredentialServiceFact(
 	token []byte,
 	sender base.Address,
 	contract base.Address,
-	credentialServiceID extensioncurrency.ContractID,
-	currency currency.CurrencyID,
+	credentialServiceID currencybase.ContractID,
+	currency currencybase.CurrencyID,
 ) CreateCredentialServiceFact {
 	bf := base.NewBaseFact(CreateCredentialServiceFactHint, token)
 	fact := CreateCredentialServiceFact{
@@ -65,7 +64,7 @@ func (fact CreateCredentialServiceFact) IsValid(b []byte) error {
 		return err
 	}
 
-	if err := currency.IsValidOperationFact(fact, b); err != nil {
+	if err := currencybase.IsValidOperationFact(fact, b); err != nil {
 		return err
 	}
 
@@ -92,11 +91,11 @@ func (fact CreateCredentialServiceFact) Contract() base.Address {
 	return fact.contract
 }
 
-func (fact CreateCredentialServiceFact) CredentialServiceID() extensioncurrency.ContractID {
+func (fact CreateCredentialServiceFact) CredentialServiceID() currencybase.ContractID {
 	return fact.credentialServiceID
 }
 
-func (fact CreateCredentialServiceFact) Currency() currency.CurrencyID {
+func (fact CreateCredentialServiceFact) Currency() currencybase.CurrencyID {
 	return fact.currency
 }
 
@@ -110,11 +109,11 @@ func (fact CreateCredentialServiceFact) Addresses() ([]base.Address, error) {
 }
 
 type CreateCredentialService struct {
-	currency.BaseOperation
+	currencybase.BaseOperation
 }
 
 func NewCreateCredentialService(fact CreateCredentialServiceFact) (CreateCredentialService, error) {
-	return CreateCredentialService{BaseOperation: currency.NewBaseOperation(CreateCredentialServiceHint, fact)}, nil
+	return CreateCredentialService{BaseOperation: currencybase.NewBaseOperation(CreateCredentialServiceHint, fact)}, nil
 }
 
 func (op *CreateCredentialService) HashSign(priv base.Privatekey, networkID base.NetworkID) error {

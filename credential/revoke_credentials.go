@@ -3,7 +3,7 @@ package credential
 import (
 	"fmt"
 
-	"github.com/ProtoconNet/mitum-currency/v2/currency"
+	currencybase "github.com/ProtoconNet/mitum-currency/v3/base"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
@@ -61,7 +61,7 @@ func (fact RevokeCredentialsFact) IsValid(b []byte) error {
 		return err
 	}
 
-	if err := currency.IsValidOperationFact(fact, b); err != nil {
+	if err := currencybase.IsValidOperationFact(fact, b); err != nil {
 		return err
 	}
 
@@ -127,11 +127,11 @@ func (fact RevokeCredentialsFact) Addresses() ([]base.Address, error) {
 }
 
 type RevokeCredentials struct {
-	currency.BaseOperation
+	currencybase.BaseOperation
 }
 
 func NewRevokeCredentials(fact RevokeCredentialsFact) (RevokeCredentials, error) {
-	return RevokeCredentials{BaseOperation: currency.NewBaseOperation(RevokeCredentialsHint, fact)}, nil
+	return RevokeCredentials{BaseOperation: currencybase.NewBaseOperation(RevokeCredentialsHint, fact)}, nil
 }
 
 func (op *RevokeCredentials) HashSign(priv base.Privatekey, networkID base.NetworkID) error {

@@ -1,8 +1,7 @@
 package credential
 
 import (
-	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/v2/currency"
-	"github.com/ProtoconNet/mitum-currency/v2/currency"
+	currencybase "github.com/ProtoconNet/mitum-currency/v3/base"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
@@ -18,7 +17,7 @@ type AddTemplateFact struct {
 	base.BaseFact
 	sender              base.Address
 	contract            base.Address
-	credentialServiceID extensioncurrency.ContractID
+	credentialServiceID currencybase.ContractID
 	templateID          Uint256
 	templateName        string
 	serviceDate         Date
@@ -29,14 +28,14 @@ type AddTemplateFact struct {
 	subjectKey          string
 	description         string
 	creator             base.Address
-	currency            currency.CurrencyID
+	currency            currencybase.CurrencyID
 }
 
 func NewAddTemplateFact(
 	token []byte,
 	sender base.Address,
 	contract base.Address,
-	credentialServiceID extensioncurrency.ContractID,
+	credentialServiceID currencybase.ContractID,
 	templateID Uint256,
 	templateName string,
 	serviceDate Date,
@@ -47,7 +46,7 @@ func NewAddTemplateFact(
 	subjectKey string,
 	description string,
 	creator base.Address,
-	currency currency.CurrencyID,
+	currency currencybase.CurrencyID,
 ) AddTemplateFact {
 	bf := base.NewBaseFact(AddTemplateFactHint, token)
 	fact := AddTemplateFact{
@@ -101,7 +100,7 @@ func (fact AddTemplateFact) Bytes() []byte {
 }
 
 func (fact AddTemplateFact) IsValid(b []byte) error {
-	if err := currency.IsValidOperationFact(fact, b); err != nil {
+	if err := currencybase.IsValidOperationFact(fact, b); err != nil {
 		return err
 	}
 
@@ -152,7 +151,7 @@ func (fact AddTemplateFact) IsValid(b []byte) error {
 		return err
 	}
 
-	if expire.Compare(service) <= 0 {
+	if expire.UnixNano() < service.UnixNano() {
 		return util.ErrInvalid.Errorf("expire date <= service date, %s <= %s", fact.expirationDate, fact.serviceDate)
 	}
 
@@ -171,7 +170,7 @@ func (fact AddTemplateFact) Contract() base.Address {
 	return fact.contract
 }
 
-func (fact AddTemplateFact) CredentialServiceID() extensioncurrency.ContractID {
+func (fact AddTemplateFact) CredentialServiceID() currencybase.ContractID {
 	return fact.credentialServiceID
 }
 
@@ -215,7 +214,7 @@ func (fact AddTemplateFact) Creator() base.Address {
 	return fact.creator
 }
 
-func (fact AddTemplateFact) Currency() currency.CurrencyID {
+func (fact AddTemplateFact) Currency() currencybase.CurrencyID {
 	return fact.currency
 }
 
@@ -228,11 +227,11 @@ func (fact AddTemplateFact) Addresses() ([]base.Address, error) {
 }
 
 type AddTemplate struct {
-	currency.BaseOperation
+	currencybase.BaseOperation
 }
 
 func NewAddTemplate(fact AddTemplateFact) (AddTemplate, error) {
-	return AddTemplate{BaseOperation: currency.NewBaseOperation(AddTemplateHint, fact)}, nil
+	return AddTemplate{BaseOperation: currencybase.NewBaseOperation(AddTemplateHint, fact)}, nil
 }
 
 func (op *AddTemplate) HashSign(priv base.Privatekey, networkID base.NetworkID) error {
