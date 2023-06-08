@@ -1,8 +1,7 @@
 package credential
 
 import (
-	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/v2/currency"
-	"github.com/ProtoconNet/mitum-currency/v2/currency"
+	currencybase "github.com/ProtoconNet/mitum-currency/v3/base"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/encoder"
@@ -25,8 +24,8 @@ func (fact *CreateCredentialServiceFact) unpack(enc encoder.Encoder, sa, ca, csi
 		fact.contract = a
 	}
 
-	fact.credentialServiceID = extensioncurrency.ContractID(csid)
-	fact.currency = currency.CurrencyID(cid)
+	fact.credentialServiceID = currencybase.ContractID(csid)
+	fact.currency = currencybase.CurrencyID(cid)
 
 	return nil
 }

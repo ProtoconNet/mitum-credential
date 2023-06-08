@@ -1,8 +1,7 @@
 package credential
 
 import (
-	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/v2/currency"
-	"github.com/ProtoconNet/mitum-currency/v2/currency"
+	currencybase "github.com/ProtoconNet/mitum-currency/v3/base"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	jsonenc "github.com/ProtoconNet/mitum2/util/encoder/json"
@@ -11,16 +10,16 @@ import (
 
 type AssignCredentialsItemJSONMarshaler struct {
 	hint.BaseHinter
-	Contract          base.Address                 `json:"contract"`
-	CredentialService extensioncurrency.ContractID `json:"credential_service_id"`
-	Holder            base.Address                 `json:"holder"`
-	TemplateID        Uint256                      `json:"template_id"`
-	ID                string                       `json:"id"`
-	Value             string                       `json:"value"`
-	ValidFrom         Uint256                      `json:"valid_from"`
-	ValidUntil        Uint256                      `json:"valid_until"`
-	DID               string                       `json:"did"`
-	Currency          currency.CurrencyID          `json:"currency"`
+	Contract          base.Address            `json:"contract"`
+	CredentialService currencybase.ContractID `json:"credential_service_id"`
+	Holder            base.Address            `json:"holder"`
+	TemplateID        Uint256                 `json:"template_id"`
+	ID                string                  `json:"id"`
+	Value             string                  `json:"value"`
+	ValidFrom         Uint256                 `json:"valid_from"`
+	ValidUntil        Uint256                 `json:"valid_until"`
+	DID               string                  `json:"did"`
+	Currency          currencybase.CurrencyID `json:"currency"`
 }
 
 func (it AssignCredentialsItem) MarshalJSON() ([]byte, error) {

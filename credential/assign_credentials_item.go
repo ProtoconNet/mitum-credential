@@ -1,8 +1,7 @@
 package credential
 
 import (
-	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/v2/currency"
-	"github.com/ProtoconNet/mitum-currency/v2/currency"
+	currencybase "github.com/ProtoconNet/mitum-currency/v3/base"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
@@ -13,7 +12,7 @@ var AssignCredentialsItemHint = hint.MustNewHint("mitum-credential-assign-creden
 type AssignCredentialsItem struct {
 	hint.BaseHinter
 	contract            base.Address
-	credentialServiceID extensioncurrency.ContractID
+	credentialServiceID currencybase.ContractID
 	holder              base.Address
 	templateID          Uint256
 	id                  string
@@ -21,12 +20,12 @@ type AssignCredentialsItem struct {
 	validfrom           Uint256
 	validuntil          Uint256
 	did                 string
-	currency            currency.CurrencyID
+	currency            currencybase.CurrencyID
 }
 
 func NewAssignCredentialsItem(
 	contract base.Address,
-	credentialServiceID extensioncurrency.ContractID,
+	credentialServiceID currencybase.ContractID,
 	holder base.Address,
 	templateID Uint256,
 	id string,
@@ -34,7 +33,7 @@ func NewAssignCredentialsItem(
 	validfrom Uint256,
 	validuntil Uint256,
 	did string,
-	currency currency.CurrencyID,
+	currency currencybase.CurrencyID,
 ) AssignCredentialsItem {
 	return AssignCredentialsItem{
 		BaseHinter:          hint.NewBaseHinter(AssignCredentialsItemHint),
@@ -103,7 +102,7 @@ func (it AssignCredentialsItem) IsValid([]byte) error {
 	return nil
 }
 
-func (it AssignCredentialsItem) CredentialServiceID() extensioncurrency.ContractID {
+func (it AssignCredentialsItem) CredentialServiceID() currencybase.ContractID {
 	return it.credentialServiceID
 }
 
@@ -139,7 +138,7 @@ func (it AssignCredentialsItem) DID() string {
 	return it.did
 }
 
-func (it AssignCredentialsItem) Currency() currency.CurrencyID {
+func (it AssignCredentialsItem) Currency() currencybase.CurrencyID {
 	return it.currency
 }
 

@@ -86,7 +86,7 @@ func (t Template) IsValid([]byte) error {
 		return err
 	}
 
-	if expire.Compare(service) <= 0 {
+	if expire.UnixNano() < service.UnixNano() {
 		return util.ErrInvalid.Errorf("expire date <= service date, %s <= %s", t.expirationDate, t.serviceDate)
 	}
 

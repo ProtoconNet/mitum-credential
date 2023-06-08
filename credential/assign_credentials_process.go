@@ -4,8 +4,11 @@ import (
 	"context"
 	"sync"
 
-	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/v2/currency"
-	"github.com/ProtoconNet/mitum-currency/v2/currency"
+	currencybase "github.com/ProtoconNet/mitum-currency/v3/base"
+	currencyoperation "github.com/ProtoconNet/mitum-currency/v3/operation/currency"
+	types "github.com/ProtoconNet/mitum-currency/v3/operation/type"
+	currency "github.com/ProtoconNet/mitum-currency/v3/state/currency"
+	extensioncurrency "github.com/ProtoconNet/mitum-currency/v3/state/extension"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/pkg/errors"
@@ -146,7 +149,7 @@ type AssignCredentialsProcessor struct {
 	*base.BaseOperationProcessor
 }
 
-func NewAssignCredentialsProcessor() extensioncurrency.GetNewProcessor {
+func NewAssignCredentialsProcessor() types.GetNewProcessor {
 	return func(
 		height base.Height,
 		getStateFunc base.GetStateFunc,
@@ -315,7 +318,7 @@ func (opp *AssignCredentialsProcessor) Process( // nolint:dupl
 	if err != nil {
 		return nil, base.NewBaseOperationProcessReasonError("failed to calculate fee: %w", err), nil
 	}
-	sb, err := currency.CheckEnoughBalance(fact.sender, required, getStateFunc)
+	sb, err := currencyoperation.CheckEnoughBalance(fact.sender, required, getStateFunc)
 	if err != nil {
 		return nil, base.NewBaseOperationProcessReasonError("failed to check enough balance: %w", err), nil
 	}
@@ -326,7 +329,7 @@ func (opp *AssignCredentialsProcessor) Process( // nolint:dupl
 			return nil, nil, e(nil, "expected BalanceStateValue, not %T", sb[i].Value())
 		}
 		stv := currency.NewBalanceStateValue(v.Amount.WithBig(v.Amount.Big().Sub(required[i][0])))
-		sts = append(sts, currency.NewBalanceStateMergeValue(sb[i].Key(), stv))
+		sts = append(sts, NewStateMergeValue(sb[i].Key(), stv))
 	}
 
 	return sts, nil, nil
@@ -338,11 +341,11 @@ func (opp *AssignCredentialsProcessor) Close() error {
 	return nil
 }
 
-func calculateCredentialItemsFee(getStateFunc base.GetStateFunc, items []CredentialItem) (map[currency.CurrencyID][2]currency.Big, error) {
-	required := map[currency.CurrencyID][2]currency.Big{}
+func calculateCredentialItemsFee(getStateFunc base.GetStateFunc, items []CredentialItem) (map[currencybase.CurrencyID][2]currencybase.Big, error) {
+	required := map[currencybase.CurrencyID][2]currencybase.Big{}
 
 	for _, item := range items {
-		rq := [2]currency.Big{currency.ZeroBig, currency.ZeroBig}
+		rq := [2]currencybase.Big{currencybase.ZeroBig, currencybase.ZeroBig}
 
 		if k, found := required[item.Currency()]; found {
 			rq = k
@@ -353,13 +356,13 @@ func calculateCredentialItemsFee(getStateFunc base.GetStateFunc, items []Credent
 			return nil, err
 		}
 
-		switch k, err := policy.Feeer().Fee(currency.ZeroBig); {
+		switch k, err := policy.Feeer().Fee(currencybase.ZeroBig); {
 		case err != nil:
 			return nil, err
 		case !k.OverZero():
-			required[item.Currency()] = [2]currency.Big{rq[0], rq[1]}
+			required[item.Currency()] = [2]currencybase.Big{rq[0], rq[1]}
 		default:
-			required[item.Currency()] = [2]currency.Big{rq[0].Add(k), rq[1].Add(k)}
+			required[item.Currency()] = [2]currencybase.Big{rq[0].Add(k), rq[1].Add(k)}
 		}
 
 	}

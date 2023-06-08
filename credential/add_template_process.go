@@ -4,8 +4,10 @@ import (
 	"context"
 	"sync"
 
-	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/v2/currency"
-	"github.com/ProtoconNet/mitum-currency/v2/currency"
+	currencybase "github.com/ProtoconNet/mitum-currency/v3/base"
+	types "github.com/ProtoconNet/mitum-currency/v3/operation/type"
+	currency "github.com/ProtoconNet/mitum-currency/v3/state/currency"
+	extensioncurrency "github.com/ProtoconNet/mitum-currency/v3/state/extension"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/pkg/errors"
@@ -27,7 +29,7 @@ type AddTemplateProcessor struct {
 	*base.BaseOperationProcessor
 }
 
-func NewAddTemplateProcessor() extensioncurrency.GetNewProcessor {
+func NewAddTemplateProcessor() types.GetNewProcessor {
 	return func(
 		height base.Height,
 		getStateFunc base.GetStateFunc,
@@ -190,7 +192,7 @@ func (opp *AddTemplateProcessor) Process(
 		return nil, base.NewBaseOperationProcessReasonError("currency not found, %q: %w", fact.Currency(), err), nil
 	}
 
-	fee, err := currencyPolicy.Feeer().Fee(currency.ZeroBig)
+	fee, err := currencyPolicy.Feeer().Fee(currencybase.ZeroBig)
 	if err != nil {
 		return nil, base.NewBaseOperationProcessReasonError("failed to check fee of currency, %q: %w", fact.Currency(), err), nil
 	}
@@ -199,7 +201,8 @@ func (opp *AddTemplateProcessor) Process(
 	if err != nil {
 		return nil, base.NewBaseOperationProcessReasonError("sender balance not found, %q: %w", fact.Sender(), err), nil
 	}
-	sb := currency.NewBalanceStateMergeValue(st.Key(), st.Value())
+
+	sb := NewStateMergeValue(st.Key(), st.Value())
 
 	switch b, err := currency.StateBalanceValue(st); {
 	case err != nil:
@@ -212,10 +215,7 @@ func (opp *AddTemplateProcessor) Process(
 	if !ok {
 		return nil, base.NewBaseOperationProcessReasonError("expected BalanceStateValue, not %T", sb.Value()), nil
 	}
-	sts[2] = currency.NewBalanceStateMergeValue(
-		sb.Key(),
-		currency.NewBalanceStateValue(v.Amount.WithBig(v.Amount.Big().Sub(fee))),
-	)
+	sts[2] = NewStateMergeValue(sb.Key(), currency.NewBalanceStateValue(v.Amount.WithBig(v.Amount.Big().Sub(fee))))
 
 	return sts, nil, nil
 }

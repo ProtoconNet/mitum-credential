@@ -3,8 +3,8 @@ package credential // nolint: dupl
 import (
 	"go.mongodb.org/mongo-driver/bson"
 
-	"github.com/ProtoconNet/mitum-currency/v2/currency"
-	bsonenc "github.com/ProtoconNet/mitum-currency/v2/digest/util/bson"
+	"github.com/ProtoconNet/mitum-currency/v3/base"
+	bsonenc "github.com/ProtoconNet/mitum-currency/v3/digest/util/bson"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
 	"github.com/ProtoconNet/mitum2/util/valuehash"
@@ -35,7 +35,7 @@ type CreateCredentialServiceFactBSONUnmarshaler struct {
 func (fact *CreateCredentialServiceFact) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
 	e := util.StringErrorFunc("failed to decode bson of CreateCredentialServiceFact")
 
-	var ubf currency.BaseFactBSONUnmarshaler
+	var ubf base.BaseFactBSONUnmarshaler
 
 	if err := enc.Unmarshal(b, &ubf); err != nil {
 		return e(err, "")
@@ -71,7 +71,7 @@ func (op CreateCredentialService) MarshalBSON() ([]byte, error) {
 func (op *CreateCredentialService) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
 	e := util.StringErrorFunc("failed to decode bson of CreateCredentialService")
 
-	var ubo currency.BaseOperation
+	var ubo base.BaseOperation
 	if err := ubo.DecodeBSON(b, enc); err != nil {
 		return e(err, "")
 	}

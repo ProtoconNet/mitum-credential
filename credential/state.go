@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/v2/currency"
-	"github.com/ProtoconNet/mitum-currency/v2/currency"
+	currencybase "github.com/ProtoconNet/mitum-currency/v3/base"
+	currency "github.com/ProtoconNet/mitum-currency/v3/state/currency"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
@@ -42,7 +42,7 @@ func NewStateMergeValue(key string, stv base.StateValue) base.StateMergeValue {
 	)
 }
 
-func StateKeyCredentialServicePrefix(ca base.Address, credentialServiceID extensioncurrency.ContractID) string {
+func StateKeyCredentialServicePrefix(ca base.Address, credentialServiceID currencybase.ContractID) string {
 	return fmt.Sprintf("%s%s:%s", CredentialServicePrefix, ca.String(), credentialServiceID)
 }
 
@@ -98,7 +98,7 @@ func IsStateDesignKey(key string) bool {
 	return strings.HasPrefix(key, CredentialServicePrefix) && strings.HasSuffix(key, DesignSuffix)
 }
 
-func StateKeyDesign(ca base.Address, crid extensioncurrency.ContractID) string {
+func StateKeyDesign(ca base.Address, crid currencybase.ContractID) string {
 	return fmt.Sprintf("%s%s", StateKeyCredentialServicePrefix(ca, crid), DesignSuffix)
 }
 
@@ -141,7 +141,7 @@ func (sv TemplateStateValue) HashBytes() []byte {
 	return sv.Template.Bytes()
 }
 
-func StateKeyTemplate(ca base.Address, credentialServiceID extensioncurrency.ContractID, templateID Uint256) string {
+func StateKeyTemplate(ca base.Address, credentialServiceID currencybase.ContractID, templateID Uint256) string {
 	return fmt.Sprintf("%s-%s%s", StateKeyCredentialServicePrefix(ca, credentialServiceID), templateID.String(), TemplateSuffix)
 }
 
@@ -202,7 +202,7 @@ func (sv CredentialStateValue) HashBytes() []byte {
 	return sv.Credential.Bytes()
 }
 
-func StateKeyCredential(ca base.Address, credentialServiceID extensioncurrency.ContractID, templateID Uint256, id string) string {
+func StateKeyCredential(ca base.Address, credentialServiceID currencybase.ContractID, templateID Uint256, id string) string {
 	return fmt.Sprintf("%s-%s-%s%s", StateKeyCredentialServicePrefix(ca, credentialServiceID), templateID.String(), id, CredentialSuffix)
 }
 
@@ -277,7 +277,7 @@ func IsStateHolderDIDKey(key string) bool {
 	return strings.HasPrefix(key, CredentialServicePrefix) && strings.HasSuffix(key, HolderDIDSuffix)
 }
 
-func StateKeyHolderDID(ca base.Address, credentialServiceID extensioncurrency.ContractID, ha base.Address) string {
+func StateKeyHolderDID(ca base.Address, credentialServiceID currencybase.ContractID, ha base.Address) string {
 	return fmt.Sprintf("%s:%s%s", StateKeyCredentialServicePrefix(ca, credentialServiceID), ha.String(), HolderDIDSuffix)
 }
 
@@ -336,22 +336,22 @@ func notExistsState(
 	case found:
 		return nil, base.NewBaseOperationProcessReasonError("%s already exists", name)
 	case !found:
-		st = currency.NewBaseState(base.NilHeight, k, nil, nil, nil)
+		st = currencybase.NewBaseState(base.NilHeight, k, nil, nil, nil)
 	}
 	return st, nil
 }
 
-func existsCurrencyPolicy(cid currency.CurrencyID, getStateFunc base.GetStateFunc) (extensioncurrency.CurrencyPolicy, error) {
-	var policy extensioncurrency.CurrencyPolicy
-	switch i, found, err := getStateFunc(extensioncurrency.StateKeyCurrencyDesign(cid)); {
+func existsCurrencyPolicy(cid currencybase.CurrencyID, getStateFunc base.GetStateFunc) (currencybase.CurrencyPolicy, error) {
+	var policy currencybase.CurrencyPolicy
+	switch i, found, err := getStateFunc(currency.StateKeyCurrencyDesign(cid)); {
 	case err != nil:
-		return extensioncurrency.CurrencyPolicy{}, err
+		return currencybase.CurrencyPolicy{}, err
 	case !found:
-		return extensioncurrency.CurrencyPolicy{}, base.NewBaseOperationProcessReasonError("currency not found, %v", cid)
+		return currencybase.CurrencyPolicy{}, base.NewBaseOperationProcessReasonError("currency not found, %v", cid)
 	default:
-		currencydesign, ok := i.Value().(extensioncurrency.CurrencyDesignStateValue) //nolint:forcetypeassert //...
+		currencydesign, ok := i.Value().(currency.CurrencyDesignStateValue) //nolint:forcetypeassert //...
 		if !ok {
-			return extensioncurrency.CurrencyPolicy{}, errors.Errorf("expected CurrencyDesignStateValue, not %T", i.Value())
+			return currencybase.CurrencyPolicy{}, errors.Errorf("expected CurrencyDesignStateValue, not %T", i.Value())
 		}
 		policy = currencydesign.CurrencyDesign.Policy()
 	}

@@ -1,8 +1,7 @@
 package credential
 
 import (
-	extensioncurrency "github.com/ProtoconNet/mitum-currency-extension/v2/currency"
-	"github.com/ProtoconNet/mitum-currency/v2/currency"
+	currencybase "github.com/ProtoconNet/mitum-currency/v3/base"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
@@ -13,20 +12,20 @@ var RevokeCredentialsItemHint = hint.MustNewHint("mitum-credential-revoke-creden
 type RevokeCredentialsItem struct {
 	hint.BaseHinter
 	contract            base.Address
-	credentialServiceID extensioncurrency.ContractID
+	credentialServiceID currencybase.ContractID
 	holder              base.Address
 	templateID          Uint256
 	id                  string
-	currency            currency.CurrencyID
+	currency            currencybase.CurrencyID
 }
 
 func NewRevokeCredentialsItem(
 	contract base.Address,
-	credentialServiceID extensioncurrency.ContractID,
+	credentialServiceID currencybase.ContractID,
 	holder base.Address,
 	templateID Uint256,
 	id string,
-	currency currency.CurrencyID,
+	currency currencybase.CurrencyID,
 ) RevokeCredentialsItem {
 	return RevokeCredentialsItem{
 		BaseHinter:          hint.NewBaseHinter(RevokeCredentialsItemHint),
@@ -73,7 +72,7 @@ func (it RevokeCredentialsItem) IsValid([]byte) error {
 	return nil
 }
 
-func (it RevokeCredentialsItem) CredentialServiceID() extensioncurrency.ContractID {
+func (it RevokeCredentialsItem) CredentialServiceID() currencybase.ContractID {
 	return it.credentialServiceID
 }
 
@@ -93,7 +92,7 @@ func (it RevokeCredentialsItem) ID() string {
 	return it.id
 }
 
-func (it RevokeCredentialsItem) Currency() currency.CurrencyID {
+func (it RevokeCredentialsItem) Currency() currencybase.CurrencyID {
 	return it.currency
 }
 
