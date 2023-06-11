@@ -17,7 +17,8 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/ProtoconNet/mitum-credential/credential"
+	"github.com/ProtoconNet/mitum-credential/operation/credential"
+	"github.com/ProtoconNet/mitum-credential/operation/processor"
 	currencycmds "github.com/ProtoconNet/mitum-currency/v3/cmds"
 	mongodbstorage "github.com/ProtoconNet/mitum-currency/v3/digest/mongodb"
 	bsonenc "github.com/ProtoconNet/mitum-currency/v3/digest/util/bson"
@@ -165,7 +166,7 @@ func POperationProcessorsMap(ctx context.Context) (context.Context, error) {
 
 	set := hint.NewCompatibleSet()
 
-	opr := credential.NewOperationProcessor()
+	opr := processor.NewOperationProcessor()
 	opr.SetProcessor(mitumcurrency.CreateAccountsHint, mitumcurrency.NewCreateAccountsProcessor())
 	opr.SetProcessor(mitumcurrency.KeyUpdaterHint, mitumcurrency.NewKeyUpdaterProcessor())
 	opr.SetProcessor(mitumcurrency.TransfersHint, mitumcurrency.NewTransfersProcessor())

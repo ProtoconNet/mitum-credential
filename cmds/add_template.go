@@ -5,7 +5,8 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/ProtoconNet/mitum-credential/credential"
+	"github.com/ProtoconNet/mitum-credential/operation/credential"
+	"github.com/ProtoconNet/mitum-credential/types"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 )
@@ -29,9 +30,9 @@ type AddTemplateCommand struct {
 	Currency          CurrencyIDFlag `arg:"" name:"currency-id" help:"currency id" required:"true"`
 	sender            base.Address
 	contract          base.Address
-	tid               credential.Uint256
-	service           credential.Date
-	expiration        credential.Date
+	tid               types.Uint256
+	service           types.Date
+	expiration        types.Date
 	creator           base.Address
 }
 
@@ -87,13 +88,13 @@ func (cmd *AddTemplateCommand) parseFlags() error {
 	}
 	cmd.creator = creator
 
-	tid, err := credential.NewUint256FromString(cmd.TemplateID)
+	tid, err := types.NewUint256FromString(cmd.TemplateID)
 	if err != nil {
 		return errors.Wrapf(err, "invalid template id format, %q", cmd.TemplateID)
 	}
 	cmd.tid = tid
 
-	service, expiration := credential.Date(cmd.ServiceDate), credential.Date(cmd.ExpirationDate)
+	service, expiration := types.Date(cmd.ServiceDate), types.Date(cmd.ExpirationDate)
 	if err := service.IsValid(nil); err != nil {
 		return errors.Wrapf(err, "invalid service date format, %q", cmd.ServiceDate)
 	}
@@ -118,8 +119,8 @@ func (cmd *AddTemplateCommand) createOperation() (base.Operation, error) { // no
 		cmd.TemplateName,
 		cmd.service,
 		cmd.expiration,
-		credential.Bool(cmd.TemplateShare),
-		credential.Bool(cmd.MultiAudit),
+		types.Bool(cmd.TemplateShare),
+		types.Bool(cmd.MultiAudit),
 		cmd.DisplayName,
 		cmd.SubjectKey,
 		cmd.Description,

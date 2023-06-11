@@ -5,7 +5,8 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/ProtoconNet/mitum-credential/credential"
+	"github.com/ProtoconNet/mitum-credential/operation/credential"
+	"github.com/ProtoconNet/mitum-credential/types"
 	"github.com/ProtoconNet/mitum2/base"
 )
 
@@ -26,9 +27,9 @@ type AssignCredentialsCommand struct {
 	sender            base.Address
 	contract          base.Address
 	holder            base.Address
-	tid               credential.Uint256
-	validfrom         credential.Uint256
-	validuntil        credential.Uint256
+	tid               types.Uint256
+	validfrom         types.Uint256
+	validuntil        types.Uint256
 }
 
 func NewAssignCredentialsCommand() AssignCredentialsCommand {
@@ -83,19 +84,19 @@ func (cmd *AssignCredentialsCommand) parseFlags() error {
 	}
 	cmd.holder = holder
 
-	tid, err := credential.NewUint256FromString(cmd.TemplateID)
+	tid, err := types.NewUint256FromString(cmd.TemplateID)
 	if err != nil {
 		return errors.Wrapf(err, "invalid template id format, %q", cmd.TemplateID)
 	}
 	cmd.tid = tid
 
-	vf, err := credential.NewUint256FromString(cmd.ValidFrom)
+	vf, err := types.NewUint256FromString(cmd.ValidFrom)
 	if err != nil {
 		return errors.Wrapf(err, "invalid valid-from format, %q", cmd.ValidFrom)
 	}
 	cmd.validfrom = vf
 
-	vu, err := credential.NewUint256FromString(cmd.ValidUntil)
+	vu, err := types.NewUint256FromString(cmd.ValidUntil)
 	if err != nil {
 		return errors.Wrapf(err, "invalid valid-until format, %q", cmd.ValidFrom)
 	}
