@@ -1,4 +1,4 @@
 /*
-Package operation provides the currency operations.
+Package operation provides the credential operations.
 */
 package credential
