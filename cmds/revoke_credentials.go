@@ -5,7 +5,8 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/ProtoconNet/mitum-credential/credential"
+	"github.com/ProtoconNet/mitum-credential/operation/credential"
+	"github.com/ProtoconNet/mitum-credential/types"
 	"github.com/ProtoconNet/mitum2/base"
 )
 
@@ -22,7 +23,7 @@ type RevokeCredentialsCommand struct {
 	sender            base.Address
 	contract          base.Address
 	holder            base.Address
-	tid               credential.Uint256
+	tid               types.Uint256
 }
 
 func NewRevokeCredentialsCommand() RevokeCredentialsCommand {
@@ -77,7 +78,7 @@ func (cmd *RevokeCredentialsCommand) parseFlags() error {
 	}
 	cmd.holder = holder
 
-	tid, err := credential.NewUint256FromString(cmd.TemplateID)
+	tid, err := types.NewUint256FromString(cmd.TemplateID)
 	if err != nil {
 		return errors.Wrapf(err, "invalid template id format, %q", cmd.TemplateID)
 	}

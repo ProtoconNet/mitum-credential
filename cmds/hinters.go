@@ -1,8 +1,10 @@
 package cmds
 
 import (
-	"github.com/ProtoconNet/mitum-credential/credential"
-	currencybase "github.com/ProtoconNet/mitum-currency/v3/base"
+	"github.com/ProtoconNet/mitum-credential/operation/credential"
+	state "github.com/ProtoconNet/mitum-credential/state/credential"
+	"github.com/ProtoconNet/mitum-credential/types"
+	"github.com/ProtoconNet/mitum-currency/v3/common"
 	"github.com/ProtoconNet/mitum-currency/v3/digest"
 	digestisaac "github.com/ProtoconNet/mitum-currency/v3/digest/isaac"
 	mitumcurrency "github.com/ProtoconNet/mitum-currency/v3/operation/currency"
@@ -10,6 +12,7 @@ import (
 	isaacoperation "github.com/ProtoconNet/mitum-currency/v3/operation/isaac"
 	currencystate "github.com/ProtoconNet/mitum-currency/v3/state/currency"
 	extensionstate "github.com/ProtoconNet/mitum-currency/v3/state/extension"
+	currencytypes "github.com/ProtoconNet/mitum-currency/v3/types"
 	"github.com/ProtoconNet/mitum2/launch"
 	"github.com/ProtoconNet/mitum2/util/encoder"
 	"github.com/pkg/errors"
@@ -20,13 +23,13 @@ var SupportedProposalOperationFactHinters []encoder.DecodeDetail
 
 var hinters = []encoder.DecodeDetail{
 	// revive:disable-next-line:line-length-limit
-	{Hint: currencybase.BaseStateHint, Instance: currencybase.BaseState{}},
-	{Hint: currencybase.NodeHint, Instance: currencybase.BaseNode{}},
-	{Hint: currencybase.AccountHint, Instance: currencybase.Account{}},
-	{Hint: currencybase.AddressHint, Instance: currencybase.Address{}},
-	{Hint: currencybase.AmountHint, Instance: currencybase.Amount{}},
-	{Hint: currencybase.AccountKeysHint, Instance: currencybase.BaseAccountKeys{}},
-	{Hint: currencybase.AccountKeyHint, Instance: currencybase.BaseAccountKey{}},
+	{Hint: common.BaseStateHint, Instance: common.BaseState{}},
+	{Hint: common.NodeHint, Instance: common.BaseNode{}},
+	{Hint: currencytypes.AccountHint, Instance: currencytypes.Account{}},
+	{Hint: currencytypes.AddressHint, Instance: currencytypes.Address{}},
+	{Hint: currencytypes.AmountHint, Instance: currencytypes.Amount{}},
+	{Hint: currencytypes.AccountKeysHint, Instance: currencytypes.BaseAccountKeys{}},
+	{Hint: currencytypes.AccountKeyHint, Instance: currencytypes.BaseAccountKey{}},
 	{Hint: mitumcurrency.CreateAccountsItemMultiAmountsHint, Instance: mitumcurrency.CreateAccountsItemMultiAmounts{}},
 	{Hint: mitumcurrency.CreateAccountsItemSingleAmountHint, Instance: mitumcurrency.CreateAccountsItemSingleAmount{}},
 	{Hint: mitumcurrency.CreateAccountsHint, Instance: mitumcurrency.CreateAccounts{}},
@@ -38,11 +41,11 @@ var hinters = []encoder.DecodeDetail{
 	{Hint: currencystate.AccountStateValueHint, Instance: currencystate.AccountStateValue{}},
 	{Hint: currencystate.BalanceStateValueHint, Instance: currencystate.BalanceStateValue{}},
 
-	{Hint: currencybase.CurrencyDesignHint, Instance: currencybase.CurrencyDesign{}},
-	{Hint: currencybase.CurrencyPolicyHint, Instance: currencybase.CurrencyPolicy{}},
+	{Hint: currencytypes.CurrencyDesignHint, Instance: currencytypes.CurrencyDesign{}},
+	{Hint: currencytypes.CurrencyPolicyHint, Instance: currencytypes.CurrencyPolicy{}},
 	{Hint: mitumcurrency.CurrencyRegisterHint, Instance: mitumcurrency.CurrencyRegister{}},
 	{Hint: mitumcurrency.CurrencyPolicyUpdaterHint, Instance: mitumcurrency.CurrencyPolicyUpdater{}},
-	{Hint: currencybase.ContractAccountKeysHint, Instance: currencybase.ContractAccountKeys{}},
+	{Hint: currencytypes.ContractAccountKeysHint, Instance: currencytypes.ContractAccountKeys{}},
 	{Hint: extensioncurrency.CreateContractAccountsItemMultiAmountsHint, Instance: extensioncurrency.CreateContractAccountsItemMultiAmounts{}},
 	{Hint: extensioncurrency.CreateContractAccountsItemSingleAmountHint, Instance: extensioncurrency.CreateContractAccountsItemSingleAmount{}},
 	{Hint: extensioncurrency.CreateContractAccountsHint, Instance: extensioncurrency.CreateContractAccounts{}},
@@ -51,20 +54,20 @@ var hinters = []encoder.DecodeDetail{
 	{Hint: extensioncurrency.WithdrawsHint, Instance: extensioncurrency.Withdraws{}},
 	{Hint: mitumcurrency.GenesisCurrenciesFactHint, Instance: mitumcurrency.GenesisCurrenciesFact{}},
 	{Hint: mitumcurrency.GenesisCurrenciesHint, Instance: mitumcurrency.GenesisCurrencies{}},
-	{Hint: currencybase.NilFeeerHint, Instance: currencybase.NilFeeer{}},
-	{Hint: currencybase.FixedFeeerHint, Instance: currencybase.FixedFeeer{}},
-	{Hint: currencybase.RatioFeeerHint, Instance: currencybase.RatioFeeer{}},
+	{Hint: currencytypes.NilFeeerHint, Instance: currencytypes.NilFeeer{}},
+	{Hint: currencytypes.FixedFeeerHint, Instance: currencytypes.FixedFeeer{}},
+	{Hint: currencytypes.RatioFeeerHint, Instance: currencytypes.RatioFeeer{}},
 	{Hint: extensionstate.ContractAccountStateValueHint, Instance: extensionstate.ContractAccountStateValue{}},
 	{Hint: currencystate.CurrencyDesignStateValueHint, Instance: currencystate.CurrencyDesignStateValue{}},
 
-	{Hint: credential.DesignHint, Instance: credential.Design{}},
-	{Hint: credential.DesignStateValueHint, Instance: credential.DesignStateValue{}},
-	{Hint: credential.PolicyHint, Instance: credential.Policy{}},
-	{Hint: credential.CredentialHint, Instance: credential.Credential{}},
-	{Hint: credential.CredentialStateValueHint, Instance: credential.CredentialStateValue{}},
-	{Hint: credential.HolderDIDStateValueHint, Instance: credential.HolderDIDStateValue{}},
-	{Hint: credential.TemplateHint, Instance: credential.Template{}},
-	{Hint: credential.TemplateStateValueHint, Instance: credential.TemplateStateValue{}},
+	{Hint: types.DesignHint, Instance: types.Design{}},
+	{Hint: state.DesignStateValueHint, Instance: state.DesignStateValue{}},
+	{Hint: types.PolicyHint, Instance: types.Policy{}},
+	{Hint: types.CredentialHint, Instance: types.Credential{}},
+	{Hint: state.CredentialStateValueHint, Instance: state.CredentialStateValue{}},
+	{Hint: state.HolderDIDStateValueHint, Instance: state.HolderDIDStateValue{}},
+	{Hint: types.TemplateHint, Instance: types.Template{}},
+	{Hint: state.TemplateStateValueHint, Instance: state.TemplateStateValue{}},
 	{Hint: credential.CreateCredentialServiceHint, Instance: credential.CreateCredentialService{}},
 	{Hint: credential.AddTemplateHint, Instance: credential.AddTemplate{}},
 	{Hint: credential.AssignCredentialsItemHint, Instance: credential.AssignCredentialsItem{}},
