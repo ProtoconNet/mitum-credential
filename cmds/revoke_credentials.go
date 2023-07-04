@@ -3,33 +3,25 @@ package cmds
 import (
 	"context"
 
-	"github.com/pkg/errors"
-
-	"github.com/ProtoconNet/mitum-credential/credential"
+	"github.com/ProtoconNet/mitum-credential/operation/credential"
+	currencycmds "github.com/ProtoconNet/mitum-currency/v3/cmds"
 	"github.com/ProtoconNet/mitum2/base"
+	"github.com/pkg/errors"
 )
 
 type RevokeCredentialsCommand struct {
-	baseCommand
-	OperationFlags
-	Sender            AddressFlag    `arg:"" name:"sender" help:"sender address" required:"true"`
-	Contract          AddressFlag    `arg:"" name:"contract" help:"contract account address" required:"true"`
-	CredentialService ContractIDFlag `arg:"" name:"credential-service-id" help:"credential id" required:"true"`
-	Holder            AddressFlag    `arg:"" name:"holder" help:"credential holder" required:"true"`
-	TemplateID        string         `arg:"" name:"template-id" help:"template id" required:"true"`
-	ID                string         `arg:"" name:"id" help:"credential id" required:"true"`
-	Currency          CurrencyIDFlag `arg:"" name:"currency-id" help:"currency id" required:"true"`
+	BaseCommand
+	currencycmds.OperationFlags
+	Sender            currencycmds.AddressFlag    `arg:"" name:"sender" help:"sender address" required:"true"`
+	Contract          currencycmds.AddressFlag    `arg:"" name:"contract" help:"contract account address" required:"true"`
+	CredentialService currencycmds.ContractIDFlag `arg:"" name:"credential-service-id" help:"credential id" required:"true"`
+	Holder            currencycmds.AddressFlag    `arg:"" name:"holder" help:"credential holder" required:"true"`
+	TemplateID        uint64                      `arg:"" name:"template-id" help:"template id" required:"true"`
+	ID                string                      `arg:"" name:"id" help:"credential id" required:"true"`
+	Currency          currencycmds.CurrencyIDFlag `arg:"" name:"currency-id" help:"currency id" required:"true"`
 	sender            base.Address
 	contract          base.Address
 	holder            base.Address
-	tid               credential.Uint256
-}
-
-func NewRevokeCredentialsCommand() RevokeCredentialsCommand {
-	cmd := NewbaseCommand()
-	return RevokeCredentialsCommand{
-		baseCommand: *cmd,
-	}
 }
 
 func (cmd *RevokeCredentialsCommand) Run(pctx context.Context) error {
@@ -37,8 +29,8 @@ func (cmd *RevokeCredentialsCommand) Run(pctx context.Context) error {
 		return err
 	}
 
-	encs = cmd.encs
-	enc = cmd.enc
+	encs = cmd.Encoders
+	enc = cmd.Encoder
 
 	if err := cmd.parseFlags(); err != nil {
 		return err
@@ -49,7 +41,7 @@ func (cmd *RevokeCredentialsCommand) Run(pctx context.Context) error {
 		return err
 	}
 
-	PrettyPrint(cmd.Out, op)
+	currencycmds.PrettyPrint(cmd.Out, op)
 
 	return nil
 }
@@ -77,12 +69,6 @@ func (cmd *RevokeCredentialsCommand) parseFlags() error {
 	}
 	cmd.holder = holder
 
-	tid, err := credential.NewUint256FromString(cmd.TemplateID)
-	if err != nil {
-		return errors.Wrapf(err, "invalid template id format, %q", cmd.TemplateID)
-	}
-	cmd.tid = tid
-
 	return nil
 }
 
@@ -93,7 +79,7 @@ func (cmd *RevokeCredentialsCommand) createOperation() (base.Operation, error) {
 		cmd.contract,
 		cmd.CredentialService.ID,
 		cmd.holder,
-		cmd.tid,
+		cmd.TemplateID,
 		cmd.ID,
 		cmd.Currency.CID,
 	)

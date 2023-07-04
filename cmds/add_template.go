@@ -3,43 +3,36 @@ package cmds
 import (
 	"context"
 
-	"github.com/pkg/errors"
-
-	"github.com/ProtoconNet/mitum-credential/credential"
+	"github.com/ProtoconNet/mitum-credential/operation/credential"
+	"github.com/ProtoconNet/mitum-credential/types"
+	currencycmds "github.com/ProtoconNet/mitum-currency/v3/cmds"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
+	"github.com/pkg/errors"
 )
 
 type AddTemplateCommand struct {
-	baseCommand
-	OperationFlags
-	Sender            AddressFlag    `arg:"" name:"sender" help:"sender address" required:"true"`
-	Contract          AddressFlag    `arg:"" name:"contract" help:"contract address of credential" required:"true"`
-	CredentialService ContractIDFlag `arg:"" name:"credential-service-id" help:"credential id" required:"true"`
-	TemplateID        string         `arg:"" name:"template-id" help:"template id" required:"true"`
-	TemplateName      string         `arg:"" name:"template-name" help:"template name"  required:"true"`
-	ServiceDate       string         `arg:"" name:"service-date" help:"service date; yyyy-MM-dd" required:"true"`
-	ExpirationDate    string         `arg:"" name:"expiration-date" help:"expiration date; yyyy-MM-dd" required:"true"`
-	TemplateShare     bool           `arg:"" name:"template-share" help:"template share; true | false" required:"true"`
-	MultiAudit        bool           `arg:"" name:"multi-audit" help:"multi audit; true | false" required:"true"`
-	DisplayName       string         `arg:"" name:"display-name" help:"display name" required:"true"`
-	SubjectKey        string         `arg:"" name:"subject-key" help:"subject key" required:"true"`
-	Description       string         `arg:"" name:"description" help:"description"  required:"true"`
-	Creator           AddressFlag    `arg:"" name:"creator" help:"creator address"  required:"true"`
-	Currency          CurrencyIDFlag `arg:"" name:"currency-id" help:"currency id" required:"true"`
+	BaseCommand
+	currencycmds.OperationFlags
+	Sender            currencycmds.AddressFlag    `arg:"" name:"sender" help:"sender address" required:"true"`
+	Contract          currencycmds.AddressFlag    `arg:"" name:"contract" help:"contract address of credential" required:"true"`
+	CredentialService currencycmds.ContractIDFlag `arg:"" name:"credential-service-id" help:"credential id" required:"true"`
+	TemplateID        uint64                      `arg:"" name:"template-id" help:"template id" required:"true"`
+	TemplateName      string                      `arg:"" name:"template-name" help:"template name"  required:"true"`
+	ServiceDate       string                      `arg:"" name:"service-date" help:"service date; yyyy-MM-dd" required:"true"`
+	ExpirationDate    string                      `arg:"" name:"expiration-date" help:"expiration date; yyyy-MM-dd" required:"true"`
+	TemplateShare     bool                        `arg:"" name:"template-share" help:"template share; true | false" required:"true"`
+	MultiAudit        bool                        `arg:"" name:"multi-audit" help:"multi audit; true | false" required:"true"`
+	DisplayName       string                      `arg:"" name:"display-name" help:"display name" required:"true"`
+	SubjectKey        string                      `arg:"" name:"subject-key" help:"subject key" required:"true"`
+	Description       string                      `arg:"" name:"description" help:"description"  required:"true"`
+	Creator           currencycmds.AddressFlag    `arg:"" name:"creator" help:"creator address"  required:"true"`
+	Currency          currencycmds.CurrencyIDFlag `arg:"" name:"currency-id" help:"currency id" required:"true"`
 	sender            base.Address
 	contract          base.Address
-	tid               credential.Uint256
-	service           credential.Date
-	expiration        credential.Date
+	service           types.Date
+	expiration        types.Date
 	creator           base.Address
-}
-
-func NewAddTemplateCommand() AddTemplateCommand {
-	cmd := NewbaseCommand()
-	return AddTemplateCommand{
-		baseCommand: *cmd,
-	}
 }
 
 func (cmd *AddTemplateCommand) Run(pctx context.Context) error { // nolint:dupl
@@ -47,8 +40,8 @@ func (cmd *AddTemplateCommand) Run(pctx context.Context) error { // nolint:dupl
 		return err
 	}
 
-	encs = cmd.encs
-	enc = cmd.enc
+	encs = cmd.Encoders
+	enc = cmd.Encoder
 
 	if err := cmd.parseFlags(); err != nil {
 		return err
@@ -59,7 +52,7 @@ func (cmd *AddTemplateCommand) Run(pctx context.Context) error { // nolint:dupl
 		return err
 	}
 
-	PrettyPrint(cmd.Out, op)
+	currencycmds.PrettyPrint(cmd.Out, op)
 
 	return nil
 }
@@ -87,13 +80,7 @@ func (cmd *AddTemplateCommand) parseFlags() error {
 	}
 	cmd.creator = creator
 
-	tid, err := credential.NewUint256FromString(cmd.TemplateID)
-	if err != nil {
-		return errors.Wrapf(err, "invalid template id format, %q", cmd.TemplateID)
-	}
-	cmd.tid = tid
-
-	service, expiration := credential.Date(cmd.ServiceDate), credential.Date(cmd.ExpirationDate)
+	service, expiration := types.Date(cmd.ServiceDate), types.Date(cmd.ExpirationDate)
 	if err := service.IsValid(nil); err != nil {
 		return errors.Wrapf(err, "invalid service date format, %q", cmd.ServiceDate)
 	}
@@ -107,19 +94,19 @@ func (cmd *AddTemplateCommand) parseFlags() error {
 }
 
 func (cmd *AddTemplateCommand) createOperation() (base.Operation, error) { // nolint:dupl}
-	e := util.StringErrorFunc("failed to create add-template operation")
+	e := util.StringError("failed to create add-template operation")
 
 	fact := credential.NewAddTemplateFact(
 		[]byte(cmd.Token),
 		cmd.sender,
 		cmd.contract,
 		cmd.CredentialService.ID,
-		cmd.tid,
+		cmd.TemplateID,
 		cmd.TemplateName,
 		cmd.service,
 		cmd.expiration,
-		credential.Bool(cmd.TemplateShare),
-		credential.Bool(cmd.MultiAudit),
+		types.Bool(cmd.TemplateShare),
+		types.Bool(cmd.MultiAudit),
 		cmd.DisplayName,
 		cmd.SubjectKey,
 		cmd.Description,
@@ -129,12 +116,12 @@ func (cmd *AddTemplateCommand) createOperation() (base.Operation, error) { // no
 
 	op, err := credential.NewAddTemplate(fact)
 	if err != nil {
-		return nil, e(err, "")
+		return nil, e.Wrap(err)
 	}
 
 	err = op.HashSign(cmd.Privatekey, cmd.NetworkID.NetworkID())
 	if err != nil {
-		return nil, e(err, "")
+		return nil, e.Wrap(err)
 	}
 
 	return op, nil
