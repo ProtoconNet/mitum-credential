@@ -28,16 +28,16 @@ func (t Template) MarshalBSON() ([]byte, error) {
 
 type TemplateBSONUnmarshaler struct {
 	Hint           string `bson:"_hint"`
-	TemplateID     uint64 `json:"template_id"`
-	TemplateName   string `json:"template_name"`
-	ServiceDate    string `json:"service_date"`
-	ExpirationDate string `json:"expiration_date"`
-	TemplateShare  bool   `json:"template_share"`
-	MultiAudit     bool   `json:"multi_audit"`
-	DisplayName    string `json:"display_name"`
-	SubjectKey     string `json:"subject_key"`
-	Description    string `json:"description"`
-	Creator        string `json:"creator"`
+	TemplateID     uint64 `bson:"template_id"`
+	TemplateName   string `bson:"template_name"`
+	ServiceDate    string `bson:"service_date"`
+	ExpirationDate string `bson:"expiration_date"`
+	TemplateShare  bool   `bson:"template_share"`
+	MultiAudit     bool   `bson:"multi_audit"`
+	DisplayName    string `bson:"display_name"`
+	SubjectKey     string `bson:"subject_key"`
+	Description    string `bson:"description"`
+	Creator        string `bson:"creator"`
 }
 
 func (t *Template) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {

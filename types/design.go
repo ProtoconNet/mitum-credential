@@ -41,7 +41,7 @@ func (de Design) Bytes() []byte {
 	)
 }
 
-func (de Design) CredentialServiceID() currencytypes.ContractID {
+func (de Design) ServiceID() currencytypes.ContractID {
 	return de.credentialServiceID
 }
 
