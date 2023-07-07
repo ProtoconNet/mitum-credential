@@ -18,6 +18,14 @@ import (
 	"golang.org/x/sync/singleflight"
 )
 
+var (
+	HandlerPathDIDIssuer      = `/did/{contract:.*}/issuer/{serviceid:[A-Z0-9][A-Z0-9_\.\!\$\*\@]*[A-Z0-9]+}`
+	HandlerPathDIDCredential  = `/did/{contract:.*}/issuer/{serviceid:[A-Z0-9][A-Z0-9_\.\!\$\*\@]*[A-Z0-9]+}/template/{templateid:[0-9]*[0-9]+}/credential/{credentialid:.*}`
+	HandlerPathDIDTemplate    = `/did/{contract:.*}/issuer/{serviceid:[A-Z0-9][A-Z0-9_\.\!\$\*\@]*[A-Z0-9]+}/template/{templateid:[0-9]*[0-9]+}`
+	HandlerPathDIDCredentials = `/did/{contract:.*}/issuer/{serviceid:[A-Z0-9][A-Z0-9_\.\!\$\*\@]*[A-Z0-9]+}/template/{templateid:[0-9]*[0-9]+}/credentials`
+	HandlerPathDIDHolder      = `/did/{contract:.*}/issuer/{serviceid:[A-Z0-9][A-Z0-9_\.\!\$\*\@]*[A-Z0-9]+}/holder/{holder:(?i)` + base.REStringAddressString + `}` // revive:disable-line:line-length-limit
+)
+
 func init() {
 	if b, err := currencydigest.JSON.Marshal(currencydigest.UnknownProblem); err != nil {
 		panic(err)
@@ -29,8 +37,8 @@ func init() {
 type Handlers struct {
 	*zerolog.Logger
 	networkID       base.NetworkID
-	encs            *encoder.Encoders
-	enc             encoder.Encoder
+	encoders        *encoder.Encoders
+	encoder         encoder.Encoder
 	database        *currencydigest.Database
 	cache           currencydigest.Cache
 	nodeInfoHandler currencydigest.NodeInfoHandler
@@ -45,8 +53,8 @@ type Handlers struct {
 func NewHandlers(
 	ctx context.Context,
 	networkID base.NetworkID,
-	encs *encoder.Encoders,
-	enc encoder.Encoder,
+	encoders *encoder.Encoders,
+	encoder encoder.Encoder,
 	st *currencydigest.Database,
 	cache currencydigest.Cache,
 	router *mux.Router,
@@ -59,8 +67,8 @@ func NewHandlers(
 	return &Handlers{
 		Logger:          log.Log(),
 		networkID:       networkID,
-		encs:            encs,
-		enc:             enc,
+		encoders:        encoders,
+		encoder:         encoder,
 		database:        st,
 		cache:           cache,
 		router:          router,
@@ -104,6 +112,16 @@ func (hd *Handlers) Handler() http.Handler {
 }
 
 func (hd *Handlers) setHandlers() {
+	_ = hd.setHandler(HandlerPathDIDIssuer, hd.handleDIDIssuer, true).
+		Methods(http.MethodOptions, "GET")
+	_ = hd.setHandler(HandlerPathDIDCredentials, hd.handleCredentials, true).
+		Methods(http.MethodOptions, "GET")
+	_ = hd.setHandler(HandlerPathDIDCredential, hd.handleCredential, true).
+		Methods(http.MethodOptions, "GET")
+	_ = hd.setHandler(HandlerPathDIDHolder, hd.handleHolderDID, true).
+		Methods(http.MethodOptions, "GET")
+	_ = hd.setHandler(HandlerPathDIDTemplate, hd.handleTemplate, true).
+		Methods(http.MethodOptions, "GET")
 }
 
 func (hd *Handlers) setHandler(prefix string, h network.HTTPHandlerFunc, useCache bool) *mux.Route {

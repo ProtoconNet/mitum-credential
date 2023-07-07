@@ -3,20 +3,19 @@ package digest
 import (
 	"context"
 	"fmt"
-	currencydigest "github.com/ProtoconNet/mitum-currency/v3/digest"
+	"github.com/ProtoconNet/mitum-credential/state"
 	"sync"
 	"time"
 
-	"github.com/pkg/errors"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
-
+	currencydigest "github.com/ProtoconNet/mitum-currency/v3/digest"
 	"github.com/ProtoconNet/mitum-currency/v3/digest/isaac"
 	statecurrency "github.com/ProtoconNet/mitum-currency/v3/state/currency"
-
 	mitumbase "github.com/ProtoconNet/mitum2/base"
 	mitumutil "github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/fixedtree"
+	"github.com/pkg/errors"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 var bulkWriteLimit = 500
@@ -35,8 +34,13 @@ type BlockSession struct {
 	balanceModels         []mongo.WriteModel
 	currencyModels        []mongo.WriteModel
 	contractAccountModels []mongo.WriteModel
+	didIssuerModels       []mongo.WriteModel
+	didCredentialModels   []mongo.WriteModel
+	didHolderDIDModels    []mongo.WriteModel
+	didTemplateModels     []mongo.WriteModel
 	statesValue           *sync.Map
 	balanceAddressList    []string
+	credentialMap         map[string]struct{}
 }
 
 func NewBlockSession(
@@ -80,6 +84,9 @@ func (bs *BlockSession) Prepare() error {
 	if err := bs.prepareCurrencies(); err != nil {
 		return err
 	}
+	if err := bs.prepareDID(); err != nil {
+		return err
+	}
 
 	return bs.prepareAccounts()
 }
@@ -119,6 +126,43 @@ func (bs *BlockSession) Commit(ctx context.Context) error {
 
 	if len(bs.balanceModels) > 0 {
 		if err := bs.writeModels(ctx, defaultColNameBalance, bs.balanceModels); err != nil {
+			return err
+		}
+	}
+
+	if len(bs.didIssuerModels) > 0 {
+		if err := bs.writeModels(ctx, defaultColNameDIDIssuer, bs.didIssuerModels); err != nil {
+			return err
+		}
+	}
+
+	if len(bs.didCredentialModels) > 0 {
+		for nft := range bs.credentialMap {
+			err := bs.st.CleanByHeightColName(
+				ctx,
+				bs.block.Manifest().Height(),
+				defaultColNameDIDCredential,
+				"credential_id",
+				nft,
+			)
+			if err != nil {
+				return err
+			}
+		}
+
+		if err := bs.writeModels(ctx, defaultColNameDIDCredential, bs.didCredentialModels); err != nil {
+			return err
+		}
+	}
+
+	if len(bs.didHolderDIDModels) > 0 {
+		if err := bs.writeModels(ctx, defaultColNameHolderDID, bs.didHolderDIDModels); err != nil {
+			return err
+		}
+	}
+
+	if len(bs.didTemplateModels) > 0 {
+		if err := bs.writeModels(ctx, defaultColNameTemplate, bs.didTemplateModels); err != nil {
 			return err
 		}
 	}
@@ -278,6 +322,56 @@ func (bs *BlockSession) prepareCurrencies() error {
 	return nil
 }
 
+func (bs *BlockSession) prepareDID() error {
+	if len(bs.sts) < 1 {
+		return nil
+	}
+
+	var didModels []mongo.WriteModel
+	var didCredentialModels []mongo.WriteModel
+	var didHolderDIDModels []mongo.WriteModel
+	var didTemplateModels []mongo.WriteModel
+
+	for i := range bs.sts {
+		st := bs.sts[i]
+		switch {
+		case state.IsStateDesignKey(st.Key()):
+			j, err := bs.handleDIDIssuerState(st)
+			if err != nil {
+				return err
+			}
+			didModels = append(didModels, j...)
+		case state.IsStateCredentialKey(st.Key()):
+			j, err := bs.handleCredentialState(st)
+			if err != nil {
+				return err
+			}
+			didCredentialModels = append(didCredentialModels, j...)
+		case state.IsStateHolderDIDKey(st.Key()):
+			j, err := bs.handleHolderDIDState(st)
+			if err != nil {
+				return err
+			}
+			didHolderDIDModels = append(didHolderDIDModels, j...)
+		case state.IsStateTemplateKey(st.Key()):
+			j, err := bs.handleTemplateState(st)
+			if err != nil {
+				return err
+			}
+			didTemplateModels = append(didTemplateModels, j...)
+		default:
+			continue
+		}
+	}
+
+	bs.didIssuerModels = didModels
+	bs.didCredentialModels = didCredentialModels
+	bs.didHolderDIDModels = didHolderDIDModels
+	bs.didTemplateModels = didTemplateModels
+
+	return nil
+}
+
 func (bs *BlockSession) handleAccountState(st mitumbase.State) ([]mongo.WriteModel, error) {
 	if rs, err := currencydigest.NewAccountValue(st); err != nil {
 		return nil, err
@@ -302,6 +396,46 @@ func (bs *BlockSession) handleCurrencyState(st mitumbase.State) ([]mongo.WriteMo
 		return nil, err
 	}
 	return []mongo.WriteModel{mongo.NewInsertOneModel().SetDocument(doc)}, nil
+}
+
+func (bs *BlockSession) handleDIDIssuerState(st mitumbase.State) ([]mongo.WriteModel, error) {
+	if issuerDoc, err := NewIssuerDoc(st, bs.st.DatabaseEncoder()); err != nil {
+		return nil, err
+	} else {
+		return []mongo.WriteModel{
+			mongo.NewInsertOneModel().SetDocument(issuerDoc),
+		}, nil
+	}
+}
+
+func (bs *BlockSession) handleCredentialState(st mitumbase.State) ([]mongo.WriteModel, error) {
+	if credentialDoc, err := NewCredentialDoc(st, bs.st.DatabaseEncoder()); err != nil {
+		return nil, err
+	} else {
+		return []mongo.WriteModel{
+			mongo.NewInsertOneModel().SetDocument(credentialDoc),
+		}, nil
+	}
+}
+
+func (bs *BlockSession) handleHolderDIDState(st mitumbase.State) ([]mongo.WriteModel, error) {
+	if holderDidDoc, err := NewHolderDIDDoc(st, bs.st.DatabaseEncoder()); err != nil {
+		return nil, err
+	} else {
+		return []mongo.WriteModel{
+			mongo.NewInsertOneModel().SetDocument(holderDidDoc),
+		}, nil
+	}
+}
+
+func (bs *BlockSession) handleTemplateState(st mitumbase.State) ([]mongo.WriteModel, error) {
+	if templateDoc, err := NewTemplateDoc(st, bs.st.DatabaseEncoder()); err != nil {
+		return nil, err
+	} else {
+		return []mongo.WriteModel{
+			mongo.NewInsertOneModel().SetDocument(templateDoc),
+		}, nil
+	}
 }
 
 func (bs *BlockSession) writeModels(ctx context.Context, col string, models []mongo.WriteModel) error {
@@ -355,6 +489,10 @@ func (bs *BlockSession) close() error {
 	bs.accountModels = nil
 	bs.balanceModels = nil
 	bs.contractAccountModels = nil
+	bs.didIssuerModels = nil
+	bs.didCredentialModels = nil
+	bs.didHolderDIDModels = nil
+	bs.didTemplateModels = nil
 
 	return bs.st.Close()
 }
