@@ -2,7 +2,6 @@ package cmds
 
 import (
 	"context"
-
 	"github.com/ProtoconNet/mitum-credential/operation/credential"
 	"github.com/ProtoconNet/mitum-credential/types"
 	currencycmds "github.com/ProtoconNet/mitum-currency/v3/cmds"
@@ -21,8 +20,8 @@ type AddTemplateCommand struct {
 	TemplateName      string                      `arg:"" name:"template-name" help:"template name"  required:"true"`
 	ServiceDate       string                      `arg:"" name:"service-date" help:"service date; yyyy-MM-dd" required:"true"`
 	ExpirationDate    string                      `arg:"" name:"expiration-date" help:"expiration date; yyyy-MM-dd" required:"true"`
-	TemplateShare     bool                        `arg:"" name:"template-share" help:"template share; true | false" required:"true"`
-	MultiAudit        bool                        `arg:"" name:"multi-audit" help:"multi audit; true | false" required:"true"`
+	TemplateShare     bool                        `name:"template-share" help:"template share; true | false" required:"true"`
+	MultiAudit        bool                        `name:"multi-audit" help:"multi audit; true | false" required:"true"`
 	DisplayName       string                      `arg:"" name:"display-name" help:"display name" required:"true"`
 	SubjectKey        string                      `arg:"" name:"subject-key" help:"subject key" required:"true"`
 	Description       string                      `arg:"" name:"description" help:"description"  required:"true"`
@@ -111,7 +110,8 @@ func (cmd *AddTemplateCommand) createOperation() (base.Operation, error) { // no
 		cmd.SubjectKey,
 		cmd.Description,
 		cmd.creator,
-		cmd.Currency.CID,
+		"MCC",
+		//cmd.Currency.CID,
 	)
 
 	op, err := credential.NewAddTemplate(fact)

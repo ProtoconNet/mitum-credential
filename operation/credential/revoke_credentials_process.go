@@ -318,7 +318,7 @@ func (opp *RevokeCredentialsProcessor) Process( // nolint:dupl
 
 	for k, de := range designs {
 		policy := types.NewPolicy(de.Policy().TemplateIDs(), *holders[k], *counters[k])
-		design := types.NewDesign(de.CredentialServiceID(), policy)
+		design := types.NewDesign(de.ServiceID(), policy)
 		if err := design.IsValid(nil); err != nil {
 			return nil, base.NewBaseOperationProcessReasonError("invalid design, %s: %w", k, err), nil
 		}

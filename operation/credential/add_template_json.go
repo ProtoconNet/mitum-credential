@@ -18,7 +18,7 @@ type AddTemplateFactJSONMarshaler struct {
 	TemplateName        string                   `json:"template_name"`
 	ServiceDate         types.Date               `json:"service_date"`
 	ExpirationDate      types.Date               `json:"expiration_date"`
-	TemplateShare       types.Bool               `json:"temcdplate_share"`
+	TemplateShare       types.Bool               `json:"template_share"`
 	MultiAudit          types.Bool               `json:"multi_audit"`
 	DisplayName         string                   `json:"display_name"`
 	SubjectKey          string                   `json:"subject_key"`
