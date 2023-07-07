@@ -3,6 +3,7 @@ package state
 import (
 	"fmt"
 	"github.com/ProtoconNet/mitum-credential/types"
+	"github.com/ProtoconNet/mitum-currency/v3/common"
 	currencytypes "github.com/ProtoconNet/mitum-currency/v3/types"
 	"strconv"
 	"strings"
@@ -14,18 +15,18 @@ import (
 )
 
 var (
-	CredentialServicePrefix = "credentialservice:"
-	DesignStateValueHint    = hint.MustNewHint("mitum-credential-design-state-value-v0.0.1")
-	DesignSuffix            = ":design"
+	CredentialPrefix     = "credential:"
+	DesignStateValueHint = hint.MustNewHint("mitum-credential-design-state-value-v0.0.1")
+	DesignSuffix         = ":design"
 )
 
 type StateValueMerger struct {
-	*base.BaseStateValueMerger
+	*common.BaseStateValueMerger
 }
 
 func NewStateValueMerger(height base.Height, key string, st base.State) *StateValueMerger {
 	s := &StateValueMerger{
-		BaseStateValueMerger: base.NewBaseStateValueMerger(height, key, st),
+		BaseStateValueMerger: common.NewBaseStateValueMerger(height, key, st),
 	}
 
 	return s
@@ -43,8 +44,8 @@ func NewStateMergeValue(key string, stv base.StateValue) base.StateMergeValue {
 	)
 }
 
-func StateKeyCredentialServicePrefix(ca base.Address, credentialServiceID currencytypes.ContractID) string {
-	return fmt.Sprintf("%s%s:%s", CredentialServicePrefix, ca.String(), credentialServiceID)
+func StateKeyCredentialPrefix(contract base.Address, serviceID currencytypes.ContractID) string {
+	return fmt.Sprintf("%s%s:%s", CredentialPrefix, contract.String(), serviceID)
 }
 
 type DesignStateValue struct {
@@ -96,16 +97,16 @@ func StateDesignValue(st base.State) (types.Design, error) {
 }
 
 func IsStateDesignKey(key string) bool {
-	return strings.HasPrefix(key, CredentialServicePrefix) && strings.HasSuffix(key, DesignSuffix)
+	return strings.HasPrefix(key, CredentialPrefix) && strings.HasSuffix(key, DesignSuffix)
 }
 
-func StateKeyDesign(ca base.Address, crid currencytypes.ContractID) string {
-	return fmt.Sprintf("%s%s", StateKeyCredentialServicePrefix(ca, crid), DesignSuffix)
+func StateKeyDesign(contract base.Address, serviceID currencytypes.ContractID) string {
+	return fmt.Sprintf("%s%s", StateKeyCredentialPrefix(contract, serviceID), DesignSuffix)
 }
 
 var (
 	TemplateStateValueHint = hint.MustNewHint("mitum-credential-template-state-value-v0.0.1")
-	TemplateSuffix         = ":credential-template"
+	TemplateSuffix         = ":template"
 )
 
 type TemplateStateValue struct {
@@ -142,16 +143,16 @@ func (sv TemplateStateValue) HashBytes() []byte {
 	return sv.Template.Bytes()
 }
 
-func StateKeyTemplate(ca base.Address, credentialServiceID currencytypes.ContractID, templateID uint64) string {
-	return fmt.Sprintf("%s-%s%s",
-		StateKeyCredentialServicePrefix(ca, credentialServiceID),
+func StateKeyTemplate(contract base.Address, serviceID currencytypes.ContractID, templateID uint64) string {
+	return fmt.Sprintf("%s:%s%s",
+		StateKeyCredentialPrefix(contract, serviceID),
 		strconv.FormatUint(templateID, 10),
 		TemplateSuffix,
 	)
 }
 
 func IsStateTemplateKey(key string) bool {
-	return strings.HasPrefix(key, CredentialServicePrefix) && strings.HasSuffix(key, TemplateSuffix)
+	return strings.HasPrefix(key, CredentialPrefix) && strings.HasSuffix(key, TemplateSuffix)
 }
 
 func StateTemplateValue(st base.State) (types.Template, error) {
@@ -207,17 +208,17 @@ func (sv CredentialStateValue) HashBytes() []byte {
 	return sv.Credential.Bytes()
 }
 
-func StateKeyCredential(ca base.Address, credentialServiceID currencytypes.ContractID, templateID uint64, id string) string {
+func StateKeyCredential(contract base.Address, serviceID currencytypes.ContractID, templateID uint64, id string) string {
 	return fmt.Sprintf(
-		"%s-%s-%s%s",
-		StateKeyCredentialServicePrefix(ca, credentialServiceID), strconv.FormatUint(templateID, 10),
+		"%s:%s:%s%s",
+		StateKeyCredentialPrefix(contract, serviceID), strconv.FormatUint(templateID, 10),
 		id,
 		CredentialSuffix,
 	)
 }
 
 func IsStateCredentialKey(key string) bool {
-	return strings.HasPrefix(key, CredentialServicePrefix) && strings.HasSuffix(key, CredentialSuffix)
+	return strings.HasPrefix(key, CredentialPrefix) && strings.HasSuffix(key, CredentialSuffix)
 }
 
 func StateCredentialValue(st base.State) (types.Credential, error) {
@@ -269,24 +270,36 @@ func (hd HolderDIDStateValue) HashBytes() []byte {
 	return []byte(hd.did)
 }
 
-func StateHolderDIDValue(st base.State) (*string, error) {
+func StateHolderDIDValue(st base.State) (string, error) {
 	v := st.Value()
 	if v == nil {
-		return nil, util.ErrNotFound.Errorf("holder did not found in State")
+		return "", util.ErrNotFound.Errorf("holder did not found in State")
 	}
 
 	d, ok := v.(HolderDIDStateValue)
 	if !ok {
-		return nil, errors.Errorf("invalid holder did value found, %T", v)
+		return "", errors.Errorf("invalid holder did value found, %T", v)
 	}
 
-	return &d.did, nil
+	return d.did, nil
 }
 
 func IsStateHolderDIDKey(key string) bool {
-	return strings.HasPrefix(key, CredentialServicePrefix) && strings.HasSuffix(key, HolderDIDSuffix)
+	return strings.HasPrefix(key, CredentialPrefix) && strings.HasSuffix(key, HolderDIDSuffix)
 }
 
-func StateKeyHolderDID(ca base.Address, credentialServiceID currencytypes.ContractID, ha base.Address) string {
-	return fmt.Sprintf("%s:%s%s", StateKeyCredentialServicePrefix(ca, credentialServiceID), ha.String(), HolderDIDSuffix)
+func StateKeyHolderDID(contract base.Address, serviceID currencytypes.ContractID, holder base.Address) string {
+	return fmt.Sprintf("%s:%s%s", StateKeyCredentialPrefix(contract, serviceID), holder.String(), HolderDIDSuffix)
+}
+
+func ParseStateKey(key string, Prefix string) ([]string, error) {
+	parsedKey := strings.Split(key, ":")
+	if parsedKey[0] != Prefix[:len(Prefix)-1] {
+		return nil, errors.Errorf("State Key not include NFTPrefix, %s", parsedKey)
+	}
+	if len(parsedKey) < 3 {
+		return nil, errors.Errorf("parsing State Key string failed, %s", parsedKey)
+	} else {
+		return parsedKey, nil
+	}
 }
