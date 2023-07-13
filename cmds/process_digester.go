@@ -2,7 +2,6 @@ package cmds
 
 import (
 	"context"
-
 	"github.com/ProtoconNet/mitum-credential/digest"
 	currencycmds "github.com/ProtoconNet/mitum-currency/v3/cmds"
 	currencydigest "github.com/ProtoconNet/mitum-currency/v3/digest"

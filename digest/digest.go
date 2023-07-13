@@ -2,6 +2,10 @@ package digest
 
 import (
 	"context"
+	"sort"
+	"sync"
+	"time"
+
 	currencydigest "github.com/ProtoconNet/mitum-currency/v3/digest"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/isaac"
@@ -12,9 +16,6 @@ import (
 	"github.com/ProtoconNet/mitum2/util/logging"
 	"github.com/pkg/errors"
 	"github.com/rs/zerolog"
-	"sort"
-	"sync"
-	"time"
 )
 
 type Digester struct {
@@ -135,7 +136,14 @@ func (di *Digester) digest(ctx context.Context, blk base.BlockMap) error {
 	return di.database.SetLastBlock(blk.Manifest().Height())
 }
 
-func DigestBlock(ctx context.Context, st *currencydigest.Database, blk base.BlockMap, ops []base.Operation, opstree fixedtree.Tree, sts []base.State) error {
+func DigestBlock(
+	ctx context.Context,
+	st *currencydigest.Database,
+	blk base.BlockMap,
+	ops []base.Operation,
+	opstree fixedtree.Tree,
+	sts []base.State,
+) error {
 	bs, err := NewBlockSession(st, blk, ops, opstree, sts)
 	if err != nil {
 		return err
