@@ -8,6 +8,38 @@ import (
 	"github.com/ProtoconNet/mitum2/util/hint"
 )
 
+func (h Holder) MarshalBSON() ([]byte, error) {
+	return bsonenc.Marshal(
+		bson.M{
+			"_hint":            h.Hint().String(),
+			"address":          h.address,
+			"credential_count": h.credentialCount,
+		},
+	)
+}
+
+type HolderBSONUnmarshaler struct {
+	Hint            string `bson:"_hint"`
+	Address         string `bson:"address"`
+	CredentialCount uint64 `bson:"credential_count"`
+}
+
+func (h *Holder) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
+	e := util.StringError("failed to decode bson of Holder")
+
+	var upo HolderBSONUnmarshaler
+	if err := enc.Unmarshal(b, &upo); err != nil {
+		return e.Wrap(err)
+	}
+
+	ht, err := hint.ParseHint(upo.Hint)
+	if err != nil {
+		return e.Wrap(err)
+	}
+
+	return h.unpack(enc, ht, upo.Address, upo.CredentialCount)
+}
+
 func (po Policy) MarshalBSON() ([]byte, error) {
 	return bsonenc.Marshal(
 		bson.M{

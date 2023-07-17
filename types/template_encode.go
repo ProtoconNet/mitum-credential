@@ -13,7 +13,7 @@ func (t *Template) unpack(enc encoder.Encoder, ht hint.Hint,
 	share, audit bool,
 	dname, sjk, desc, creator string,
 ) error {
-	e := util.StringError("failed to decode bson of Template")
+	e := util.StringError("failed to unpack of Template")
 
 	t.BaseHinter = hint.NewBaseHinter(ht)
 	t.templateID = tid

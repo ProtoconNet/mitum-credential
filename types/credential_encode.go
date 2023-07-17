@@ -14,7 +14,7 @@ func (t *Credential) unpack(enc encoder.Encoder, ht hint.Hint,
 	vf, vu uint64,
 	did string,
 ) error {
-	e := util.StringError("failed to decode bson of Credential")
+	e := util.StringError("failed to unpack of Credential")
 
 	t.BaseHinter = hint.NewBaseHinter(ht)
 	t.id = id
