@@ -2,10 +2,6 @@ module github.com/ProtoconNet/mitum-credential
 
 go 1.20
 
-replace github.com/ProtoconNet/mitum2 => /Users/soonkukkang/go/src/github.com/spikeekips/mitum2
-replace github.com/ProtoconNet/mitum-currency/v3 => /Users/soonkukkang/go/src/github.com/spikeekips/mitum-currency
-
-
 require (
 	github.com/ProtoconNet/mitum-currency/v3 v3.0.0-alpha.0.20230704001310-409e49fce5b4
 	github.com/ProtoconNet/mitum2 v0.0.0-20230704001603-99ed1a35ce71
