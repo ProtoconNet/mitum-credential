@@ -295,7 +295,7 @@ func StateKeyHolderDID(contract base.Address, serviceID currencytypes.ContractID
 func ParseStateKey(key string, Prefix string) ([]string, error) {
 	parsedKey := strings.Split(key, ":")
 	if parsedKey[0] != Prefix[:len(Prefix)-1] {
-		return nil, errors.Errorf("State Key not include NFTPrefix, %s", parsedKey)
+		return nil, errors.Errorf("State Key not include Prefix, %s", parsedKey)
 	}
 	if len(parsedKey) < 3 {
 		return nil, errors.Errorf("parsing State Key string failed, %s", parsedKey)
