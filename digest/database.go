@@ -27,11 +27,11 @@ var (
 
 var maxLimit int64 = 50
 
-func DIDService(st *currencydigest.Database, contract, svc string) (types.Design, error) {
+func DIDService(st *currencydigest.Database, contract, svc string) (*types.Design, error) {
 	filter := util.NewBSONFilter("contract", contract)
 	filter = filter.Add("service", svc)
 
-	var design types.Design
+	var design *types.Design
 	var sta mitumbase.State
 	var err error
 	if err := st.DatabaseClient().GetByFilter(
@@ -43,28 +43,29 @@ func DIDService(st *currencydigest.Database, contract, svc string) (types.Design
 				return err
 			}
 
-			design, err = state.StateDesignValue(sta)
+			de, err := state.StateDesignValue(sta)
 			if err != nil {
 				return err
 			}
+			design = &de
 
 			return nil
 		},
 		options.FindOne().SetSort(util.NewBSONFilter("height", -1).D()),
 	); err != nil {
-		return types.Design{}, err
+		return nil, err
 	}
 
 	return design, nil
 }
 
-func Credential(st *currencydigest.Database, contract, svc, tid, id string) (types.Credential, error) {
+func Credential(st *currencydigest.Database, contract, svc, tid, id string) (*types.Credential, error) {
 	filter := util.NewBSONFilter("contract", contract)
 	filter = filter.Add("service", svc)
 	filter = filter.Add("template", tid)
 	filter = filter.Add("credential_id", id)
 
-	var credential types.Credential
+	var credential *types.Credential
 	var sta mitumbase.State
 	var err error
 	if err = st.DatabaseClient().GetByFilter(
@@ -75,27 +76,27 @@ func Credential(st *currencydigest.Database, contract, svc, tid, id string) (typ
 			if err != nil {
 				return err
 			}
-			credential, err = state.StateCredentialValue(sta)
+			cre, err := state.StateCredentialValue(sta)
 			if err != nil {
 				return err
 			}
-
+			credential = &cre
 			return nil
 		},
 		options.FindOne().SetSort(util.NewBSONFilter("height", -1).D()),
 	); err != nil {
-		return types.Credential{}, err
+		return nil, err
 	}
 
 	return credential, nil
 }
 
-func Template(st *currencydigest.Database, contract, svc, tid string) (types.Template, error) {
+func Template(st *currencydigest.Database, contract, svc, tid string) (*types.Template, error) {
 	filter := util.NewBSONFilter("contract", contract)
 	filter = filter.Add("service", svc)
 	filter = filter.Add("template", tid)
 
-	var template types.Template
+	var template *types.Template
 	var sta mitumbase.State
 	var err error
 	if err = st.DatabaseClient().GetByFilter(
@@ -106,16 +107,16 @@ func Template(st *currencydigest.Database, contract, svc, tid string) (types.Tem
 			if err != nil {
 				return err
 			}
-			template, err = state.StateTemplateValue(sta)
+			te, err := state.StateTemplateValue(sta)
 			if err != nil {
 				return err
 			}
-
+			template = &te
 			return nil
 		},
 		options.FindOne().SetSort(util.NewBSONFilter("height", -1).D()),
 	); err != nil {
-		return types.Template{}, err
+		return nil, err
 	}
 
 	return template, nil
@@ -220,7 +221,6 @@ func buildCredentialFilterByService(contract, col, templateID string, offset str
 				{"credential_id", bson.D{{"$gt", offset}}},
 			}
 			filterA = append(filterA, filterOffset)
-			// if reverse true, lesser then offset height
 		} else {
 			filterHeight := bson.D{
 				{"credential_id", bson.D{{"$lt", offset}}},

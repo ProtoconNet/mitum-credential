@@ -3,6 +3,7 @@ package digest
 import (
 	"github.com/ProtoconNet/mitum-credential/types"
 	currencydigest "github.com/ProtoconNet/mitum-currency/v3/digest"
+	mitumutil "github.com/ProtoconNet/mitum2/util"
 	"github.com/gorilla/mux"
 	"net/http"
 	"strings"
@@ -48,8 +49,10 @@ func (hd *Handlers) handleDIDIssuerInGroup(contract, service string) (interface{
 	switch design, err := DIDService(hd.database, contract, service); {
 	case err != nil:
 		return nil, err
+	case design == nil:
+		return nil, mitumutil.ErrNotFound.Errorf("issuer design, %v in handleDIDIssuer", service)
 	default:
-		hal, err := hd.buildDIDServiceHal(contract, service, design)
+		hal, err := hd.buildDIDServiceHal(contract, service, *design)
 		if err != nil {
 			return nil, err
 		}
@@ -114,8 +117,10 @@ func (hd *Handlers) handleCredentialInGroup(contract, serviceID, templateID, cre
 	switch credential, err := Credential(hd.database, contract, serviceID, templateID, credentialID); {
 	case err != nil:
 		return nil, err
+	case credential == nil:
+		return nil, mitumutil.ErrNotFound.Errorf("credential, %v in handleCredential", credentialID)
 	default:
-		hal, err := hd.buildCredentialHal(contract, serviceID, templateID, credential)
+		hal, err := hd.buildCredentialHal(contract, serviceID, templateID, *credential)
 		if err != nil {
 			return nil, err
 		}
@@ -344,6 +349,8 @@ func (hd *Handlers) handleHolderDIDInGroup(contract, serviceID, holder string) (
 	switch did, err := HolderDID(hd.database, contract, serviceID, holder); {
 	case err != nil:
 		return nil, err
+	case did == "":
+		return nil, mitumutil.ErrNotFound.Errorf("DID for holder, %v in handleHolderDID", holder)
 	default:
 		hal, err := hd.buildHolderDIDHal(contract, serviceID, holder, did)
 		if err != nil {
@@ -406,8 +413,10 @@ func (hd *Handlers) handleTemplateInGroup(contract, serviceID, templateID string
 	switch template, err := Template(hd.database, contract, serviceID, templateID); {
 	case err != nil:
 		return nil, err
+	case template == nil:
+		return nil, mitumutil.ErrNotFound.Errorf("template, %v in handleTemplate", templateID)
 	default:
-		hal, err := hd.buildTemplateHal(contract, serviceID, templateID, template)
+		hal, err := hd.buildTemplateHal(contract, serviceID, templateID, *template)
 		if err != nil {
 			return nil, err
 		}
