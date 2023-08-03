@@ -3,7 +3,7 @@ module github.com/ProtoconNet/mitum-credential
 go 1.20
 
 require (
-	github.com/ProtoconNet/mitum-currency/v3 v3.0.0-alpha.0.20230801063519-e0b1591cd4ea
+	github.com/ProtoconNet/mitum-currency/v3 v3.0.0-alpha.0.20230803061702-793923d6153d
 	github.com/ProtoconNet/mitum2 v0.0.0-20230704001603-99ed1a35ce71
 	github.com/alecthomas/kong v0.7.1
 	github.com/arl/statsviz v0.5.2
