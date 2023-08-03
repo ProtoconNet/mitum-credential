@@ -14,9 +14,9 @@ type RevokeCredentialsCommand struct {
 	currencycmds.OperationFlags
 	Sender            currencycmds.AddressFlag    `arg:"" name:"sender" help:"sender address" required:"true"`
 	Contract          currencycmds.AddressFlag    `arg:"" name:"contract" help:"contract account address" required:"true"`
-	CredentialService currencycmds.ContractIDFlag `arg:"" name:"credential-service-id" help:"credential id" required:"true"`
+	CredentialService ServiceIDFlag               `arg:"" name:"credential-service-id" help:"credential id" required:"true"`
 	Holder            currencycmds.AddressFlag    `arg:"" name:"holder" help:"credential holder" required:"true"`
-	TemplateID        uint64                      `arg:"" name:"template-id" help:"template id" required:"true"`
+	TemplateID        string                      `arg:"" name:"template-id" help:"template id" required:"true"`
 	ID                string                      `arg:"" name:"id" help:"credential id" required:"true"`
 	Currency          currencycmds.CurrencyIDFlag `arg:"" name:"currency-id" help:"currency id" required:"true"`
 	sender            base.Address
@@ -41,7 +41,7 @@ func (cmd *RevokeCredentialsCommand) Run(pctx context.Context) error {
 		return err
 	}
 
-	currencycmds.PrettyPrint(cmd.Out, op)
+	PrettyPrint(cmd.Out, op)
 
 	return nil
 }

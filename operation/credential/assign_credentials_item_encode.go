@@ -1,6 +1,7 @@
 package credential
 
 import (
+	"github.com/ProtoconNet/mitum-credential/types"
 	currencytypes "github.com/ProtoconNet/mitum-currency/v3/types"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
@@ -9,8 +10,7 @@ import (
 )
 
 func (it *AssignCredentialsItem) unpack(enc encoder.Encoder, ht hint.Hint,
-	ca, csid, hd string,
-	tid uint64,
+	ca, csid, hd, tid string,
 	id string,
 	v string,
 	vf, vu uint64,
@@ -19,7 +19,7 @@ func (it *AssignCredentialsItem) unpack(enc encoder.Encoder, ht hint.Hint,
 	e := util.StringError("failed to unmarshal AssignCredentialsItem")
 
 	it.BaseHinter = hint.NewBaseHinter(ht)
-	it.credentialServiceID = currencytypes.ContractID(csid)
+	it.credentialServiceID = types.ServiceID(csid)
 	it.id = id
 	it.value = v
 	it.did = did

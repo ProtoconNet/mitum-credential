@@ -28,7 +28,7 @@ func (t Template) MarshalBSON() ([]byte, error) {
 
 type TemplateBSONUnmarshaler struct {
 	Hint           string `bson:"_hint"`
-	TemplateID     uint64 `bson:"template_id"`
+	TemplateID     string `bson:"template_id"`
 	TemplateName   string `bson:"template_name"`
 	ServiceDate    string `bson:"service_date"`
 	ExpirationDate string `bson:"expiration_date"`

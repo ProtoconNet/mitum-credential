@@ -1,6 +1,7 @@
 package credential
 
 import (
+	"github.com/ProtoconNet/mitum-credential/types"
 	"github.com/ProtoconNet/mitum-currency/v3/common"
 	currencytypes "github.com/ProtoconNet/mitum-currency/v3/types"
 	"github.com/ProtoconNet/mitum2/base"
@@ -18,7 +19,7 @@ type CreateCredentialServiceFact struct {
 	base.BaseFact
 	sender              base.Address
 	contract            base.Address
-	credentialServiceID currencytypes.ContractID
+	credentialServiceID types.ServiceID
 	currency            currencytypes.CurrencyID
 }
 
@@ -26,7 +27,7 @@ func NewCreateCredentialServiceFact(
 	token []byte,
 	sender base.Address,
 	contract base.Address,
-	credentialServiceID currencytypes.ContractID,
+	credentialServiceID types.ServiceID,
 	currency currencytypes.CurrencyID,
 ) CreateCredentialServiceFact {
 	bf := base.NewBaseFact(CreateCredentialServiceFactHint, token)
@@ -69,7 +70,14 @@ func (fact CreateCredentialServiceFact) IsValid(b []byte) error {
 		return err
 	}
 
-	if err := util.CheckIsValiders(nil, false, fact.sender, fact.credentialServiceID, fact.contract, fact.currency); err != nil {
+	if err := util.CheckIsValiders(
+		nil,
+		false,
+		fact.sender,
+		fact.credentialServiceID,
+		fact.contract,
+		fact.currency,
+	); err != nil {
 		return err
 	}
 
@@ -92,7 +100,7 @@ func (fact CreateCredentialServiceFact) Contract() base.Address {
 	return fact.contract
 }
 
-func (fact CreateCredentialServiceFact) CredentialServiceID() currencytypes.ContractID {
+func (fact CreateCredentialServiceFact) CredentialServiceID() types.ServiceID {
 	return fact.credentialServiceID
 }
 

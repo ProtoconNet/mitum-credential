@@ -1,10 +1,12 @@
 package credential
 
 import (
+	"github.com/ProtoconNet/mitum-credential/types"
 	currencytypes "github.com/ProtoconNet/mitum-currency/v3/types"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
+	"unicode/utf8"
 )
 
 var RevokeCredentialsItemHint = hint.MustNewHint("mitum-credential-revoke-credentials-item-v0.0.1")
@@ -12,19 +14,18 @@ var RevokeCredentialsItemHint = hint.MustNewHint("mitum-credential-revoke-creden
 type RevokeCredentialsItem struct {
 	hint.BaseHinter
 	contract            base.Address
-	credentialServiceID currencytypes.ContractID
+	credentialServiceID types.ServiceID
 	holder              base.Address
-	templateID          uint64
+	templateID          string
 	id                  string
 	currency            currencytypes.CurrencyID
 }
 
 func NewRevokeCredentialsItem(
 	contract base.Address,
-	credentialServiceID currencytypes.ContractID,
+	credentialServiceID types.ServiceID,
 	holder base.Address,
-	templateID uint64,
-	id string,
+	templateID, id string,
 	currency currencytypes.CurrencyID,
 ) RevokeCredentialsItem {
 	return RevokeCredentialsItem{
@@ -43,7 +44,7 @@ func (it RevokeCredentialsItem) Bytes() []byte {
 		it.contract.Bytes(),
 		it.credentialServiceID.Bytes(),
 		it.holder.Bytes(),
-		util.Uint64ToBytes(it.templateID),
+		[]byte(it.templateID),
 		[]byte(it.id),
 		it.currency.Bytes(),
 	)
@@ -64,14 +65,18 @@ func (it RevokeCredentialsItem) IsValid([]byte) error {
 		return util.ErrInvalid.Errorf("contract address is same with sender, %q", it.holder)
 	}
 
-	if len(it.id) == 0 {
-		return util.ErrInvalid.Errorf("empty id")
+	if l := utf8.RuneCountInString(it.templateID); l < 1 || l > MaxLengthTemplateID {
+		return util.ErrInvalid.Errorf("invalid length of template ID, 0 <= length <= %d", MaxLengthTemplateID)
+	}
+
+	if l := utf8.RuneCountInString(it.id); l < 1 || l > MaxLengthCredentialID {
+		return util.ErrInvalid.Errorf("invalid length of ID, 0 <= length <= %d", MaxLengthCredentialID)
 	}
 
 	return nil
 }
 
-func (it RevokeCredentialsItem) CredentialServiceID() currencytypes.ContractID {
+func (it RevokeCredentialsItem) CredentialServiceID() types.ServiceID {
 	return it.credentialServiceID
 }
 
@@ -83,7 +88,7 @@ func (it RevokeCredentialsItem) Holder() base.Address {
 	return it.holder
 }
 
-func (it RevokeCredentialsItem) TemplateID() uint64 {
+func (it RevokeCredentialsItem) TemplateID() string {
 	return it.templateID
 }
 

@@ -45,12 +45,12 @@ var PolicyHint = hint.MustNewHint("mitum-credential-policy-v0.0.1")
 
 type Policy struct {
 	hint.BaseHinter
-	templateIDs     []uint64
+	templateIDs     []string
 	holders         []Holder
 	credentialCount uint64
 }
 
-func NewPolicy(templates []uint64, holders []Holder, credentialCount uint64) Policy {
+func NewPolicy(templates []string, holders []Holder, credentialCount uint64) Policy {
 	return Policy{
 		BaseHinter:      hint.NewBaseHinter(PolicyHint),
 		templateIDs:     templates,
@@ -62,7 +62,7 @@ func NewPolicy(templates []uint64, holders []Holder, credentialCount uint64) Pol
 func (po Policy) Bytes() []byte {
 	ts := make([][]byte, len(po.templateIDs))
 	for i, t := range po.templateIDs {
-		ts[i] = util.Uint64ToBytes(t)
+		ts[i] = []byte(t)
 	}
 
 	hs := make([][]byte, len(po.holders))
@@ -93,7 +93,7 @@ func (po Policy) IsValid([]byte) error {
 	return nil
 }
 
-func (po Policy) TemplateIDs() []uint64 {
+func (po Policy) TemplateIDs() []string {
 	return po.templateIDs
 }
 

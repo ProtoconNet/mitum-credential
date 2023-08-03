@@ -2,8 +2,6 @@ package types
 
 import (
 	"encoding/json"
-	currencytypes "github.com/ProtoconNet/mitum-currency/v3/types"
-
 	"github.com/ProtoconNet/mitum2/util"
 	jsonenc "github.com/ProtoconNet/mitum2/util/encoder/json"
 	"github.com/ProtoconNet/mitum2/util/hint"
@@ -11,8 +9,8 @@ import (
 
 type DesignJSONMarshaler struct {
 	hint.BaseHinter
-	Credential currencytypes.ContractID `json:"credential_service_id"`
-	Policy     Policy                   `json:"policy"`
+	Credential ServiceID `json:"credential_service_id"`
+	Policy     Policy    `json:"policy"`
 }
 
 func (de Design) MarshalJSON() ([]byte, error) {

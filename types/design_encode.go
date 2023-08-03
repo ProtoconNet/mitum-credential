@@ -1,7 +1,6 @@
 package types
 
 import (
-	currencytypes "github.com/ProtoconNet/mitum-currency/v3/types"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/encoder"
 	"github.com/ProtoconNet/mitum2/util/hint"
@@ -12,7 +11,7 @@ func (de *Design) unpack(enc encoder.Encoder, ht hint.Hint, credit string, bpo [
 	e := util.StringError("failed to unpack of Design")
 
 	de.BaseHinter = hint.NewBaseHinter(ht)
-	de.credentialServiceID = currencytypes.ContractID(credit)
+	de.credentialServiceID = ServiceID(credit)
 
 	if hinter, err := enc.Decode(bpo); err != nil {
 		return e.Wrap(err)

@@ -10,7 +10,7 @@ import (
 type CredentialJSONMarshaler struct {
 	hint.BaseHinter
 	Holder     base.Address `json:"holder"`
-	TemplateID uint64       `json:"template_id"`
+	TemplateID string       `json:"template_id"`
 	ID         string       `json:"id"`
 	Value      string       `json:"value"`
 	ValidFrom  uint64       `json:"valid_from"`
@@ -33,7 +33,7 @@ func (cd Credential) MarshalJSON() ([]byte, error) {
 type CredentialJSONUnmarshaler struct {
 	Hint       hint.Hint `json:"_hint"`
 	Holder     string    `json:"holder"`
-	TemplateID uint64    `json:"template_id"`
+	TemplateID string    `json:"template_id"`
 	ID         string    `json:"id"`
 	Value      string    `json:"value"`
 	ValidFrom  uint64    `json:"valid_from"`

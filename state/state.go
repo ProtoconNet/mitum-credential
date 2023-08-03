@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"github.com/ProtoconNet/mitum-credential/types"
 	"github.com/ProtoconNet/mitum-currency/v3/common"
-	currencytypes "github.com/ProtoconNet/mitum-currency/v3/types"
-	"strconv"
 	"strings"
 
 	"github.com/ProtoconNet/mitum2/base"
@@ -44,7 +42,7 @@ func NewStateMergeValue(key string, stv base.StateValue) base.StateMergeValue {
 	)
 }
 
-func StateKeyCredentialPrefix(contract base.Address, serviceID currencytypes.ContractID) string {
+func StateKeyCredentialPrefix(contract base.Address, serviceID types.ServiceID) string {
 	return fmt.Sprintf("%s%s:%s", CredentialPrefix, contract.String(), serviceID)
 }
 
@@ -100,7 +98,7 @@ func IsStateDesignKey(key string) bool {
 	return strings.HasPrefix(key, CredentialPrefix) && strings.HasSuffix(key, DesignSuffix)
 }
 
-func StateKeyDesign(contract base.Address, serviceID currencytypes.ContractID) string {
+func StateKeyDesign(contract base.Address, serviceID types.ServiceID) string {
 	return fmt.Sprintf("%s%s", StateKeyCredentialPrefix(contract, serviceID), DesignSuffix)
 }
 
@@ -143,10 +141,10 @@ func (sv TemplateStateValue) HashBytes() []byte {
 	return sv.Template.Bytes()
 }
 
-func StateKeyTemplate(contract base.Address, serviceID currencytypes.ContractID, templateID uint64) string {
+func StateKeyTemplate(contract base.Address, serviceID types.ServiceID, templateID string) string {
 	return fmt.Sprintf("%s:%s%s",
 		StateKeyCredentialPrefix(contract, serviceID),
-		strconv.FormatUint(templateID, 10),
+		templateID,
 		TemplateSuffix,
 	)
 }
@@ -208,10 +206,10 @@ func (sv CredentialStateValue) HashBytes() []byte {
 	return sv.Credential.Bytes()
 }
 
-func StateKeyCredential(contract base.Address, serviceID currencytypes.ContractID, templateID uint64, id string) string {
+func StateKeyCredential(contract base.Address, serviceID types.ServiceID, templateID string, id string) string {
 	return fmt.Sprintf(
 		"%s:%s:%s%s",
-		StateKeyCredentialPrefix(contract, serviceID), strconv.FormatUint(templateID, 10),
+		StateKeyCredentialPrefix(contract, serviceID), templateID,
 		id,
 		CredentialSuffix,
 	)
@@ -288,7 +286,7 @@ func IsStateHolderDIDKey(key string) bool {
 	return strings.HasPrefix(key, CredentialPrefix) && strings.HasSuffix(key, HolderDIDSuffix)
 }
 
-func StateKeyHolderDID(contract base.Address, serviceID currencytypes.ContractID, holder base.Address) string {
+func StateKeyHolderDID(contract base.Address, serviceID types.ServiceID, holder base.Address) string {
 	return fmt.Sprintf("%s:%s%s", StateKeyCredentialPrefix(contract, serviceID), holder.String(), HolderDIDSuffix)
 }
 

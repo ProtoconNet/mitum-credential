@@ -1,6 +1,7 @@
 package credential
 
 import (
+	"github.com/ProtoconNet/mitum-credential/types"
 	currencytypes "github.com/ProtoconNet/mitum-currency/v3/types"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
@@ -24,7 +25,7 @@ func (fact *CreateCredentialServiceFact) unpack(enc encoder.Encoder, sa, ca, csi
 		fact.contract = a
 	}
 
-	fact.credentialServiceID = currencytypes.ContractID(csid)
+	fact.credentialServiceID = types.ServiceID(csid)
 	fact.currency = currencytypes.CurrencyID(cid)
 
 	return nil

@@ -233,7 +233,7 @@ func (hd *Handlers) handleCredentialsInGroup(
 	); err != nil {
 		return nil, false, err
 	} else if len(vas) < 1 {
-		return nil, false, errors.Errorf("nfts not found")
+		return nil, false, errors.Errorf("credentials not found")
 	}
 
 	i, err := hd.buildCredentialsHal(contract, serviceID, templateID, vas, offset, reverse)

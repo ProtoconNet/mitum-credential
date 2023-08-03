@@ -8,7 +8,7 @@ import (
 )
 
 func (t *Template) unpack(enc encoder.Encoder, ht hint.Hint,
-	tid uint64,
+	tid string,
 	name, service, expire string,
 	share, audit bool,
 	dname, sjk, desc, creator string,

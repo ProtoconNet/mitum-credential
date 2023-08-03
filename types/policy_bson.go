@@ -53,7 +53,7 @@ func (po Policy) MarshalBSON() ([]byte, error) {
 
 type PolicyBSONUnmarshaler struct {
 	Hint            string   `bson:"_hint"`
-	Templates       []uint64 `bson:"templates"`
+	Templates       []string `bson:"templates"`
 	Holders         bson.Raw `bson:"holders"`
 	CredentialCount uint64   `bson:"credential_count"`
 }

@@ -1,10 +1,12 @@
 package credential
 
 import (
+	"github.com/ProtoconNet/mitum-credential/types"
 	currencytypes "github.com/ProtoconNet/mitum-currency/v3/types"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
+	"unicode/utf8"
 )
 
 var AssignCredentialsItemHint = hint.MustNewHint("mitum-credential-assign-credentials-item-v0.0.1")
@@ -12,9 +14,9 @@ var AssignCredentialsItemHint = hint.MustNewHint("mitum-credential-assign-creden
 type AssignCredentialsItem struct {
 	hint.BaseHinter
 	contract            base.Address
-	credentialServiceID currencytypes.ContractID
+	credentialServiceID types.ServiceID
 	holder              base.Address
-	templateID          uint64
+	templateID          string
 	id                  string
 	value               string
 	validfrom           uint64
@@ -25,9 +27,9 @@ type AssignCredentialsItem struct {
 
 func NewAssignCredentialsItem(
 	contract base.Address,
-	credentialServiceID currencytypes.ContractID,
+	credentialServiceID types.ServiceID,
 	holder base.Address,
-	templateID uint64,
+	templateID string,
 	id string,
 	value string,
 	validfrom uint64,
@@ -55,7 +57,7 @@ func (it AssignCredentialsItem) Bytes() []byte {
 		it.contract.Bytes(),
 		it.credentialServiceID.Bytes(),
 		it.holder.Bytes(),
-		util.Uint64ToBytes(it.templateID),
+		[]byte(it.templateID),
 		[]byte(it.id),
 		[]byte(it.value),
 		util.Uint64ToBytes(it.validfrom),
@@ -84,22 +86,26 @@ func (it AssignCredentialsItem) IsValid([]byte) error {
 		return util.ErrInvalid.Errorf("valid until <= valid from, %q <= %q", it.validuntil, it.validfrom)
 	}
 
-	if len(it.id) == 0 {
-		return util.ErrInvalid.Errorf("empty id")
+	if l := utf8.RuneCountInString(it.templateID); l < 1 || l > MaxLengthTemplateID {
+		return util.ErrInvalid.Errorf("invalid length of template ID, 0 <= length <= %d", MaxLengthTemplateID)
+	}
+
+	if l := utf8.RuneCountInString(it.id); l < 1 || l > MaxLengthCredentialID {
+		return util.ErrInvalid.Errorf("invalid length of ID, 0 <= length <= %d", MaxLengthCredentialID)
 	}
 
 	if len(it.did) == 0 {
 		return util.ErrInvalid.Errorf("empty did")
 	}
 
-	if len(it.value) == 0 {
-		return util.ErrInvalid.Errorf("empty value")
+	if l := utf8.RuneCountInString(it.value); l < 1 || l > MaxLengthCredentialValue {
+		return util.ErrInvalid.Errorf("invalid length of value, 0 <= length <= %d", MaxLengthCredentialValue)
 	}
 
 	return nil
 }
 
-func (it AssignCredentialsItem) CredentialServiceID() currencytypes.ContractID {
+func (it AssignCredentialsItem) CredentialServiceID() types.ServiceID {
 	return it.credentialServiceID
 }
 
@@ -111,7 +117,7 @@ func (it AssignCredentialsItem) Holder() base.Address {
 	return it.holder
 }
 
-func (it AssignCredentialsItem) TemplateID() uint64 {
+func (it AssignCredentialsItem) TemplateID() string {
 	return it.templateID
 }
 

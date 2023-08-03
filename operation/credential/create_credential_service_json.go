@@ -1,6 +1,7 @@
 package credential
 
 import (
+	"github.com/ProtoconNet/mitum-credential/types"
 	"github.com/ProtoconNet/mitum-currency/v3/common"
 	currencytypes "github.com/ProtoconNet/mitum-currency/v3/types"
 	"github.com/ProtoconNet/mitum2/base"
@@ -12,7 +13,7 @@ type CreateCredentialServiceFactJSONMarshaler struct {
 	base.BaseFactJSONMarshaler
 	Owner               base.Address             `json:"sender"`
 	Contract            base.Address             `json:"contract"`
-	CredentialServiceID currencytypes.ContractID `json:"credential_service_id"`
+	CredentialServiceID types.ServiceID          `json:"credential_service_id"`
 	Currency            currencytypes.CurrencyID `json:"currency"`
 }
 

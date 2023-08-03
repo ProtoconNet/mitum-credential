@@ -9,7 +9,7 @@ import (
 
 type TemplateJSONMarshaler struct {
 	hint.BaseHinter
-	TemplateID     uint64       `json:"template_id"`
+	TemplateID     string       `json:"template_id"`
 	TemplateName   string       `json:"template_name"`
 	ServiceDate    Date         `json:"service_date"`
 	ExpirationDate Date         `json:"expiration_date"`
@@ -39,7 +39,7 @@ func (t Template) MarshalJSON() ([]byte, error) {
 
 type TemplateJSONUnmarshaler struct {
 	Hint           hint.Hint `json:"_hint"`
-	TemplateID     uint64    `json:"template_id"`
+	TemplateID     string    `json:"template_id"`
 	TemplateName   string    `json:"template_name"`
 	ServiceDate    string    `json:"service_date"`
 	ExpirationDate string    `json:"expiration_date"`

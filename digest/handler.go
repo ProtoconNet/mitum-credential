@@ -2,6 +2,7 @@ package digest
 
 import (
 	"context"
+	"github.com/ProtoconNet/mitum-credential/types"
 	currencydigest "github.com/ProtoconNet/mitum-currency/v3/digest"
 	"net/http"
 	"time"
@@ -19,11 +20,11 @@ import (
 )
 
 var (
-	HandlerPathDIDIssuer      = `/did/{contract:.*}/issuer/{serviceid:[A-Z0-9][A-Z0-9_\.\!\$\*\@]*[A-Z0-9]+}`
-	HandlerPathDIDCredential  = `/did/{contract:.*}/issuer/{serviceid:[A-Z0-9][A-Z0-9_\.\!\$\*\@]*[A-Z0-9]+}/template/{templateid:[0-9]*[0-9]+}/credential/{credentialid:.*}`
-	HandlerPathDIDTemplate    = `/did/{contract:.*}/issuer/{serviceid:[A-Z0-9][A-Z0-9_\.\!\$\*\@]*[A-Z0-9]+}/template/{templateid:[0-9]*[0-9]+}`
-	HandlerPathDIDCredentials = `/did/{contract:.*}/issuer/{serviceid:[A-Z0-9][A-Z0-9_\.\!\$\*\@]*[A-Z0-9]+}/template/{templateid:[0-9]*[0-9]+}/credentials`
-	HandlerPathDIDHolder      = `/did/{contract:.*}/issuer/{serviceid:[A-Z0-9][A-Z0-9_\.\!\$\*\@]*[A-Z0-9]+}/holder/{holder:(?i)` + base.REStringAddressString + `}` // revive:disable-line:line-length-limit
+	HandlerPathDIDIssuer      = `/did/{contract:.*}/issuer/{serviceid:` + types.REServiceIDString + `}`
+	HandlerPathDIDCredential  = `/did/{contract:.*}/issuer/{serviceid:` + types.REServiceIDString + `}/template/{templateid:[0-9]*[0-9]+}/credential/{credentialid:.*}`
+	HandlerPathDIDTemplate    = `/did/{contract:.*}/issuer/{serviceid:` + types.REServiceIDString + `}/template/{templateid:[0-9]*[0-9]+}`
+	HandlerPathDIDCredentials = `/did/{contract:.*}/issuer/{serviceid:` + types.REServiceIDString + `}/template/{templateid:[0-9]*[0-9]+}/credentials`
+	HandlerPathDIDHolder      = `/did/{contract:.*}/issuer/{serviceid:` + types.REServiceIDString + `}/holder/{holder:(?i)` + base.REStringAddressString + `}` // revive:disable-line:line-length-limit
 )
 
 func init() {

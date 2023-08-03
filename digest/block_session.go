@@ -136,13 +136,13 @@ func (bs *BlockSession) Commit(ctx context.Context) error {
 	}
 
 	if len(bs.didCredentialModels) > 0 {
-		for nft := range bs.credentialMap {
+		for credential := range bs.credentialMap {
 			err := bs.st.CleanByHeightColName(
 				ctx,
 				bs.block.Manifest().Height(),
 				defaultColNameDIDCredential,
 				"credential_id",
-				nft,
+				credential,
 			)
 			if err != nil {
 				return err

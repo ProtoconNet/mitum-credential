@@ -15,8 +15,8 @@ type AddTemplateCommand struct {
 	currencycmds.OperationFlags
 	Sender            currencycmds.AddressFlag    `arg:"" name:"sender" help:"sender address" required:"true"`
 	Contract          currencycmds.AddressFlag    `arg:"" name:"contract" help:"contract address of credential" required:"true"`
-	CredentialService currencycmds.ContractIDFlag `arg:"" name:"credential-service-id" help:"credential id" required:"true"`
-	TemplateID        uint64                      `arg:"" name:"template-id" help:"template id" required:"true"`
+	CredentialService ServiceIDFlag               `arg:"" name:"credential-service-id" help:"credential id" required:"true"`
+	TemplateID        string                      `arg:"" name:"template-id" help:"template id" required:"true"`
 	TemplateName      string                      `arg:"" name:"template-name" help:"template name"  required:"true"`
 	ServiceDate       string                      `arg:"" name:"service-date" help:"service date; yyyy-MM-dd" required:"true"`
 	ExpirationDate    string                      `arg:"" name:"expiration-date" help:"expiration date; yyyy-MM-dd" required:"true"`
@@ -51,7 +51,7 @@ func (cmd *AddTemplateCommand) Run(pctx context.Context) error { // nolint:dupl
 		return err
 	}
 
-	currencycmds.PrettyPrint(cmd.Out, op)
+	PrettyPrint(cmd.Out, op)
 
 	return nil
 }

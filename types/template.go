@@ -10,7 +10,7 @@ var TemplateHint = hint.MustNewHint("mitum-credential-template-v0.0.1")
 
 type Template struct {
 	hint.BaseHinter
-	templateID     uint64
+	templateID     string
 	templateName   string
 	serviceDate    Date
 	expirationDate Date
@@ -23,14 +23,14 @@ type Template struct {
 }
 
 func NewTemplate(
-	templateID uint64,
+	templateID,
 	templateName string,
-	serviceDate Date,
+	serviceDate,
 	expirationDate Date,
-	templateShare Bool,
+	templateShare,
 	multiAudit Bool,
-	displayName string,
-	subjectKey string,
+	displayName,
+	subjectKey,
 	description string,
 	creator base.Address,
 ) Template {
@@ -50,13 +50,20 @@ func NewTemplate(
 }
 
 func (t Template) IsValid([]byte) error {
-
 	if err := util.CheckIsValiders(nil, false,
 		t.BaseHinter,
 		t.serviceDate,
 		t.expirationDate,
 	); err != nil {
 		return err
+	}
+
+	if len(t.templateID) == 0 {
+		return util.ErrInvalid.Errorf("empty template id")
+	}
+
+	if len(t.templateID) > 20 {
+		return util.ErrInvalid.Errorf("invalid length of template id, length < %d", MaxLengthContractID)
 	}
 
 	if len(t.templateName) == 0 {
@@ -94,7 +101,7 @@ func (t Template) IsValid([]byte) error {
 
 func (t Template) Bytes() []byte {
 	return util.ConcatBytesSlice(
-		util.Uint64ToBytes(t.templateID),
+		[]byte(t.templateID),
 		[]byte(t.templateName),
 		t.serviceDate.Bytes(),
 		t.expirationDate.Bytes(),
@@ -107,7 +114,7 @@ func (t Template) Bytes() []byte {
 	)
 }
 
-func (t Template) TemplateID() uint64 {
+func (t Template) TemplateID() string {
 	return t.templateID
 }
 

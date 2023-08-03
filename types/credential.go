@@ -11,7 +11,7 @@ var CredentialHint = hint.MustNewHint("mitum-credential-credential-v0.0.1")
 type Credential struct {
 	hint.BaseHinter
 	holder     base.Address
-	templateID uint64
+	templateID string
 	id         string
 	value      string
 	validFrom  uint64
@@ -21,7 +21,7 @@ type Credential struct {
 
 func NewCredential(
 	holder base.Address,
-	templateID uint64,
+	templateID string,
 	id string,
 	value string,
 	validFrom uint64,
@@ -43,7 +43,7 @@ func NewCredential(
 func (it Credential) Bytes() []byte {
 	return util.ConcatBytesSlice(
 		it.holder.Bytes(),
-		util.Uint64ToBytes(it.templateID),
+		[]byte(it.templateID),
 		[]byte(it.id),
 		[]byte(it.value),
 		util.Uint64ToBytes(it.validFrom),
@@ -83,7 +83,7 @@ func (it Credential) Holder() base.Address {
 	return it.holder
 }
 
-func (it Credential) TemplateID() uint64 {
+func (it Credential) TemplateID() string {
 	return it.templateID
 }
 

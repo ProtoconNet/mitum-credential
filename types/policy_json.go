@@ -41,7 +41,7 @@ func (h *Holder) DecodeJSON(b []byte, enc *jsonenc.Encoder) error {
 
 type PolicyJSONMarshaler struct {
 	hint.BaseHinter
-	Templates       []uint64 `json:"templates"`
+	Templates       []string `json:"templates"`
 	Holders         []Holder `json:"holders"`
 	CredentialCount uint64   `json:"credential_count"`
 }
@@ -57,7 +57,7 @@ func (po Policy) MarshalJSON() ([]byte, error) {
 
 type PolicyJSONUnmarshaler struct {
 	Hint            hint.Hint       `json:"_hint"`
-	Templates       []uint64        `json:"templates"`
+	Templates       []string        `json:"templates"`
 	Holders         json.RawMessage `json:"holders"`
 	CredentialCount uint64          `json:"credential_count"`
 }

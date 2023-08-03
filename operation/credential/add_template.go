@@ -8,6 +8,7 @@ import (
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
 	"github.com/ProtoconNet/mitum2/util/valuehash"
+	"unicode/utf8"
 )
 
 var (
@@ -19,8 +20,8 @@ type AddTemplateFact struct {
 	base.BaseFact
 	sender              base.Address
 	contract            base.Address
-	credentialServiceID currencytypes.ContractID
-	templateID          uint64
+	credentialServiceID types.ServiceID
+	templateID          string
 	templateName        string
 	serviceDate         types.Date
 	expirationDate      types.Date
@@ -37,8 +38,8 @@ func NewAddTemplateFact(
 	token []byte,
 	sender base.Address,
 	contract base.Address,
-	credentialServiceID currencytypes.ContractID,
-	templateID uint64,
+	credentialServiceID types.ServiceID,
+	templateID string,
 	templateName string,
 	serviceDate types.Date,
 	expirationDate types.Date,
@@ -87,7 +88,7 @@ func (fact AddTemplateFact) Bytes() []byte {
 		fact.sender.Bytes(),
 		fact.contract.Bytes(),
 		fact.credentialServiceID.Bytes(),
-		util.Uint64ToBytes(fact.templateID),
+		[]byte(fact.templateID),
 		[]byte(fact.templateName),
 		fact.serviceDate.Bytes(),
 		fact.expirationDate.Bytes(),
@@ -118,20 +119,24 @@ func (fact AddTemplateFact) IsValid(b []byte) error {
 		return err
 	}
 
-	if len(fact.templateName) == 0 {
-		return util.ErrInvalid.Errorf("empty template name")
+	if l := utf8.RuneCountInString(fact.templateID); l < 1 || l > MaxLengthTemplateID {
+		return util.ErrInvalid.Errorf("invalid length of template ID, 0 <= length <= %d", MaxLengthTemplateID)
 	}
 
-	if len(fact.displayName) == 0 {
-		return util.ErrInvalid.Errorf("empty display name")
+	if l := utf8.RuneCountInString(fact.templateName); l < 1 || l > MaxLengthTemplateName {
+		return util.ErrInvalid.Errorf("invalid length of template name, 0 <= length <= %d", MaxLengthTemplateName)
 	}
 
-	if len(fact.subjectKey) == 0 {
-		return util.ErrInvalid.Errorf("empty subject key")
+	if l := utf8.RuneCountInString(fact.displayName); l < 1 || l > MaxLengthDisplayName {
+		return util.ErrInvalid.Errorf("invalid length of display name, 0 <= length <= %d", MaxLengthDisplayName)
 	}
 
-	if len(fact.description) == 0 {
-		return util.ErrInvalid.Errorf("empty description")
+	if l := utf8.RuneCountInString(fact.subjectKey); l < 1 || l > MaxLengthSubjectKey {
+		return util.ErrInvalid.Errorf("invalid length of subjectKey, 0 <= length <= %d", MaxLengthSubjectKey)
+	}
+
+	if l := utf8.RuneCountInString(fact.description); l < 1 || l > MaxLengthDescription {
+		return util.ErrInvalid.Errorf("invalid length of description, 0 <= length <= %d", MaxLengthDescription)
 	}
 
 	if fact.sender.Equal(fact.contract) {
@@ -171,11 +176,11 @@ func (fact AddTemplateFact) Contract() base.Address {
 	return fact.contract
 }
 
-func (fact AddTemplateFact) CredentialServiceID() currencytypes.ContractID {
+func (fact AddTemplateFact) CredentialServiceID() types.ServiceID {
 	return fact.credentialServiceID
 }
 
-func (fact AddTemplateFact) TemplateID() uint64 {
+func (fact AddTemplateFact) TemplateID() string {
 	return fact.templateID
 }
 
@@ -242,3 +247,13 @@ func (op *AddTemplate) HashSign(priv base.Privatekey, networkID base.NetworkID) 
 	}
 	return nil
 }
+
+var (
+	MaxLengthTemplateID      = 20
+	MaxLengthCredentialID    = 20
+	MaxLengthTemplateName    = 20
+	MaxLengthDisplayName     = 20
+	MaxLengthSubjectKey      = 256
+	MaxLengthCredentialValue = 1024
+	MaxLengthDescription     = 1024
+)

@@ -26,7 +26,7 @@ func (cd Credential) MarshalBSON() ([]byte, error) {
 type CredentialBSONUnmarshaler struct {
 	Hint       string `bson:"_hint"`
 	Holder     string `bson:"holder"`
-	TemplateID uint64 `bson:"template_id"`
+	TemplateID string `bson:"template_id"`
 	ID         string `bson:"id"`
 	Value      string `bson:"value"`
 	ValidFrom  uint64 `bson:"valid_from"`

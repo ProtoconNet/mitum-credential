@@ -15,7 +15,7 @@ type CreateCredentialServiceCommand struct {
 	currencycmds.OperationFlags
 	Sender            currencycmds.AddressFlag    `arg:"" name:"sender" help:"sender address" required:"true"`
 	Contract          currencycmds.AddressFlag    `arg:"" name:"contract" help:"contract address of credential" required:"true"`
-	CredentialService currencycmds.ContractIDFlag `arg:"" name:"credential-service-id" help:"credential id" required:"true"`
+	CredentialService ServiceIDFlag               `arg:"" name:"credential-service-id" help:"credential id" required:"true"`
 	Currency          currencycmds.CurrencyIDFlag `arg:"" name:"currency-id" help:"currency id" required:"true"`
 	sender            base.Address
 	contract          base.Address
@@ -38,7 +38,7 @@ func (cmd *CreateCredentialServiceCommand) Run(pctx context.Context) error { // 
 		return err
 	}
 
-	currencycmds.PrettyPrint(cmd.Out, op)
+	PrettyPrint(cmd.Out, op)
 
 	return nil
 }

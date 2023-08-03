@@ -13,8 +13,8 @@ type AddTemplateFactJSONMarshaler struct {
 	base.BaseFactJSONMarshaler
 	Owner               base.Address             `json:"sender"`
 	Contract            base.Address             `json:"contract"`
-	CredentialServiceID currencytypes.ContractID `json:"credential_service_id"`
-	TemplateID          uint64                   `json:"template_id"`
+	CredentialServiceID types.ServiceID          `json:"credential_service_id"`
+	TemplateID          string                   `json:"template_id"`
 	TemplateName        string                   `json:"template_name"`
 	ServiceDate         types.Date               `json:"service_date"`
 	ExpirationDate      types.Date               `json:"expiration_date"`
@@ -52,7 +52,7 @@ type AddTemplateFactJSONUnMarshaler struct {
 	Owner               string `json:"sender"`
 	Contract            string `json:"contract"`
 	CredentialServiceID string `json:"credential_service_id"`
-	TemplateID          uint64 `json:"template_id"`
+	TemplateID          string `json:"template_id"`
 	TemplateName        string `json:"template_name"`
 	ServiceDate         string `json:"service_date"`
 	ExpirationDate      string `json:"expiration_date"`

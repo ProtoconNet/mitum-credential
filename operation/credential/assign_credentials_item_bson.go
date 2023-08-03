@@ -30,7 +30,7 @@ type AssignCredentialsItemBSONUnmarshaler struct {
 	Contract          string `bson:"contract"`
 	CredentialService string `json:"credential_service_id"`
 	Holder            string `json:"holder"`
-	TemplateID        uint64 `json:"template_id"`
+	TemplateID        string `json:"template_id"`
 	ID                string `json:"id"`
 	Value             string `json:"value"`
 	ValidFrom         uint64 `json:"valid_from"`

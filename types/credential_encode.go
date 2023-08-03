@@ -8,8 +8,7 @@ import (
 )
 
 func (t *Credential) unpack(enc encoder.Encoder, ht hint.Hint,
-	hd string,
-	tid uint64,
+	hd, tid string,
 	id, v string,
 	vf, vu uint64,
 	did string,

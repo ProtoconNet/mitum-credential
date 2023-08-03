@@ -39,7 +39,7 @@ type AddTemplateFactBSONUnmarshaler struct {
 	Sender              string `bson:"sender"`
 	Contract            string `bson:"contract"`
 	CredentialServiceID string `bson:"credential_service_id"`
-	TemplateID          uint64 `bson:"template_id"`
+	TemplateID          string `bson:"template_id"`
 	TemplateName        string `bson:"template_name"`
 	ServiceDate         string `bson:"service_date"`
 	ExpirationDate      string `bson:"expiration_date"`

@@ -1,7 +1,6 @@
 package types
 
 import (
-	currencytypes "github.com/ProtoconNet/mitum-currency/v3/types"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
 )
@@ -10,11 +9,11 @@ var DesignHint = hint.MustNewHint("mitum-credential-design-v0.0.1")
 
 type Design struct {
 	hint.BaseHinter
-	credentialServiceID currencytypes.ContractID
+	credentialServiceID ServiceID
 	policy              Policy
 }
 
-func NewDesign(credentialServiceID currencytypes.ContractID, policy Policy) Design {
+func NewDesign(credentialServiceID ServiceID, policy Policy) Design {
 	return Design{
 		BaseHinter:          hint.NewBaseHinter(DesignHint),
 		credentialServiceID: credentialServiceID,
@@ -41,7 +40,7 @@ func (de Design) Bytes() []byte {
 	)
 }
 
-func (de Design) ServiceID() currencytypes.ContractID {
+func (de Design) ServiceID() ServiceID {
 	return de.credentialServiceID
 }
 

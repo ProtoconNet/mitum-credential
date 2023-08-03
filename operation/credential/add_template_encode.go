@@ -9,15 +9,14 @@ import (
 )
 
 func (fact *AddTemplateFact) unpack(enc encoder.Encoder,
-	sa, ca, csid string,
-	tid uint64,
+	sa, ca, csid, tid string,
 	tname, sd, ed string,
 	ts, ma bool,
 	dn, sk, desc, cr, cid string,
 ) error {
 	e := util.StringError("failed to unmarshal AddTemplateFact")
 
-	fact.credentialServiceID = currencytypes.ContractID(csid)
+	fact.credentialServiceID = types.ServiceID(csid)
 	fact.templateName = tname
 	fact.serviceDate = types.Date(sd)
 	fact.expirationDate = types.Date(ed)

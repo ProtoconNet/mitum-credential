@@ -72,7 +72,6 @@ func (opp *CreateCredentialServiceProcessor) PreProcess(
 	if err := fact.IsValid(nil); err != nil {
 		return ctx, nil, e.Wrap(err)
 	}
-
 	if err := currencystate.CheckExistsState(currency.StateKeyAccount(fact.Sender()), getStateFunc); err != nil {
 		return nil, base.NewBaseOperationProcessReasonError("sender not found, %q: %w", fact.Sender(), err), nil
 	}
@@ -117,7 +116,7 @@ func (opp *CreateCredentialServiceProcessor) Process(
 		return nil, nil, e.Errorf("expected CreateCredentialServiceFact, not %T", op.Fact())
 	}
 
-	var templates []uint64
+	var templates []string
 	var holders []types2.Holder
 
 	policy := types2.NewPolicy(templates, holders, 0)

@@ -25,7 +25,7 @@ func (h *Holder) unpack(enc encoder.Encoder, ht hint.Hint, as string, ccount uin
 	return nil
 }
 
-func (po *Policy) unpack(enc encoder.Encoder, ht hint.Hint, ts []uint64, bhd []byte, ccount uint64) error {
+func (po *Policy) unpack(enc encoder.Encoder, ht hint.Hint, ts []string, bhd []byte, ccount uint64) error {
 	e := util.StringError("failed to unpack of Policy")
 
 	po.BaseHinter = hint.NewBaseHinter(ht)

@@ -1,6 +1,7 @@
 package credential
 
 import (
+	"github.com/ProtoconNet/mitum-credential/types"
 	currencytypes "github.com/ProtoconNet/mitum-currency/v3/types"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
@@ -11,9 +12,9 @@ import (
 type RevokeCredentialsItemJSONMarshaler struct {
 	hint.BaseHinter
 	Contract          base.Address             `json:"contract"`
-	CredentialService currencytypes.ContractID `json:"credential_service_id"`
+	CredentialService types.ServiceID          `json:"credential_service_id"`
 	Holder            base.Address             `json:"holder"`
-	TemplateID        uint64                   `json:"template_id"`
+	TemplateID        string                   `json:"template_id"`
 	ID                string                   `json:"id"`
 	Currency          currencytypes.CurrencyID `json:"currency"`
 }
@@ -35,7 +36,7 @@ type RevokeCredentialsItemJSONUnMarshaler struct {
 	Contract          string    `json:"contract"`
 	CredentialService string    `json:"credential_service_id"`
 	Holder            string    `json:"holder"`
-	TemplateID        uint64    `json:"template_id"`
+	TemplateID        string    `json:"template_id"`
 	ID                string    `json:"id"`
 	Currency          string    `json:"currency"`
 }

@@ -159,7 +159,7 @@ func CredentialsByServiceAndTemplate(
 	reverse bool,
 	offset string,
 	limit int64,
-	callback func(nft types.Credential, st mitumbase.State) (bool, error),
+	callback func(types.Credential, mitumbase.State) (bool, error),
 ) error {
 	filter, err := buildCredentialFilterByService(contract, serviceID, templateID, offset, reverse)
 	if err != nil {
