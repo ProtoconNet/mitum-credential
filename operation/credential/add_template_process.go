@@ -75,7 +75,7 @@ func (opp *AddTemplateProcessor) PreProcess(
 	}
 
 	if err := currencystate.CheckExistsState(currency.StateKeyAccount(fact.Sender()), getStateFunc); err != nil {
-		return nil, base.NewBaseOperationProcessReasonError("sender state not found, %q: %w", fact.Sender(), err), nil
+		return nil, base.NewBaseOperationProcessReasonError("sender state not found, %q; %w", fact.Sender(), err), nil
 	}
 
 	if err := currencystate.CheckExistsState(currency.StateKeyCurrencyDesign(fact.Currency()), getStateFunc); err != nil {
@@ -83,25 +83,25 @@ func (opp *AddTemplateProcessor) PreProcess(
 	}
 
 	if err := currencystate.CheckNotExistsState(extensioncurrency.StateKeyContractAccount(fact.Sender()), getStateFunc); err != nil {
-		return nil, base.NewBaseOperationProcessReasonError("sender is contract account and contract account cannot add template, %q: %w", fact.Sender(), err), nil
+		return nil, base.NewBaseOperationProcessReasonError("sender is contract account and contract account cannot add template, %q; %w", fact.Sender(), err), nil
 	}
 
 	if err := currencystate.CheckExistsState(currency.StateKeyAccount(fact.Creator()), getStateFunc); err != nil {
-		return nil, base.NewBaseOperationProcessReasonError("creator not found, %q: %w", fact.Creator(), err), nil
+		return nil, base.NewBaseOperationProcessReasonError("creator not found, %q; %w", fact.Creator(), err), nil
 	}
 
 	if err := currencystate.CheckNotExistsState(extensioncurrency.StateKeyContractAccount(fact.Creator()), getStateFunc); err != nil {
-		return nil, base.NewBaseOperationProcessReasonError("creator is contract account and contract account cannot be creator, %q: %w", fact.Creator(), err), nil
+		return nil, base.NewBaseOperationProcessReasonError("creator is contract account and contract account cannot be creator, %q; %w", fact.Creator(), err), nil
 	}
 
 	st, err := currencystate.ExistsState(extensioncurrency.StateKeyContractAccount(fact.Contract()), "key of contract account", getStateFunc)
 	if err != nil {
-		return nil, base.NewBaseOperationProcessReasonError("target contract account state not found, %q: %w", fact.Contract(), err), nil
+		return nil, base.NewBaseOperationProcessReasonError("target contract account state not found, %q; %w", fact.Contract(), err), nil
 	}
 
 	ca, err := extensioncurrency.StateContractAccountValue(st)
 	if err != nil {
-		return nil, base.NewBaseOperationProcessReasonError("contract account value not found from state, %q: %w", fact.Contract(), err), nil
+		return nil, base.NewBaseOperationProcessReasonError("contract account value not found from state, %q; %w", fact.Contract(), err), nil
 	}
 
 	if !ca.Owner().Equal(fact.sender) {
@@ -110,12 +110,12 @@ func (opp *AddTemplateProcessor) PreProcess(
 
 	st, err = currencystate.ExistsState(state.StateKeyDesign(fact.Contract(), fact.CredentialServiceID()), "key of design", getStateFunc)
 	if err != nil {
-		return nil, base.NewBaseOperationProcessReasonError("credential service state not found, %s-%s: %w", fact.Contract(), fact.CredentialServiceID(), err), nil
+		return nil, base.NewBaseOperationProcessReasonError("credential service state not found, %s-%s; %w", fact.Contract(), fact.CredentialServiceID(), err), nil
 	}
 
 	design, err := state.StateDesignValue(st)
 	if err != nil {
-		return nil, base.NewBaseOperationProcessReasonError("credential service value not found from state, %s-%s: %w", fact.Contract(), fact.CredentialServiceID(), err), nil
+		return nil, base.NewBaseOperationProcessReasonError("credential service value not found from state, %s-%s; %w", fact.Contract(), fact.CredentialServiceID(), err), nil
 	}
 
 	for _, templateID := range design.Policy().TemplateIDs() {
@@ -125,7 +125,7 @@ func (opp *AddTemplateProcessor) PreProcess(
 	}
 
 	if err := currencystate.CheckFactSignsByState(fact.Sender(), op.Signs(), getStateFunc); err != nil {
-		return ctx, base.NewBaseOperationProcessReasonError("invalid signing: %w", err), nil
+		return ctx, base.NewBaseOperationProcessReasonError("invalid signing; %w", err), nil
 	}
 
 	return ctx, nil, nil
@@ -145,12 +145,12 @@ func (opp *AddTemplateProcessor) Process(
 	})
 	policy := types.NewPolicy(templateIDs, design.Policy().Holders(), design.Policy().CredentialCount())
 	if err := policy.IsValid(nil); err != nil {
-		return nil, base.NewBaseOperationProcessReasonError("invalid credential policy, %s-%s: %w", fact.Contract(), fact.CredentialServiceID(), err), nil
+		return nil, base.NewBaseOperationProcessReasonError("invalid credential policy, %s-%s; %w", fact.Contract(), fact.CredentialServiceID(), err), nil
 	}
 
 	design = types.NewDesign(fact.CredentialServiceID(), policy)
 	if err := design.IsValid(nil); err != nil {
-		return nil, base.NewBaseOperationProcessReasonError("invalid credential design, %s-%s: %w", fact.Contract(), fact.CredentialServiceID(), err), nil
+		return nil, base.NewBaseOperationProcessReasonError("invalid credential design, %s-%s; %w", fact.Contract(), fact.CredentialServiceID(), err), nil
 	}
 
 	template := types.NewTemplate(
@@ -159,7 +159,7 @@ func (opp *AddTemplateProcessor) Process(
 		fact.Description(), fact.Creator(),
 	)
 	if err := template.IsValid(nil); err != nil {
-		return nil, base.NewBaseOperationProcessReasonError("invalid template, %q: %w", fact.TemplateID(), err), nil
+		return nil, base.NewBaseOperationProcessReasonError("invalid template, %q; %w", fact.TemplateID(), err), nil
 	}
 
 	sts := make([]base.StateMergeValue, 3)
@@ -178,19 +178,19 @@ func (opp *AddTemplateProcessor) Process(
 
 	fee, err := currencyPolicy.Feeer().Fee(common.ZeroBig)
 	if err != nil {
-		return nil, base.NewBaseOperationProcessReasonError("failed to check fee of currency, %q: %w", fact.Currency(), err), nil
+		return nil, base.NewBaseOperationProcessReasonError("failed to check fee of currency, %q; %w", fact.Currency(), err), nil
 	}
 
 	st, err = currencystate.ExistsState(currency.StateKeyBalance(fact.Sender(), fact.Currency()), "key of sender balance", getStateFunc)
 	if err != nil {
-		return nil, base.NewBaseOperationProcessReasonError("sender balance not found, %q: %w", fact.Sender(), err), nil
+		return nil, base.NewBaseOperationProcessReasonError("sender balance not found, %q; %w", fact.Sender(), err), nil
 	}
 
 	sb := state.NewStateMergeValue(st.Key(), st.Value())
 
 	switch b, err := currency.StateBalanceValue(st); {
 	case err != nil:
-		return nil, base.NewBaseOperationProcessReasonError("failed to get balance value, %q: %w", currency.StateKeyBalance(fact.Sender(), fact.Currency()), err), nil
+		return nil, base.NewBaseOperationProcessReasonError("failed to get balance value, %q; %w", currency.StateKeyBalance(fact.Sender(), fact.Currency()), err), nil
 	case b.Big().Compare(fee) < 0:
 		return nil, base.NewBaseOperationProcessReasonError("not enough balance of sender, %q", fact.Sender()), nil
 	}

@@ -214,15 +214,15 @@ func (opp *RevokeCredentialsProcessor) PreProcess(
 	}
 
 	if err := currencystate.CheckExistsState(statecurrency.StateKeyAccount(fact.Sender()), getStateFunc); err != nil {
-		return ctx, base.NewBaseOperationProcessReasonError("sender not found, %q: %w", fact.Sender(), err), nil
+		return ctx, base.NewBaseOperationProcessReasonError("sender not found, %q; %w", fact.Sender(), err), nil
 	}
 
 	if err := currencystate.CheckNotExistsState(extension.StateKeyContractAccount(fact.Sender()), getStateFunc); err != nil {
-		return ctx, base.NewBaseOperationProcessReasonError("contract account cannot revoke credential status, %q: %w", fact.Sender(), err), nil
+		return ctx, base.NewBaseOperationProcessReasonError("contract account cannot revoke credential status, %q; %w", fact.Sender(), err), nil
 	}
 
 	if err := currencystate.CheckFactSignsByState(fact.sender, op.Signs(), getStateFunc); err != nil {
-		return ctx, base.NewBaseOperationProcessReasonError("invalid signing: %w", err), nil
+		return ctx, base.NewBaseOperationProcessReasonError("invalid signing; %w", err), nil
 	}
 
 	for _, it := range fact.Items() {
@@ -239,7 +239,7 @@ func (opp *RevokeCredentialsProcessor) PreProcess(
 		ipc.holders = nil
 
 		if err := ipc.PreProcess(ctx, op, getStateFunc); err != nil {
-			return nil, base.NewBaseOperationProcessReasonError("failed to preprocess RevokeCredentialsItem: %w", err), nil
+			return nil, base.NewBaseOperationProcessReasonError("failed to preprocess RevokeCredentialsItem; %w", err), nil
 		}
 
 		ipc.Close()
@@ -308,7 +308,7 @@ func (opp *RevokeCredentialsProcessor) Process( // nolint:dupl
 
 		st, err := ipc.Process(ctx, op, getStateFunc)
 		if err != nil {
-			return nil, base.NewBaseOperationProcessReasonError("failed to process RevokeCredentialsItem: %w", err), nil
+			return nil, base.NewBaseOperationProcessReasonError("failed to process RevokeCredentialsItem; %w", err), nil
 		}
 
 		sts = append(sts, st...)
@@ -320,7 +320,7 @@ func (opp *RevokeCredentialsProcessor) Process( // nolint:dupl
 		policy := types.NewPolicy(de.Policy().TemplateIDs(), *holders[k], *counters[k])
 		design := types.NewDesign(de.ServiceID(), policy)
 		if err := design.IsValid(nil); err != nil {
-			return nil, base.NewBaseOperationProcessReasonError("invalid design, %s: %w", k, err), nil
+			return nil, base.NewBaseOperationProcessReasonError("invalid design, %s; %w", k, err), nil
 		}
 
 		sts = append(sts,
@@ -339,11 +339,11 @@ func (opp *RevokeCredentialsProcessor) Process( // nolint:dupl
 
 	required, err := calculateCredentialItemsFee(getStateFunc, items)
 	if err != nil {
-		return nil, base.NewBaseOperationProcessReasonError("failed to calculate fee: %w", err), nil
+		return nil, base.NewBaseOperationProcessReasonError("failed to calculate fee; %w", err), nil
 	}
 	sb, err := currency.CheckEnoughBalance(fact.sender, required, getStateFunc)
 	if err != nil {
-		return nil, base.NewBaseOperationProcessReasonError("failed to check enough balance: %w", err), nil
+		return nil, base.NewBaseOperationProcessReasonError("failed to check enough balance; %w", err), nil
 	}
 
 	for i := range sb {
