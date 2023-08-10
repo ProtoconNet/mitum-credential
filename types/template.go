@@ -78,10 +78,6 @@ func (t Template) IsValid([]byte) error {
 		return util.ErrInvalid.Errorf("empty subject key")
 	}
 
-	if len(t.description) == 0 {
-		return util.ErrInvalid.Errorf("empty description")
-	}
-
 	service, err := t.serviceDate.Parse()
 	if err != nil {
 		return err
