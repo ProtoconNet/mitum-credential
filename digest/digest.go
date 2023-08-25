@@ -11,6 +11,7 @@ import (
 	"github.com/ProtoconNet/mitum2/isaac"
 	isaacblock "github.com/ProtoconNet/mitum2/isaac/block"
 	"github.com/ProtoconNet/mitum2/util"
+	mitumutil "github.com/ProtoconNet/mitum2/util"
 	jsonenc "github.com/ProtoconNet/mitum2/util/encoder/json"
 	"github.com/ProtoconNet/mitum2/util/fixedtree"
 	"github.com/ProtoconNet/mitum2/util/logging"
@@ -103,7 +104,14 @@ func (di *Digester) Digest(blocks []base.BlockMap) {
 func (di *Digester) digest(ctx context.Context, blk base.BlockMap) error {
 	di.Lock()
 	defer di.Unlock()
-	reader, err := isaacblock.NewLocalFSReaderFromHeight(di.localfsRoot, blk.Manifest().Height(), di.database.DatabaseEncoders().Find(jsonenc.JSONEncoderHint))
+
+	enc, found := di.database.DatabaseEncoders().Find(jsonenc.JSONEncoderHint)
+	if !found { // NOTE get latest bson encoder
+		return mitumutil.ErrNotFound.Errorf("unknown encoder hint, %q", jsonenc.JSONEncoderHint)
+	}
+
+	reader, err := isaacblock.NewLocalFSReaderFromHeight(di.localfsRoot, blk.Manifest().Height(), enc)
+
 	if err != nil {
 		return err
 	}
@@ -136,14 +144,7 @@ func (di *Digester) digest(ctx context.Context, blk base.BlockMap) error {
 	return di.database.SetLastBlock(blk.Manifest().Height())
 }
 
-func DigestBlock(
-	ctx context.Context,
-	st *currencydigest.Database,
-	blk base.BlockMap,
-	ops []base.Operation,
-	opstree fixedtree.Tree,
-	sts []base.State,
-) error {
+func DigestBlock(ctx context.Context, st *currencydigest.Database, blk base.BlockMap, ops []base.Operation, opstree fixedtree.Tree, sts []base.State) error {
 	bs, err := NewBlockSession(st, blk, ops, opstree, sts)
 	if err != nil {
 		return err
