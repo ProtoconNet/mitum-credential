@@ -1,6 +1,8 @@
 package credential
 
 import (
+	"unicode/utf8"
+
 	"github.com/ProtoconNet/mitum-credential/types"
 	"github.com/ProtoconNet/mitum-currency/v3/common"
 	currencytypes "github.com/ProtoconNet/mitum-currency/v3/types"
@@ -8,7 +10,6 @@ import (
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
 	"github.com/ProtoconNet/mitum2/util/valuehash"
-	"unicode/utf8"
 )
 
 var (
@@ -18,27 +19,27 @@ var (
 
 type AddTemplateFact struct {
 	base.BaseFact
-	sender              base.Address
-	contract            base.Address
-	credentialServiceID types.ServiceID
-	templateID          string
-	templateName        string
-	serviceDate         types.Date
-	expirationDate      types.Date
-	templateShare       types.Bool
-	multiAudit          types.Bool
-	displayName         string
-	subjectKey          string
-	description         string
-	creator             base.Address
-	currency            currencytypes.CurrencyID
+	sender         base.Address
+	contract       base.Address
+	serviceID      types.ServiceID
+	templateID     string
+	templateName   string
+	serviceDate    types.Date
+	expirationDate types.Date
+	templateShare  types.Bool
+	multiAudit     types.Bool
+	displayName    string
+	subjectKey     string
+	description    string
+	creator        base.Address
+	currency       currencytypes.CurrencyID
 }
 
 func NewAddTemplateFact(
 	token []byte,
 	sender base.Address,
 	contract base.Address,
-	credentialServiceID types.ServiceID,
+	serviceID types.ServiceID,
 	templateID string,
 	templateName string,
 	serviceDate types.Date,
@@ -53,21 +54,21 @@ func NewAddTemplateFact(
 ) AddTemplateFact {
 	bf := base.NewBaseFact(AddTemplateFactHint, token)
 	fact := AddTemplateFact{
-		BaseFact:            bf,
-		sender:              sender,
-		contract:            contract,
-		credentialServiceID: credentialServiceID,
-		templateID:          templateID,
-		templateName:        templateName,
-		serviceDate:         serviceDate,
-		expirationDate:      expirationDate,
-		templateShare:       templateShare,
-		multiAudit:          multiAudit,
-		displayName:         displayName,
-		subjectKey:          subjectKey,
-		description:         description,
-		creator:             creator,
-		currency:            currency,
+		BaseFact:       bf,
+		sender:         sender,
+		contract:       contract,
+		serviceID:      serviceID,
+		templateID:     templateID,
+		templateName:   templateName,
+		serviceDate:    serviceDate,
+		expirationDate: expirationDate,
+		templateShare:  templateShare,
+		multiAudit:     multiAudit,
+		displayName:    displayName,
+		subjectKey:     subjectKey,
+		description:    description,
+		creator:        creator,
+		currency:       currency,
 	}
 	fact.SetHash(fact.GenerateHash())
 
@@ -87,7 +88,7 @@ func (fact AddTemplateFact) Bytes() []byte {
 		fact.Token(),
 		fact.sender.Bytes(),
 		fact.contract.Bytes(),
-		fact.credentialServiceID.Bytes(),
+		fact.serviceID.Bytes(),
 		[]byte(fact.templateID),
 		[]byte(fact.templateName),
 		fact.serviceDate.Bytes(),
@@ -111,7 +112,7 @@ func (fact AddTemplateFact) IsValid(b []byte) error {
 		fact.BaseHinter,
 		fact.sender,
 		fact.contract,
-		fact.credentialServiceID,
+		fact.serviceID,
 		fact.serviceDate,
 		fact.expirationDate,
 		fact.currency,
@@ -176,8 +177,8 @@ func (fact AddTemplateFact) Contract() base.Address {
 	return fact.contract
 }
 
-func (fact AddTemplateFact) CredentialServiceID() types.ServiceID {
-	return fact.credentialServiceID
+func (fact AddTemplateFact) ServiceID() types.ServiceID {
+	return fact.serviceID
 }
 
 func (fact AddTemplateFact) TemplateID() string {

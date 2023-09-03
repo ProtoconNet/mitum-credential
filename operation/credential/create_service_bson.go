@@ -1,4 +1,4 @@
-package credential
+package credential // nolint: dupl
 
 import (
 	"github.com/ProtoconNet/mitum-currency/v3/common"
@@ -10,26 +10,30 @@ import (
 	"github.com/ProtoconNet/mitum2/util/valuehash"
 )
 
-func (fact AssignCredentialsFact) MarshalBSON() ([]byte, error) {
+func (fact CreateServiceFact) MarshalBSON() ([]byte, error) {
 	return bsonenc.Marshal(
 		bson.M{
-			"_hint":  fact.Hint().String(),
-			"sender": fact.sender,
-			"items":  fact.items,
-			"hash":   fact.BaseFact.Hash().String(),
-			"token":  fact.BaseFact.Token(),
+			"_hint":      fact.Hint().String(),
+			"sender":     fact.sender,
+			"contract":   fact.contract,
+			"service_id": fact.serviceID,
+			"currency":   fact.currency,
+			"hash":       fact.BaseFact.Hash().String(),
+			"token":      fact.BaseFact.Token(),
 		},
 	)
 }
 
-type AssignCredentialsFactBSONUnmarshaler struct {
-	Hint   string   `bson:"_hint"`
-	Sender string   `bson:"sender"`
-	Items  bson.Raw `bson:"items"`
+type CreateServiceFactBSONUnmarshaler struct {
+	Hint      string `bson:"_hint"`
+	Sender    string `bson:"sender"`
+	Contract  string `bson:"contract"`
+	ServiceID string `bson:"service_id"`
+	Currency  string `bson:"currency"`
 }
 
-func (fact *AssignCredentialsFact) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
-	e := util.StringError("failed to decode bson of AssignCredentialsFact")
+func (fact *CreateServiceFact) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
+	e := util.StringError("failed to decode bson of CreateServiceFact")
 
 	var ubf common.BaseFactBSONUnmarshaler
 
@@ -40,7 +44,7 @@ func (fact *AssignCredentialsFact) DecodeBSON(b []byte, enc *bsonenc.Encoder) er
 	fact.BaseFact.SetHash(valuehash.NewBytesFromString(ubf.Hash))
 	fact.BaseFact.SetToken(ubf.Token)
 
-	var uf AssignCredentialsFactBSONUnmarshaler
+	var uf CreateServiceFactBSONUnmarshaler
 	if err := bson.Unmarshal(b, &uf); err != nil {
 		return e.Wrap(err)
 	}
@@ -51,10 +55,10 @@ func (fact *AssignCredentialsFact) DecodeBSON(b []byte, enc *bsonenc.Encoder) er
 	}
 	fact.BaseHinter = hint.NewBaseHinter(ht)
 
-	return fact.unpack(enc, uf.Sender, uf.Items)
+	return fact.unpack(enc, uf.Sender, uf.Contract, uf.ServiceID, uf.Currency)
 }
 
-func (op AssignCredentials) MarshalBSON() ([]byte, error) {
+func (op CreateService) MarshalBSON() ([]byte, error) {
 	return bsonenc.Marshal(
 		bson.M{
 			"_hint": op.Hint().String(),
@@ -64,8 +68,8 @@ func (op AssignCredentials) MarshalBSON() ([]byte, error) {
 		})
 }
 
-func (op *AssignCredentials) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
-	e := util.StringError("failed to decode bson of AssignCredentials")
+func (op *CreateService) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
+	e := util.StringError("failed to decode bson of CreateService")
 
 	var ubo common.BaseOperation
 	if err := ubo.DecodeBSON(b, enc); err != nil {

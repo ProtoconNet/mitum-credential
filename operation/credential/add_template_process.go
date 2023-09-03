@@ -108,19 +108,19 @@ func (opp *AddTemplateProcessor) PreProcess(
 		return nil, base.NewBaseOperationProcessReasonError("sender is not target contract account owner, %q", fact.sender), nil
 	}
 
-	st, err = currencystate.ExistsState(state.StateKeyDesign(fact.Contract(), fact.CredentialServiceID()), "key of design", getStateFunc)
+	st, err = currencystate.ExistsState(state.StateKeyDesign(fact.Contract(), fact.ServiceID()), "key of design", getStateFunc)
 	if err != nil {
-		return nil, base.NewBaseOperationProcessReasonError("credential service state not found, %s-%s; %w", fact.Contract(), fact.CredentialServiceID(), err), nil
+		return nil, base.NewBaseOperationProcessReasonError("credential service state not found, %s-%s; %w", fact.Contract(), fact.ServiceID(), err), nil
 	}
 
 	design, err := state.StateDesignValue(st)
 	if err != nil {
-		return nil, base.NewBaseOperationProcessReasonError("credential service value not found from state, %s-%s; %w", fact.Contract(), fact.CredentialServiceID(), err), nil
+		return nil, base.NewBaseOperationProcessReasonError("credential service value not found from state, %s-%s; %w", fact.Contract(), fact.ServiceID(), err), nil
 	}
 
 	for _, templateID := range design.Policy().TemplateIDs() {
 		if templateID == fact.TemplateID() {
-			return nil, base.NewBaseOperationProcessReasonError("already registered template, %q, %s-%s", fact.TemplateID(), fact.Contract(), fact.CredentialServiceID()), nil
+			return nil, base.NewBaseOperationProcessReasonError("already registered template, %q, %s-%s", fact.TemplateID(), fact.Contract(), fact.ServiceID()), nil
 		}
 	}
 
@@ -136,7 +136,7 @@ func (opp *AddTemplateProcessor) Process(
 	[]base.StateMergeValue, base.OperationProcessReasonError, error,
 ) {
 	fact, _ := op.Fact().(AddTemplateFact)
-	st, _ := currencystate.ExistsState(state.StateKeyDesign(fact.Contract(), fact.CredentialServiceID()), "key of design", getStateFunc)
+	st, _ := currencystate.ExistsState(state.StateKeyDesign(fact.Contract(), fact.ServiceID()), "key of design", getStateFunc)
 	design, _ := state.StateDesignValue(st)
 	templateIDs := design.Policy().TemplateIDs()
 	templateIDs = append(templateIDs, fact.templateID)
@@ -145,12 +145,12 @@ func (opp *AddTemplateProcessor) Process(
 	})
 	policy := types.NewPolicy(templateIDs, design.Policy().Holders(), design.Policy().CredentialCount())
 	if err := policy.IsValid(nil); err != nil {
-		return nil, base.NewBaseOperationProcessReasonError("invalid credential policy, %s-%s; %w", fact.Contract(), fact.CredentialServiceID(), err), nil
+		return nil, base.NewBaseOperationProcessReasonError("invalid credential policy, %s-%s; %w", fact.Contract(), fact.ServiceID(), err), nil
 	}
 
-	design = types.NewDesign(fact.CredentialServiceID(), policy)
+	design = types.NewDesign(fact.ServiceID(), policy)
 	if err := design.IsValid(nil); err != nil {
-		return nil, base.NewBaseOperationProcessReasonError("invalid credential design, %s-%s; %w", fact.Contract(), fact.CredentialServiceID(), err), nil
+		return nil, base.NewBaseOperationProcessReasonError("invalid credential design, %s-%s; %w", fact.Contract(), fact.ServiceID(), err), nil
 	}
 
 	template := types.NewTemplate(
@@ -165,12 +165,12 @@ func (opp *AddTemplateProcessor) Process(
 	sts := make([]base.StateMergeValue, 3)
 
 	sts[0] = state.NewStateMergeValue(
-		state.StateKeyDesign(fact.Contract(), fact.CredentialServiceID()),
+		state.StateKeyDesign(fact.Contract(), fact.ServiceID()),
 		state.NewDesignStateValue(design),
 	)
 
 	sts[1] = state.NewStateMergeValue(
-		state.StateKeyTemplate(fact.Contract(), fact.CredentialServiceID(), fact.TemplateID()),
+		state.StateKeyTemplate(fact.Contract(), fact.ServiceID(), fact.TemplateID()),
 		state.NewTemplateStateValue(template),
 	)
 

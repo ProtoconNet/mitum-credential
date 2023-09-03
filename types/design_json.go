@@ -2,6 +2,7 @@ package types
 
 import (
 	"encoding/json"
+
 	"github.com/ProtoconNet/mitum2/util"
 	jsonenc "github.com/ProtoconNet/mitum2/util/encoder/json"
 	"github.com/ProtoconNet/mitum2/util/hint"
@@ -9,22 +10,22 @@ import (
 
 type DesignJSONMarshaler struct {
 	hint.BaseHinter
-	Credential ServiceID `json:"credential_service_id"`
-	Policy     Policy    `json:"policy"`
+	ServiceID ServiceID `json:"service_id"`
+	Policy    Policy    `json:"policy"`
 }
 
 func (de Design) MarshalJSON() ([]byte, error) {
 	return util.MarshalJSON(DesignJSONMarshaler{
 		BaseHinter: de.BaseHinter,
-		Credential: de.credentialServiceID,
+		ServiceID:  de.serviceID,
 		Policy:     de.policy,
 	})
 }
 
 type DesignJSONUnmarshaler struct {
-	Hint       hint.Hint       `json:"_hint"`
-	Credential string          `json:"credential_service_id"`
-	Policy     json.RawMessage `json:"policy"`
+	Hint      hint.Hint       `json:"_hint"`
+	ServiceID string          `json:"service_id"`
+	Policy    json.RawMessage `json:"policy"`
 }
 
 func (de *Design) DecodeJSON(b []byte, enc *jsonenc.Encoder) error {
@@ -35,5 +36,5 @@ func (de *Design) DecodeJSON(b []byte, enc *jsonenc.Encoder) error {
 		return e.Wrap(err)
 	}
 
-	return de.unpack(enc, ud.Hint, ud.Credential, ud.Policy)
+	return de.unpack(enc, ud.Hint, ud.ServiceID, ud.Policy)
 }

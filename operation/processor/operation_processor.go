@@ -1,7 +1,7 @@
 package processor
 
 import (
-	credential2 "github.com/ProtoconNet/mitum-credential/operation/credential"
+	"github.com/ProtoconNet/mitum-credential/operation/credential"
 	"github.com/ProtoconNet/mitum-currency/v3/operation/currency"
 	extensioncurrency "github.com/ProtoconNet/mitum-currency/v3/operation/extension"
 	currencyprocessor "github.com/ProtoconNet/mitum-currency/v3/operation/processor"
@@ -68,31 +68,31 @@ func CheckDuplication(opr *currencyprocessor.OperationProcessor, op base.Operati
 		}
 		did = fact.Sender().String()
 		didtype = DuplicationTypeSender
-	case credential2.CreateCredentialService:
-		fact, ok := t.Fact().(credential2.CreateCredentialServiceFact)
+	case credential.CreateService:
+		fact, ok := t.Fact().(credential.CreateServiceFact)
 		if !ok {
-			return errors.Errorf("expected CreateCredentialServiceFact, not %T", t.Fact())
+			return errors.Errorf("expected CreateServiceFact, not %T", t.Fact())
 		}
 		did = fact.Sender().String()
 		didtype = DuplicationTypeSender
-	case credential2.AddTemplate:
-		fact, ok := t.Fact().(credential2.AddTemplateFact)
+	case credential.AddTemplate:
+		fact, ok := t.Fact().(credential.AddTemplateFact)
 		if !ok {
 			return errors.Errorf("expected AddTemplateFact, not %T", t.Fact())
 		}
 		did = fact.Sender().String()
 		didtype = DuplicationTypeSender
-	case credential2.AssignCredentials:
-		fact, ok := t.Fact().(credential2.AssignCredentialsFact)
+	case credential.Assign:
+		fact, ok := t.Fact().(credential.AssignFact)
 		if !ok {
-			return errors.Errorf("expected AssignCredentialsFact, not %T", t.Fact())
+			return errors.Errorf("expected AssignFact, not %T", t.Fact())
 		}
 		did = fact.Sender().String()
 		didtype = DuplicationTypeSender
-	case credential2.RevokeCredentials:
-		fact, ok := t.Fact().(credential2.AssignCredentialsFact)
+	case credential.Revoke:
+		fact, ok := t.Fact().(credential.AssignFact)
 		if !ok {
-			return errors.Errorf("expected RevokeCredentials, not %T", t.Fact())
+			return errors.Errorf("expected Revoke, not %T", t.Fact())
 		}
 		did = fact.Sender().String()
 		didtype = DuplicationTypeSender
@@ -156,10 +156,10 @@ func GetNewProcessor(opr *currencyprocessor.OperationProcessor, op base.Operatio
 		currency.CurrencyRegister,
 		currency.CurrencyPolicyUpdater,
 		currency.SuffrageInflation,
-		credential2.CreateCredentialService,
-		credential2.AddTemplate,
-		credential2.AssignCredentials,
-		credential2.RevokeCredentials:
+		credential.CreateService,
+		credential.AddTemplate,
+		credential.Assign,
+		credential.Revoke:
 		return nil, false, errors.Errorf("%T needs SetProcessor", t)
 	default:
 		return nil, false, nil

@@ -1,33 +1,34 @@
 package credential
 
 import (
+	"unicode/utf8"
+
 	"github.com/ProtoconNet/mitum-credential/types"
 	currencytypes "github.com/ProtoconNet/mitum-currency/v3/types"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
-	"unicode/utf8"
 )
 
-var AssignCredentialsItemHint = hint.MustNewHint("mitum-credential-assign-credentials-item-v0.0.1")
+var AssignItemHint = hint.MustNewHint("mitum-credential-assign-item-v0.0.1")
 
-type AssignCredentialsItem struct {
+type AssignItem struct {
 	hint.BaseHinter
-	contract            base.Address
-	credentialServiceID types.ServiceID
-	holder              base.Address
-	templateID          string
-	id                  string
-	value               string
-	validfrom           uint64
-	validuntil          uint64
-	did                 string
-	currency            currencytypes.CurrencyID
+	contract   base.Address
+	serviceID  types.ServiceID
+	holder     base.Address
+	templateID string
+	id         string
+	value      string
+	validfrom  uint64
+	validuntil uint64
+	did        string
+	currency   currencytypes.CurrencyID
 }
 
-func NewAssignCredentialsItem(
+func NewAssignItem(
 	contract base.Address,
-	credentialServiceID types.ServiceID,
+	serviceID types.ServiceID,
 	holder base.Address,
 	templateID string,
 	id string,
@@ -36,26 +37,26 @@ func NewAssignCredentialsItem(
 	validuntil uint64,
 	did string,
 	currency currencytypes.CurrencyID,
-) AssignCredentialsItem {
-	return AssignCredentialsItem{
-		BaseHinter:          hint.NewBaseHinter(AssignCredentialsItemHint),
-		contract:            contract,
-		credentialServiceID: credentialServiceID,
-		holder:              holder,
-		templateID:          templateID,
-		id:                  id,
-		value:               value,
-		validfrom:           validfrom,
-		validuntil:          validuntil,
-		did:                 did,
-		currency:            currency,
+) AssignItem {
+	return AssignItem{
+		BaseHinter: hint.NewBaseHinter(AssignItemHint),
+		contract:   contract,
+		serviceID:  serviceID,
+		holder:     holder,
+		templateID: templateID,
+		id:         id,
+		value:      value,
+		validfrom:  validfrom,
+		validuntil: validuntil,
+		did:        did,
+		currency:   currency,
 	}
 }
 
-func (it AssignCredentialsItem) Bytes() []byte {
+func (it AssignItem) Bytes() []byte {
 	return util.ConcatBytesSlice(
 		it.contract.Bytes(),
-		it.credentialServiceID.Bytes(),
+		it.serviceID.Bytes(),
 		it.holder.Bytes(),
 		[]byte(it.templateID),
 		[]byte(it.id),
@@ -67,10 +68,10 @@ func (it AssignCredentialsItem) Bytes() []byte {
 	)
 }
 
-func (it AssignCredentialsItem) IsValid([]byte) error {
+func (it AssignItem) IsValid([]byte) error {
 	if err := util.CheckIsValiders(nil, false,
 		it.BaseHinter,
-		it.credentialServiceID,
+		it.serviceID,
 		it.contract,
 		it.holder,
 		it.currency,
@@ -105,47 +106,47 @@ func (it AssignCredentialsItem) IsValid([]byte) error {
 	return nil
 }
 
-func (it AssignCredentialsItem) CredentialServiceID() types.ServiceID {
-	return it.credentialServiceID
+func (it AssignItem) ServiceID() types.ServiceID {
+	return it.serviceID
 }
 
-func (it AssignCredentialsItem) Contract() base.Address {
+func (it AssignItem) Contract() base.Address {
 	return it.contract
 }
 
-func (it AssignCredentialsItem) Holder() base.Address {
+func (it AssignItem) Holder() base.Address {
 	return it.holder
 }
 
-func (it AssignCredentialsItem) TemplateID() string {
+func (it AssignItem) TemplateID() string {
 	return it.templateID
 }
 
-func (it AssignCredentialsItem) ValidFrom() uint64 {
+func (it AssignItem) ValidFrom() uint64 {
 	return it.validfrom
 }
 
-func (it AssignCredentialsItem) ValidUntil() uint64 {
+func (it AssignItem) ValidUntil() uint64 {
 	return it.validuntil
 }
 
-func (it AssignCredentialsItem) ID() string {
+func (it AssignItem) ID() string {
 	return it.id
 }
 
-func (it AssignCredentialsItem) Value() string {
+func (it AssignItem) Value() string {
 	return it.value
 }
 
-func (it AssignCredentialsItem) DID() string {
+func (it AssignItem) DID() string {
 	return it.did
 }
 
-func (it AssignCredentialsItem) Currency() currencytypes.CurrencyID {
+func (it AssignItem) Currency() currencytypes.CurrencyID {
 	return it.currency
 }
 
-func (it AssignCredentialsItem) Addresses() []base.Address {
+func (it AssignItem) Addresses() []base.Address {
 	ad := make([]base.Address, 2)
 
 	ad[0] = it.contract

@@ -10,7 +10,7 @@ import (
 	"github.com/ProtoconNet/mitum2/util/valuehash"
 )
 
-func (fact RevokeCredentialsFact) MarshalBSON() ([]byte, error) {
+func (fact AssignFact) MarshalBSON() ([]byte, error) {
 	return bsonenc.Marshal(
 		bson.M{
 			"_hint":  fact.Hint().String(),
@@ -22,14 +22,14 @@ func (fact RevokeCredentialsFact) MarshalBSON() ([]byte, error) {
 	)
 }
 
-type RevokeCredentialsFactBSONUnmarshaler struct {
+type AssignFactBSONUnmarshaler struct {
 	Hint   string   `bson:"_hint"`
 	Sender string   `bson:"sender"`
 	Items  bson.Raw `bson:"items"`
 }
 
-func (fact *RevokeCredentialsFact) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
-	e := util.StringError("failed to decode bson of RevokeCredentialsFact")
+func (fact *AssignFact) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
+	e := util.StringError("failed to decode bson of AssignFact")
 
 	var ubf common.BaseFactBSONUnmarshaler
 
@@ -40,7 +40,7 @@ func (fact *RevokeCredentialsFact) DecodeBSON(b []byte, enc *bsonenc.Encoder) er
 	fact.BaseFact.SetHash(valuehash.NewBytesFromString(ubf.Hash))
 	fact.BaseFact.SetToken(ubf.Token)
 
-	var uf RevokeCredentialsFactBSONUnmarshaler
+	var uf AssignFactBSONUnmarshaler
 	if err := bson.Unmarshal(b, &uf); err != nil {
 		return e.Wrap(err)
 	}
@@ -54,7 +54,7 @@ func (fact *RevokeCredentialsFact) DecodeBSON(b []byte, enc *bsonenc.Encoder) er
 	return fact.unpack(enc, uf.Sender, uf.Items)
 }
 
-func (op RevokeCredentials) MarshalBSON() ([]byte, error) {
+func (op Assign) MarshalBSON() ([]byte, error) {
 	return bsonenc.Marshal(
 		bson.M{
 			"_hint": op.Hint().String(),
@@ -64,8 +64,8 @@ func (op RevokeCredentials) MarshalBSON() ([]byte, error) {
 		})
 }
 
-func (op *RevokeCredentials) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
-	e := util.StringError("failed to decode bson of RevokeCredentials")
+func (op *Assign) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
+	e := util.StringError("failed to decode bson of Assign")
 
 	var ubo common.BaseOperation
 	if err := ubo.DecodeBSON(b, enc); err != nil {

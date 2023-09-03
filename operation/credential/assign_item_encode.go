@@ -9,17 +9,17 @@ import (
 	"github.com/ProtoconNet/mitum2/util/hint"
 )
 
-func (it *AssignCredentialsItem) unpack(enc encoder.Encoder, ht hint.Hint,
-	ca, csid, hd, tid string,
+func (it *AssignItem) unpack(enc encoder.Encoder, ht hint.Hint,
+	ca, sid, hd, tid string,
 	id string,
 	v string,
 	vf, vu uint64,
 	did, cid string,
 ) error {
-	e := util.StringError("failed to unmarshal AssignCredentialsItem")
+	e := util.StringError("failed to unmarshal AssignItem")
 
 	it.BaseHinter = hint.NewBaseHinter(ht)
-	it.credentialServiceID = types.ServiceID(csid)
+	it.serviceID = types.ServiceID(sid)
 	it.id = id
 	it.value = v
 	it.did = did

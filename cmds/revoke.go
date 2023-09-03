@@ -12,16 +12,16 @@ import (
 type RevokeCredentialsCommand struct {
 	BaseCommand
 	currencycmds.OperationFlags
-	Sender            currencycmds.AddressFlag    `arg:"" name:"sender" help:"sender address" required:"true"`
-	Contract          currencycmds.AddressFlag    `arg:"" name:"contract" help:"contract account address" required:"true"`
-	CredentialService ServiceIDFlag               `arg:"" name:"credential-service-id" help:"credential id" required:"true"`
-	Holder            currencycmds.AddressFlag    `arg:"" name:"holder" help:"credential holder" required:"true"`
-	TemplateID        string                      `arg:"" name:"template-id" help:"template id" required:"true"`
-	ID                string                      `arg:"" name:"id" help:"credential id" required:"true"`
-	Currency          currencycmds.CurrencyIDFlag `arg:"" name:"currency-id" help:"currency id" required:"true"`
-	sender            base.Address
-	contract          base.Address
-	holder            base.Address
+	Sender     currencycmds.AddressFlag    `arg:"" name:"sender" help:"sender address" required:"true"`
+	Contract   currencycmds.AddressFlag    `arg:"" name:"contract" help:"contract account address" required:"true"`
+	ServiceID  ServiceIDFlag               `arg:"" name:"service-id" help:"credential id" required:"true"`
+	Holder     currencycmds.AddressFlag    `arg:"" name:"holder" help:"credential holder" required:"true"`
+	TemplateID string                      `arg:"" name:"template-id" help:"template id" required:"true"`
+	ID         string                      `arg:"" name:"id" help:"credential id" required:"true"`
+	Currency   currencycmds.CurrencyIDFlag `arg:"" name:"currency-id" help:"currency id" required:"true"`
+	sender     base.Address
+	contract   base.Address
+	holder     base.Address
 }
 
 func (cmd *RevokeCredentialsCommand) Run(pctx context.Context) error {
@@ -73,11 +73,11 @@ func (cmd *RevokeCredentialsCommand) parseFlags() error {
 }
 
 func (cmd *RevokeCredentialsCommand) createOperation() (base.Operation, error) { // nolint:dupl
-	var items []credential.RevokeCredentialsItem
+	var items []credential.RevokeItem
 
-	item := credential.NewRevokeCredentialsItem(
+	item := credential.NewRevokeItem(
 		cmd.contract,
-		cmd.CredentialService.ID,
+		cmd.ServiceID.ID,
 		cmd.holder,
 		cmd.TemplateID,
 		cmd.ID,
@@ -88,15 +88,15 @@ func (cmd *RevokeCredentialsCommand) createOperation() (base.Operation, error) {
 	}
 	items = append(items, item)
 
-	fact := credential.NewRevokeCredentialsFact([]byte(cmd.Token), cmd.sender, items)
+	fact := credential.NewRevokeFact([]byte(cmd.Token), cmd.sender, items)
 
-	op, err := credential.NewRevokeCredentials(fact)
+	op, err := credential.NewRevoke(fact)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to revoke credentials operation")
+		return nil, errors.Wrap(err, "failed to revoke operation")
 	}
 	err = op.HashSign(cmd.Privatekey, cmd.NetworkID.NetworkID())
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to revoke credentials operation")
+		return nil, errors.Wrap(err, "failed to revoke operation")
 	}
 
 	return op, nil

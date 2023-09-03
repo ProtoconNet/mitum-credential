@@ -11,20 +11,20 @@ import (
 
 type AddTemplateFactJSONMarshaler struct {
 	base.BaseFactJSONMarshaler
-	Owner               base.Address             `json:"sender"`
-	Contract            base.Address             `json:"contract"`
-	CredentialServiceID types.ServiceID          `json:"credential_service_id"`
-	TemplateID          string                   `json:"template_id"`
-	TemplateName        string                   `json:"template_name"`
-	ServiceDate         types.Date               `json:"service_date"`
-	ExpirationDate      types.Date               `json:"expiration_date"`
-	TemplateShare       types.Bool               `json:"template_share"`
-	MultiAudit          types.Bool               `json:"multi_audit"`
-	DisplayName         string                   `json:"display_name"`
-	SubjectKey          string                   `json:"subject_key"`
-	Description         string                   `json:"description"`
-	Creator             base.Address             `json:"creator"`
-	Currency            currencytypes.CurrencyID `json:"currency"`
+	Owner          base.Address             `json:"sender"`
+	Contract       base.Address             `json:"contract"`
+	ServiceID      types.ServiceID          `json:"service_id"`
+	TemplateID     string                   `json:"template_id"`
+	TemplateName   string                   `json:"template_name"`
+	ServiceDate    types.Date               `json:"service_date"`
+	ExpirationDate types.Date               `json:"expiration_date"`
+	TemplateShare  types.Bool               `json:"template_share"`
+	MultiAudit     types.Bool               `json:"multi_audit"`
+	DisplayName    string                   `json:"display_name"`
+	SubjectKey     string                   `json:"subject_key"`
+	Description    string                   `json:"description"`
+	Creator        base.Address             `json:"creator"`
+	Currency       currencytypes.CurrencyID `json:"currency"`
 }
 
 func (fact AddTemplateFact) MarshalJSON() ([]byte, error) {
@@ -32,7 +32,7 @@ func (fact AddTemplateFact) MarshalJSON() ([]byte, error) {
 		BaseFactJSONMarshaler: fact.BaseFact.JSONMarshaler(),
 		Owner:                 fact.sender,
 		Contract:              fact.contract,
-		CredentialServiceID:   fact.credentialServiceID,
+		ServiceID:             fact.serviceID,
 		TemplateID:            fact.templateID,
 		TemplateName:          fact.templateName,
 		ServiceDate:           fact.serviceDate,
@@ -49,20 +49,20 @@ func (fact AddTemplateFact) MarshalJSON() ([]byte, error) {
 
 type AddTemplateFactJSONUnMarshaler struct {
 	base.BaseFactJSONUnmarshaler
-	Owner               string `json:"sender"`
-	Contract            string `json:"contract"`
-	CredentialServiceID string `json:"credential_service_id"`
-	TemplateID          string `json:"template_id"`
-	TemplateName        string `json:"template_name"`
-	ServiceDate         string `json:"service_date"`
-	ExpirationDate      string `json:"expiration_date"`
-	TemplateShare       bool   `json:"template_share"`
-	MultiAudit          bool   `json:"multi_audit"`
-	DisplayName         string `json:"display_name"`
-	SubjectKey          string `json:"subject_key"`
-	Description         string `json:"description"`
-	Creator             string `json:"creator"`
-	Currency            string `json:"currency"`
+	Owner          string `json:"sender"`
+	Contract       string `json:"contract"`
+	ServiceID      string `json:"service_id"`
+	TemplateID     string `json:"template_id"`
+	TemplateName   string `json:"template_name"`
+	ServiceDate    string `json:"service_date"`
+	ExpirationDate string `json:"expiration_date"`
+	TemplateShare  bool   `json:"template_share"`
+	MultiAudit     bool   `json:"multi_audit"`
+	DisplayName    string `json:"display_name"`
+	SubjectKey     string `json:"subject_key"`
+	Description    string `json:"description"`
+	Creator        string `json:"creator"`
+	Currency       string `json:"currency"`
 }
 
 func (fact *AddTemplateFact) DecodeJSON(b []byte, enc *jsonenc.Encoder) error {
@@ -78,7 +78,7 @@ func (fact *AddTemplateFact) DecodeJSON(b []byte, enc *jsonenc.Encoder) error {
 	return fact.unpack(enc,
 		uf.Owner,
 		uf.Contract,
-		uf.CredentialServiceID,
+		uf.ServiceID,
 		uf.TemplateID,
 		uf.TemplateName,
 		uf.ServiceDate,

@@ -7,11 +7,11 @@ import (
 	"github.com/pkg/errors"
 )
 
-func (de *Design) unpack(enc encoder.Encoder, ht hint.Hint, credit string, bpo []byte) error {
+func (de *Design) unpack(enc encoder.Encoder, ht hint.Hint, id string, bpo []byte) error {
 	e := util.StringError("failed to unpack of Design")
 
 	de.BaseHinter = hint.NewBaseHinter(ht)
-	de.credentialServiceID = ServiceID(credit)
+	de.serviceID = ServiceID(id)
 
 	if hinter, err := enc.Decode(bpo); err != nil {
 		return e.Wrap(err)

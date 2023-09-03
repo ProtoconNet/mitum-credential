@@ -78,7 +78,7 @@ func (po Policy) Bytes() []byte {
 }
 
 func (po Policy) IsValid([]byte) error {
-	e := util.StringError("invalid credential policy")
+	e := util.StringError("invalid policy")
 
 	if err := util.CheckIsValiders(nil, false, po.BaseHinter); err != nil {
 		return e.Wrap(err)

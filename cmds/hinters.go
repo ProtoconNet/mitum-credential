@@ -21,12 +21,12 @@ var AddedHinters = []encoder.DecodeDetail{
 	{Hint: types.PolicyHint, Instance: types.Policy{}},
 	{Hint: types.TemplateHint, Instance: types.Template{}},
 
-	{Hint: credential.CreateCredentialServiceHint, Instance: credential.CreateCredentialService{}},
+	{Hint: credential.CreateServiceHint, Instance: credential.CreateService{}},
 	{Hint: credential.AddTemplateHint, Instance: credential.AddTemplate{}},
-	{Hint: credential.AssignCredentialsItemHint, Instance: credential.AssignCredentialsItem{}},
-	{Hint: credential.AssignCredentialsHint, Instance: credential.AssignCredentials{}},
-	{Hint: credential.RevokeCredentialsItemHint, Instance: credential.RevokeCredentialsItem{}},
-	{Hint: credential.RevokeCredentialsHint, Instance: credential.RevokeCredentials{}},
+	{Hint: credential.AssignItemHint, Instance: credential.AssignItem{}},
+	{Hint: credential.AssignHint, Instance: credential.Assign{}},
+	{Hint: credential.RevokeItemHint, Instance: credential.RevokeItem{}},
+	{Hint: credential.RevokeHint, Instance: credential.Revoke{}},
 
 	{Hint: state.CredentialStateValueHint, Instance: state.CredentialStateValue{}},
 	{Hint: state.DesignStateValueHint, Instance: state.DesignStateValue{}},
@@ -36,9 +36,9 @@ var AddedHinters = []encoder.DecodeDetail{
 
 var AddedSupportedHinters = []encoder.DecodeDetail{
 	{Hint: credential.AddTemplateFactHint, Instance: credential.AddTemplateFact{}},
-	{Hint: credential.AssignCredentialsFactHint, Instance: credential.AssignCredentialsFact{}},
-	{Hint: credential.CreateCredentialServiceFactHint, Instance: credential.CreateCredentialServiceFact{}},
-	{Hint: credential.RevokeCredentialsFactHint, Instance: credential.RevokeCredentialsFact{}},
+	{Hint: credential.AssignFactHint, Instance: credential.AssignFact{}},
+	{Hint: credential.CreateServiceFactHint, Instance: credential.CreateServiceFact{}},
+	{Hint: credential.RevokeFactHint, Instance: credential.RevokeFact{}},
 }
 
 func init() {

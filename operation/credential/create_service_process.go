@@ -2,10 +2,11 @@ package credential
 
 import (
 	"context"
-	"github.com/ProtoconNet/mitum-credential/state"
-	types2 "github.com/ProtoconNet/mitum-credential/types"
-	"github.com/ProtoconNet/mitum-currency/v3/common"
 	"sync"
+
+	"github.com/ProtoconNet/mitum-credential/state"
+	crendentialtypes "github.com/ProtoconNet/mitum-credential/types"
+	"github.com/ProtoconNet/mitum-currency/v3/common"
 
 	currencystate "github.com/ProtoconNet/mitum-currency/v3/state"
 	"github.com/ProtoconNet/mitum-currency/v3/state/currency"
@@ -16,35 +17,35 @@ import (
 	"github.com/pkg/errors"
 )
 
-var createCredentialServiceProcessorPool = sync.Pool{
+var createServiceProcessorPool = sync.Pool{
 	New: func() interface{} {
-		return new(CreateCredentialServiceProcessor)
+		return new(CreateServiceProcessor)
 	},
 }
 
-func (CreateCredentialService) Process(
+func (CreateService) Process(
 	_ context.Context, _ base.GetStateFunc,
 ) ([]base.StateMergeValue, base.OperationProcessReasonError, error) {
 	return nil, nil, nil
 }
 
-type CreateCredentialServiceProcessor struct {
+type CreateServiceProcessor struct {
 	*base.BaseOperationProcessor
 }
 
-func NewCreateCredentialServiceProcessor() types.GetNewProcessor {
+func NewCreateServiceProcessor() types.GetNewProcessor {
 	return func(
 		height base.Height,
 		getStateFunc base.GetStateFunc,
 		newPreProcessConstraintFunc base.NewOperationProcessorProcessFunc,
 		newProcessConstraintFunc base.NewOperationProcessorProcessFunc,
 	) (base.OperationProcessor, error) {
-		e := util.StringError("failed to create new CreateCredentialServiceProcessor")
+		e := util.StringError("failed to create new CreateServiceProcessor")
 
-		nopp := createCredentialServiceProcessorPool.Get()
-		opp, ok := nopp.(*CreateCredentialServiceProcessor)
+		nopp := createServiceProcessorPool.Get()
+		opp, ok := nopp.(*CreateServiceProcessor)
 		if !ok {
-			return nil, errors.Errorf("expected CreateCredentialServiceProcessor, not %T", nopp)
+			return nil, errors.Errorf("expected CreateServiceProcessor, not %T", nopp)
 		}
 
 		b, err := base.NewBaseOperationProcessor(
@@ -59,14 +60,14 @@ func NewCreateCredentialServiceProcessor() types.GetNewProcessor {
 	}
 }
 
-func (opp *CreateCredentialServiceProcessor) PreProcess(
+func (opp *CreateServiceProcessor) PreProcess(
 	ctx context.Context, op base.Operation, getStateFunc base.GetStateFunc,
 ) (context.Context, base.OperationProcessReasonError, error) {
-	e := util.StringError("failed to preprocess CreateCredentialService")
+	e := util.StringError("failed to preprocess CreateService")
 
-	fact, ok := op.Fact().(CreateCredentialServiceFact)
+	fact, ok := op.Fact().(CreateServiceFact)
 	if !ok {
-		return ctx, nil, e.Errorf("not CreateCredentialServiceFact, %T", op.Fact())
+		return ctx, nil, e.Errorf("not CreateServiceFact, %T", op.Fact())
 	}
 
 	if err := fact.IsValid(nil); err != nil {
@@ -77,7 +78,7 @@ func (opp *CreateCredentialServiceProcessor) PreProcess(
 	}
 
 	if err := currencystate.CheckNotExistsState(extensioncurrency.StateKeyContractAccount(fact.Sender()), getStateFunc); err != nil {
-		return nil, base.NewBaseOperationProcessReasonError("contract account cannot create credential service, %q; %w", fact.Sender(), err), nil
+		return nil, base.NewBaseOperationProcessReasonError("contract account cannot create service, %q; %w", fact.Sender(), err), nil
 	}
 
 	st, err := currencystate.ExistsState(extensioncurrency.StateKeyContractAccount(fact.Contract()), "key of contract account", getStateFunc)
@@ -94,8 +95,8 @@ func (opp *CreateCredentialServiceProcessor) PreProcess(
 		return nil, base.NewBaseOperationProcessReasonError("not contract account owner, %q", fact.sender), nil
 	}
 
-	if err := currencystate.CheckNotExistsState(state.StateKeyDesign(fact.Contract(), fact.CredentialServiceID()), getStateFunc); err != nil {
-		return nil, base.NewBaseOperationProcessReasonError("credential service already exists, %s-%s; %w", fact.Contract(), fact.CredentialServiceID(), err), nil
+	if err := currencystate.CheckNotExistsState(state.StateKeyDesign(fact.Contract(), fact.ServiceID()), getStateFunc); err != nil {
+		return nil, base.NewBaseOperationProcessReasonError("credential service already exists, %s-%s; %w", fact.Contract(), fact.ServiceID(), err), nil
 	}
 
 	if err := currencystate.CheckFactSignsByState(fact.Sender(), op.Signs(), getStateFunc); err != nil {
@@ -105,34 +106,34 @@ func (opp *CreateCredentialServiceProcessor) PreProcess(
 	return ctx, nil, nil
 }
 
-func (opp *CreateCredentialServiceProcessor) Process(
+func (opp *CreateServiceProcessor) Process(
 	_ context.Context, op base.Operation, getStateFunc base.GetStateFunc) (
 	[]base.StateMergeValue, base.OperationProcessReasonError, error,
 ) {
-	e := util.StringError("failed to process CreateCredentialService")
+	e := util.StringError("failed to process CreateService")
 
-	fact, ok := op.Fact().(CreateCredentialServiceFact)
+	fact, ok := op.Fact().(CreateServiceFact)
 	if !ok {
-		return nil, nil, e.Errorf("expected CreateCredentialServiceFact, not %T", op.Fact())
+		return nil, nil, e.Errorf("expected CreateServiceFact, not %T", op.Fact())
 	}
 
 	var templates []string
-	var holders []types2.Holder
+	var holders []crendentialtypes.Holder
 
-	policy := types2.NewPolicy(templates, holders, 0)
+	policy := crendentialtypes.NewPolicy(templates, holders, 0)
 	if err := policy.IsValid(nil); err != nil {
-		return nil, base.NewBaseOperationProcessReasonError("invalid credential policy, %s-%s; %w", fact.Contract(), fact.CredentialServiceID(), err), nil
+		return nil, base.NewBaseOperationProcessReasonError("invalid credential policy, %s-%s; %w", fact.Contract(), fact.ServiceID(), err), nil
 	}
 
-	design := types2.NewDesign(fact.CredentialServiceID(), policy)
+	design := crendentialtypes.NewDesign(fact.ServiceID(), policy)
 	if err := design.IsValid(nil); err != nil {
-		return nil, base.NewBaseOperationProcessReasonError("invalid credential design, %s-%s; %w", fact.Contract(), fact.CredentialServiceID(), err), nil
+		return nil, base.NewBaseOperationProcessReasonError("invalid credential design, %s-%s; %w", fact.Contract(), fact.ServiceID(), err), nil
 	}
 
 	sts := make([]base.StateMergeValue, 2)
 
 	sts[0] = state.NewStateMergeValue(
-		state.StateKeyDesign(fact.Contract(), fact.CredentialServiceID()),
+		state.StateKeyDesign(fact.Contract(), fact.ServiceID()),
 		state.NewDesignStateValue(design),
 	)
 
@@ -168,8 +169,8 @@ func (opp *CreateCredentialServiceProcessor) Process(
 	return sts, nil, nil
 }
 
-func (opp *CreateCredentialServiceProcessor) Close() error {
-	createCredentialServiceProcessorPool.Put(opp)
+func (opp *CreateServiceProcessor) Close() error {
+	createServiceProcessorPool.Put(opp)
 
 	return nil
 }
