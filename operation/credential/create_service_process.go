@@ -95,6 +95,10 @@ func (opp *CreateServiceProcessor) PreProcess(
 		return nil, base.NewBaseOperationProcessReasonError("not contract account owner, %q", fact.sender), nil
 	}
 
+	if ca.IsActive() {
+		return nil, base.NewBaseOperationProcessReasonError("a design is already registered, %q", fact.Contract().String()), nil
+	}
+
 	if err := currencystate.CheckNotExistsState(state.StateKeyDesign(fact.Contract(), fact.ServiceID()), getStateFunc); err != nil {
 		return nil, base.NewBaseOperationProcessReasonError("credential service already exists, %s-%s; %w", fact.Contract(), fact.ServiceID(), err), nil
 	}
@@ -130,11 +134,27 @@ func (opp *CreateServiceProcessor) Process(
 		return nil, base.NewBaseOperationProcessReasonError("invalid credential design, %s-%s; %w", fact.Contract(), fact.ServiceID(), err), nil
 	}
 
-	sts := make([]base.StateMergeValue, 2)
+	sts := make([]base.StateMergeValue, 3)
 
 	sts[0] = state.NewStateMergeValue(
 		state.StateKeyDesign(fact.Contract(), fact.ServiceID()),
 		state.NewDesignStateValue(design),
+	)
+
+	st, err := currencystate.ExistsState(extensioncurrency.StateKeyContractAccount(fact.Contract()), "key of contract account", getStateFunc)
+	if err != nil {
+		return nil, base.NewBaseOperationProcessReasonError("target contract account not found, %q; %w", fact.Contract(), err), nil
+	}
+
+	ca, err := extensioncurrency.StateContractAccountValue(st)
+	if err != nil {
+		return nil, base.NewBaseOperationProcessReasonError("failed to get state value of contract account, %q; %w", fact.Contract(), err), nil
+	}
+	ca.SetIsActive(true)
+
+	sts[1] = currencystate.NewStateMergeValue(
+		extensioncurrency.StateKeyContractAccount(fact.Contract()),
+		extensioncurrency.NewContractAccountStateValue(ca),
 	)
 
 	currencyPolicy, err := currencystate.ExistsCurrencyPolicy(fact.Currency(), getStateFunc)
@@ -147,7 +167,7 @@ func (opp *CreateServiceProcessor) Process(
 		return nil, base.NewBaseOperationProcessReasonError("failed to check fee of currency, %q; %w", fact.Currency(), err), nil
 	}
 
-	st, err := currencystate.ExistsState(currency.StateKeyBalance(fact.Sender(), fact.Currency()), "key of sender balance", getStateFunc)
+	st, err = currencystate.ExistsState(currency.StateKeyBalance(fact.Sender(), fact.Currency()), "key of sender balance", getStateFunc)
 	if err != nil {
 		return nil, base.NewBaseOperationProcessReasonError("sender balance not found, %q; %w", fact.Sender(), err), nil
 	}
@@ -164,7 +184,7 @@ func (opp *CreateServiceProcessor) Process(
 	if !ok {
 		return nil, base.NewBaseOperationProcessReasonError("expected BalanceStateValue, not %T", sb.Value()), nil
 	}
-	sts[1] = state.NewStateMergeValue(sb.Key(), currency.NewBalanceStateValue(v.Amount.WithBig(v.Amount.Big().Sub(fee))))
+	sts[2] = state.NewStateMergeValue(sb.Key(), currency.NewBalanceStateValue(v.Amount.WithBig(v.Amount.Big().Sub(fee))))
 
 	return sts, nil, nil
 }
