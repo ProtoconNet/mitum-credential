@@ -16,33 +16,33 @@ import (
 	"github.com/pkg/errors"
 )
 
-var revokeCredentialsItemProcessorPool = sync.Pool{
+var revokeItemProcessorPool = sync.Pool{
 	New: func() interface{} {
-		return new(RevokeCredentialsItemProcessor)
+		return new(RevokeItemProcessor)
 	},
 }
 
-var revokeCredentialsProcessorPool = sync.Pool{
+var revokeProcessorPool = sync.Pool{
 	New: func() interface{} {
-		return new(RevokeCredentialsProcessor)
+		return new(RevokeProcessor)
 	},
 }
 
-func (RevokeCredentials) Process(
+func (Revoke) Process(
 	_ context.Context, _ base.GetStateFunc,
 ) ([]base.StateMergeValue, base.OperationProcessReasonError, error) {
 	return nil, nil, nil
 }
 
-type RevokeCredentialsItemProcessor struct {
+type RevokeItemProcessor struct {
 	h               util.Hash
 	sender          base.Address
-	item            RevokeCredentialsItem
+	item            RevokeItem
 	credentialCount *uint64
 	holders         *[]types.Holder
 }
 
-func (ipp *RevokeCredentialsItemProcessor) PreProcess(
+func (ipp *RevokeItemProcessor) PreProcess(
 	_ context.Context, _ base.Operation, getStateFunc base.GetStateFunc,
 ) error {
 	it := ipp.item
@@ -73,11 +73,11 @@ func (ipp *RevokeCredentialsItemProcessor) PreProcess(
 		return errors.Errorf("sender is not contract owner, %s", ipp.sender)
 	}
 
-	if err := currencystate.CheckExistsState(state.StateKeyDesign(it.Contract(), it.CredentialServiceID()), getStateFunc); err != nil {
+	if err := currencystate.CheckExistsState(state.StateKeyDesign(it.Contract(), it.ServiceID()), getStateFunc); err != nil {
 		return err
 	}
 
-	st, err = currencystate.ExistsState(state.StateKeyCredential(it.Contract(), it.CredentialServiceID(), it.TemplateID(), it.ID()), "key of credential", getStateFunc)
+	st, err = currencystate.ExistsState(state.StateKeyCredential(it.Contract(), it.ServiceID(), it.TemplateID(), it.ID()), "key of credential", getStateFunc)
 	if err != nil {
 		return err
 	}
@@ -88,7 +88,7 @@ func (ipp *RevokeCredentialsItemProcessor) PreProcess(
 	}
 
 	if c.Holder() == nil {
-		return errors.Errorf("already revoked credential, %s-%s-%s, %s", it.Contract(), it.CredentialServiceID(), it.ID(), c.Holder())
+		return errors.Errorf("already revoked credential, %s-%s-%s, %s", it.Contract(), it.ServiceID(), it.ID(), c.Holder())
 	}
 
 	if err := currencystate.CheckExistsState(statecurrency.StateKeyCurrencyDesign(it.Currency()), getStateFunc); err != nil {
@@ -98,12 +98,12 @@ func (ipp *RevokeCredentialsItemProcessor) PreProcess(
 	return nil
 }
 
-func (ipp *RevokeCredentialsItemProcessor) Process(
+func (ipp *RevokeItemProcessor) Process(
 	_ context.Context, _ base.Operation, getStateFunc base.GetStateFunc,
 ) ([]base.StateMergeValue, error) {
 	it := ipp.item
 
-	st, err := currencystate.ExistsState(state.StateKeyCredential(it.Contract(), it.CredentialServiceID(), it.TemplateID(), it.ID()), "key of credential", getStateFunc)
+	st, err := currencystate.ExistsState(state.StateKeyCredential(it.Contract(), it.ServiceID(), it.TemplateID(), it.ID()), "key of credential", getStateFunc)
 	if err != nil {
 		return nil, err
 	}
@@ -120,7 +120,7 @@ func (ipp *RevokeCredentialsItemProcessor) Process(
 
 	sts := []base.StateMergeValue{
 		state.NewStateMergeValue(
-			state.StateKeyCredential(it.Contract(), it.CredentialServiceID(), it.TemplateID(), it.ID()),
+			state.StateKeyCredential(it.Contract(), it.ServiceID(), it.TemplateID(), it.ID()),
 			state.NewCredentialStateValue(credential),
 		),
 	}
@@ -130,7 +130,7 @@ func (ipp *RevokeCredentialsItemProcessor) Process(
 	holders := *ipp.holders
 
 	if len(holders) == 0 {
-		return nil, errors.Errorf("empty holders, %s-%s", it.Contract(), it.CredentialServiceID())
+		return nil, errors.Errorf("empty holders, %s-%s", it.Contract(), it.ServiceID())
 	}
 
 	for i, h := range holders {
@@ -147,7 +147,7 @@ func (ipp *RevokeCredentialsItemProcessor) Process(
 		}
 
 		if i == len(holders)-1 {
-			return nil, errors.Errorf("holder not found in credential service holders, %s-%s, %s", it.Contract(), it.CredentialServiceID(), it.Holder())
+			return nil, errors.Errorf("holder not found in credential service holders, %s-%s, %s", it.Contract(), it.ServiceID(), it.Holder())
 		}
 	}
 
@@ -156,35 +156,35 @@ func (ipp *RevokeCredentialsItemProcessor) Process(
 	return sts, nil
 }
 
-func (ipp *RevokeCredentialsItemProcessor) Close() error {
+func (ipp *RevokeItemProcessor) Close() error {
 	ipp.h = nil
 	ipp.sender = nil
-	ipp.item = RevokeCredentialsItem{}
+	ipp.item = RevokeItem{}
 	ipp.credentialCount = nil
 	ipp.holders = nil
 
-	revokeCredentialsItemProcessorPool.Put(ipp)
+	revokeItemProcessorPool.Put(ipp)
 
 	return nil
 }
 
-type RevokeCredentialsProcessor struct {
+type RevokeProcessor struct {
 	*base.BaseOperationProcessor
 }
 
-func NewRevokeCredentialsProcessor() currencytypes.GetNewProcessor {
+func NewRevokeProcessor() currencytypes.GetNewProcessor {
 	return func(
 		height base.Height,
 		getStateFunc base.GetStateFunc,
 		newPreProcessConstraintFunc base.NewOperationProcessorProcessFunc,
 		newProcessConstraintFunc base.NewOperationProcessorProcessFunc,
 	) (base.OperationProcessor, error) {
-		e := util.StringError("failed to create new RevokeCredentialsProcessor")
+		e := util.StringError("failed to create new RevokeProcessor")
 
-		nopp := revokeCredentialsProcessorPool.Get()
-		opp, ok := nopp.(*RevokeCredentialsProcessor)
+		nopp := revokeProcessorPool.Get()
+		opp, ok := nopp.(*RevokeProcessor)
 		if !ok {
-			return nil, e.Errorf("expected RevokeCredentialsProcessor, not %T", nopp)
+			return nil, e.Errorf("expected RevokeProcessor, not %T", nopp)
 		}
 
 		b, err := base.NewBaseOperationProcessor(
@@ -199,14 +199,14 @@ func NewRevokeCredentialsProcessor() currencytypes.GetNewProcessor {
 	}
 }
 
-func (opp *RevokeCredentialsProcessor) PreProcess(
+func (opp *RevokeProcessor) PreProcess(
 	ctx context.Context, op base.Operation, getStateFunc base.GetStateFunc,
 ) (context.Context, base.OperationProcessReasonError, error) {
-	e := util.StringError("failed to preprocess RevokeCredentials")
+	e := util.StringError("failed to preprocess Revoke")
 
-	fact, ok := op.Fact().(RevokeCredentialsFact)
+	fact, ok := op.Fact().(RevokeFact)
 	if !ok {
-		return ctx, nil, e.Errorf("expected RevokeCredentialsFact, not %T", op.Fact())
+		return ctx, nil, e.Errorf("expected RevokeFact, not %T", op.Fact())
 	}
 
 	if err := fact.IsValid(nil); err != nil {
@@ -226,10 +226,10 @@ func (opp *RevokeCredentialsProcessor) PreProcess(
 	}
 
 	for _, it := range fact.Items() {
-		ip := revokeCredentialsItemProcessorPool.Get()
-		ipc, ok := ip.(*RevokeCredentialsItemProcessor)
+		ip := revokeItemProcessorPool.Get()
+		ipc, ok := ip.(*RevokeItemProcessor)
 		if !ok {
-			return nil, nil, e.Errorf("expected RevokeCredentialsItemProcessor, not %T", ip)
+			return nil, nil, e.Errorf("expected RevokeItemProcessor, not %T", ip)
 		}
 
 		ipc.h = op.Hash()
@@ -239,7 +239,7 @@ func (opp *RevokeCredentialsProcessor) PreProcess(
 		ipc.holders = nil
 
 		if err := ipc.PreProcess(ctx, op, getStateFunc); err != nil {
-			return nil, base.NewBaseOperationProcessReasonError("failed to preprocess RevokeCredentialsItem; %w", err), nil
+			return nil, base.NewBaseOperationProcessReasonError("failed to preprocess RevokeItem; %w", err), nil
 		}
 
 		ipc.Close()
@@ -248,15 +248,15 @@ func (opp *RevokeCredentialsProcessor) PreProcess(
 	return ctx, nil, nil
 }
 
-func (opp *RevokeCredentialsProcessor) Process( // nolint:dupl
+func (opp *RevokeProcessor) Process( // nolint:dupl
 	ctx context.Context, op base.Operation, getStateFunc base.GetStateFunc) (
 	[]base.StateMergeValue, base.OperationProcessReasonError, error,
 ) {
-	e := util.StringError("failed to process RevokeCredentials")
+	e := util.StringError("failed to process Revoke")
 
-	fact, ok := op.Fact().(RevokeCredentialsFact)
+	fact, ok := op.Fact().(RevokeFact)
 	if !ok {
-		return nil, nil, e.Errorf("expected RevokeCredentialsFact, not %T", op.Fact())
+		return nil, nil, e.Errorf("expected RevokeFact, not %T", op.Fact())
 	}
 
 	designs := map[string]types.Design{}
@@ -264,7 +264,7 @@ func (opp *RevokeCredentialsProcessor) Process( // nolint:dupl
 	holders := map[string]*[]types.Holder{}
 
 	for _, it := range fact.Items() {
-		k := state.StateKeyDesign(it.Contract(), it.CredentialServiceID())
+		k := state.StateKeyDesign(it.Contract(), it.ServiceID())
 
 		if _, found := counters[k]; found {
 			continue
@@ -272,12 +272,12 @@ func (opp *RevokeCredentialsProcessor) Process( // nolint:dupl
 
 		st, err := currencystate.ExistsState(k, "key of design", getStateFunc)
 		if err != nil {
-			return nil, base.NewBaseOperationProcessReasonError("credential service not found, %s-%s:%w", it.Contract(), it.CredentialServiceID(), err), nil
+			return nil, base.NewBaseOperationProcessReasonError("credential service not found, %s-%s:%w", it.Contract(), it.ServiceID(), err), nil
 		}
 
 		design, err := state.StateDesignValue(st)
 		if err != nil {
-			return nil, base.NewBaseOperationProcessReasonError("credential service value not found, %s-%s:%w", it.Contract(), it.CredentialServiceID(), err), nil
+			return nil, base.NewBaseOperationProcessReasonError("credential service value not found, %s-%s:%w", it.Contract(), it.ServiceID(), err), nil
 		}
 
 		designs[k] = design
@@ -292,13 +292,13 @@ func (opp *RevokeCredentialsProcessor) Process( // nolint:dupl
 	var sts []base.StateMergeValue // nolint:prealloc
 
 	for _, it := range fact.Items() {
-		ip := revokeCredentialsItemProcessorPool.Get()
-		ipc, ok := ip.(*RevokeCredentialsItemProcessor)
+		ip := revokeItemProcessorPool.Get()
+		ipc, ok := ip.(*RevokeItemProcessor)
 		if !ok {
-			return nil, nil, e.Errorf("expected RevokeCredentialsItemProcessor, not %T", ip)
+			return nil, nil, e.Errorf("expected RevokeItemProcessor, not %T", ip)
 		}
 
-		k := state.StateKeyDesign(it.Contract(), it.CredentialServiceID())
+		k := state.StateKeyDesign(it.Contract(), it.ServiceID())
 
 		ipc.h = op.Hash()
 		ipc.sender = fact.Sender()
@@ -308,7 +308,7 @@ func (opp *RevokeCredentialsProcessor) Process( // nolint:dupl
 
 		st, err := ipc.Process(ctx, op, getStateFunc)
 		if err != nil {
-			return nil, base.NewBaseOperationProcessReasonError("failed to process RevokeCredentialsItem; %w", err), nil
+			return nil, base.NewBaseOperationProcessReasonError("failed to process RevokeItem; %w", err), nil
 		}
 
 		sts = append(sts, st...)
@@ -358,8 +358,8 @@ func (opp *RevokeCredentialsProcessor) Process( // nolint:dupl
 	return sts, nil, nil
 }
 
-func (opp *RevokeCredentialsProcessor) Close() error {
-	revokeCredentialsProcessorPool.Put(opp)
+func (opp *RevokeProcessor) Close() error {
+	revokeProcessorPool.Put(opp)
 
 	return nil
 }

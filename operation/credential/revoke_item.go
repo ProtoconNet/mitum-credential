@@ -1,48 +1,49 @@
 package credential
 
 import (
+	"unicode/utf8"
+
 	"github.com/ProtoconNet/mitum-credential/types"
 	currencytypes "github.com/ProtoconNet/mitum-currency/v3/types"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
-	"unicode/utf8"
 )
 
-var RevokeCredentialsItemHint = hint.MustNewHint("mitum-credential-revoke-credentials-item-v0.0.1")
+var RevokeItemHint = hint.MustNewHint("mitum-credential-item-v0.0.1")
 
-type RevokeCredentialsItem struct {
+type RevokeItem struct {
 	hint.BaseHinter
-	contract            base.Address
-	credentialServiceID types.ServiceID
-	holder              base.Address
-	templateID          string
-	id                  string
-	currency            currencytypes.CurrencyID
+	contract   base.Address
+	serviceID  types.ServiceID
+	holder     base.Address
+	templateID string
+	id         string
+	currency   currencytypes.CurrencyID
 }
 
-func NewRevokeCredentialsItem(
+func NewRevokeItem(
 	contract base.Address,
-	credentialServiceID types.ServiceID,
+	serviceID types.ServiceID,
 	holder base.Address,
 	templateID, id string,
 	currency currencytypes.CurrencyID,
-) RevokeCredentialsItem {
-	return RevokeCredentialsItem{
-		BaseHinter:          hint.NewBaseHinter(RevokeCredentialsItemHint),
-		contract:            contract,
-		credentialServiceID: credentialServiceID,
-		holder:              holder,
-		templateID:          templateID,
-		id:                  id,
-		currency:            currency,
+) RevokeItem {
+	return RevokeItem{
+		BaseHinter: hint.NewBaseHinter(RevokeItemHint),
+		contract:   contract,
+		serviceID:  serviceID,
+		holder:     holder,
+		templateID: templateID,
+		id:         id,
+		currency:   currency,
 	}
 }
 
-func (it RevokeCredentialsItem) Bytes() []byte {
+func (it RevokeItem) Bytes() []byte {
 	return util.ConcatBytesSlice(
 		it.contract.Bytes(),
-		it.credentialServiceID.Bytes(),
+		it.serviceID.Bytes(),
 		it.holder.Bytes(),
 		[]byte(it.templateID),
 		[]byte(it.id),
@@ -50,10 +51,10 @@ func (it RevokeCredentialsItem) Bytes() []byte {
 	)
 }
 
-func (it RevokeCredentialsItem) IsValid([]byte) error {
+func (it RevokeItem) IsValid([]byte) error {
 	if err := util.CheckIsValiders(nil, false,
 		it.BaseHinter,
-		it.credentialServiceID,
+		it.serviceID,
 		it.contract,
 		it.holder,
 		it.currency,
@@ -76,31 +77,31 @@ func (it RevokeCredentialsItem) IsValid([]byte) error {
 	return nil
 }
 
-func (it RevokeCredentialsItem) CredentialServiceID() types.ServiceID {
-	return it.credentialServiceID
+func (it RevokeItem) ServiceID() types.ServiceID {
+	return it.serviceID
 }
 
-func (it RevokeCredentialsItem) Contract() base.Address {
+func (it RevokeItem) Contract() base.Address {
 	return it.contract
 }
 
-func (it RevokeCredentialsItem) Holder() base.Address {
+func (it RevokeItem) Holder() base.Address {
 	return it.holder
 }
 
-func (it RevokeCredentialsItem) TemplateID() string {
+func (it RevokeItem) TemplateID() string {
 	return it.templateID
 }
 
-func (it RevokeCredentialsItem) ID() string {
+func (it RevokeItem) ID() string {
 	return it.id
 }
 
-func (it RevokeCredentialsItem) Currency() currencytypes.CurrencyID {
+func (it RevokeItem) Currency() currencytypes.CurrencyID {
 	return it.currency
 }
 
-func (it RevokeCredentialsItem) Addresses() []base.Address {
+func (it RevokeItem) Addresses() []base.Address {
 	ad := make([]base.Address, 2)
 
 	ad[0] = it.contract

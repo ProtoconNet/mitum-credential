@@ -17,39 +17,39 @@ import (
 	"github.com/pkg/errors"
 )
 
-var assignCredentialsItemProcessorPool = sync.Pool{
+var assignItemProcessorPool = sync.Pool{
 	New: func() interface{} {
-		return new(AssignCredentialsItemProcessor)
+		return new(AssignItemProcessor)
 	},
 }
 
-var assignCredentialsProcessorPool = sync.Pool{
+var assignProcessorPool = sync.Pool{
 	New: func() interface{} {
-		return new(AssignCredentialsProcessor)
+		return new(AssignProcessor)
 	},
 }
 
-func (AssignCredentials) Process(
+func (Assign) Process(
 	_ context.Context, _ base.GetStateFunc,
 ) ([]base.StateMergeValue, base.OperationProcessReasonError, error) {
 	return nil, nil, nil
 }
 
-type AssignCredentialsItemProcessor struct {
+type AssignItemProcessor struct {
 	h               util.Hash
 	sender          base.Address
-	item            AssignCredentialsItem
+	item            AssignItem
 	credentialCount *uint64
 	holders         *[]types.Holder
 }
 
-func (ipp *AssignCredentialsItemProcessor) PreProcess(
+func (ipp *AssignItemProcessor) PreProcess(
 	_ context.Context, _ base.Operation, getStateFunc base.GetStateFunc,
 ) error {
 	it := ipp.item
 
 	if err := it.IsValid(nil); err != nil {
-		return errors.Wrap(err, " invalid AssignCredentialItem")
+		return errors.Wrap(err, " invalid AssignItem")
 	}
 
 	if err := currencystate.CheckExistsState(statecurrency.StateKeyCurrencyDesign(it.Currency()), getStateFunc); err != nil {
@@ -78,23 +78,23 @@ func (ipp *AssignCredentialsItemProcessor) PreProcess(
 		return errors.Errorf("sender is not target contract owner, %s", ipp.sender)
 	}
 
-	if st, err := currencystate.ExistsState(state.StateKeyDesign(it.Contract(), it.CredentialServiceID()), "key of design", getStateFunc); err != nil {
-		return errors.Wrapf(err, "failed to get design state of credential service %s", it.CredentialServiceID())
+	if st, err := currencystate.ExistsState(state.StateKeyDesign(it.Contract(), it.ServiceID()), "key of design", getStateFunc); err != nil {
+		return errors.Wrapf(err, "failed to get design state of credential service %s", it.ServiceID())
 	} else if _, err = state.StateDesignValue(st); err != nil {
-		return errors.Wrapf(err, "failed to get design value of credential service %s from state", it.CredentialServiceID())
+		return errors.Wrapf(err, "failed to get design value of credential service %s from state", it.ServiceID())
 	}
 
 	return nil
 }
 
-func (ipp *AssignCredentialsItemProcessor) Process(
+func (ipp *AssignItemProcessor) Process(
 	_ context.Context, _ base.Operation, getStateFunc base.GetStateFunc,
 ) ([]base.StateMergeValue, error) {
 	it := ipp.item
 
 	if st, _ := currencystate.ExistsState(
 		state.StateKeyCredential(it.Contract(),
-			it.CredentialServiceID(),
+			it.ServiceID(),
 			it.TemplateID(),
 			it.ID()), "key of credential",
 		getStateFunc,
@@ -117,12 +117,12 @@ func (ipp *AssignCredentialsItemProcessor) Process(
 	}
 
 	sts[0] = state.NewStateMergeValue(
-		state.StateKeyCredential(it.Contract(), it.CredentialServiceID(), it.TemplateID(), it.ID()),
+		state.StateKeyCredential(it.Contract(), it.ServiceID(), it.TemplateID(), it.ID()),
 		state.NewCredentialStateValue(credential),
 	)
 
 	sts[1] = state.NewStateMergeValue(
-		state.StateKeyHolderDID(it.Contract(), it.CredentialServiceID(), it.Holder()),
+		state.StateKeyHolderDID(it.Contract(), it.ServiceID(), it.Holder()),
 		state.NewHolderDIDStateValue(it.DID()),
 	)
 
@@ -144,35 +144,35 @@ func (ipp *AssignCredentialsItemProcessor) Process(
 	return sts, nil
 }
 
-func (ipp *AssignCredentialsItemProcessor) Close() error {
+func (ipp *AssignItemProcessor) Close() error {
 	ipp.h = nil
 	ipp.sender = nil
-	ipp.item = AssignCredentialsItem{}
+	ipp.item = AssignItem{}
 	ipp.credentialCount = nil
 	ipp.holders = nil
 
-	assignCredentialsItemProcessorPool.Put(ipp)
+	assignItemProcessorPool.Put(ipp)
 
 	return nil
 }
 
-type AssignCredentialsProcessor struct {
+type AssignProcessor struct {
 	*base.BaseOperationProcessor
 }
 
-func NewAssignCredentialsProcessor() currencytypes.GetNewProcessor {
+func NewAssignProcessor() currencytypes.GetNewProcessor {
 	return func(
 		height base.Height,
 		getStateFunc base.GetStateFunc,
 		newPreProcessConstraintFunc base.NewOperationProcessorProcessFunc,
 		newProcessConstraintFunc base.NewOperationProcessorProcessFunc,
 	) (base.OperationProcessor, error) {
-		e := util.StringError("failed to create new AssignCredentialsProcessor")
+		e := util.StringError("failed to create new AssignProcessor")
 
-		nopp := assignCredentialsProcessorPool.Get()
-		opp, ok := nopp.(*AssignCredentialsProcessor)
+		nopp := assignProcessorPool.Get()
+		opp, ok := nopp.(*AssignProcessor)
 		if !ok {
-			return nil, e.Errorf("expected AssignCredentialsProcessor, not %T", nopp)
+			return nil, e.Errorf("expected AssignProcessor, not %T", nopp)
 		}
 
 		b, err := base.NewBaseOperationProcessor(
@@ -187,14 +187,14 @@ func NewAssignCredentialsProcessor() currencytypes.GetNewProcessor {
 	}
 }
 
-func (opp *AssignCredentialsProcessor) PreProcess(
+func (opp *AssignProcessor) PreProcess(
 	ctx context.Context, op base.Operation, getStateFunc base.GetStateFunc,
 ) (context.Context, base.OperationProcessReasonError, error) {
-	e := util.StringError("failed to preprocess AssignCredentials")
+	e := util.StringError("failed to preprocess Assign")
 
-	fact, ok := op.Fact().(AssignCredentialsFact)
+	fact, ok := op.Fact().(AssignFact)
 	if !ok {
-		return ctx, nil, e.Errorf("expected AssignCredentialsFact, not %T", op.Fact())
+		return ctx, nil, e.Errorf("expected AssignFact, not %T", op.Fact())
 	}
 
 	if err := fact.IsValid(nil); err != nil {
@@ -221,10 +221,10 @@ func (opp *AssignCredentialsProcessor) PreProcess(
 	}
 
 	for _, it := range fact.Items() {
-		ip := assignCredentialsItemProcessorPool.Get()
-		ipc, ok := ip.(*AssignCredentialsItemProcessor)
+		ip := assignItemProcessorPool.Get()
+		ipc, ok := ip.(*AssignItemProcessor)
 		if !ok {
-			return nil, nil, e.Errorf("expected AssignCredentialsItemProcessor, not %T", ip)
+			return nil, nil, e.Errorf("expected AssignItemProcessor, not %T", ip)
 		}
 
 		ipc.h = op.Hash()
@@ -235,7 +235,7 @@ func (opp *AssignCredentialsProcessor) PreProcess(
 
 		if err := ipc.PreProcess(ctx, op, getStateFunc); err != nil {
 			return nil, base.NewBaseOperationProcessReasonError(
-				"failed to preprocess AssignCredentialsItem; %w",
+				"failed to preprocess AssignItem; %w",
 				err,
 			), nil
 		}
@@ -246,19 +246,19 @@ func (opp *AssignCredentialsProcessor) PreProcess(
 	return ctx, nil, nil
 }
 
-func (opp *AssignCredentialsProcessor) Process( // nolint:dupl
+func (opp *AssignProcessor) Process( // nolint:dupl
 	ctx context.Context, op base.Operation, getStateFunc base.GetStateFunc) (
 	[]base.StateMergeValue, base.OperationProcessReasonError, error,
 ) {
-	e := util.StringError("failed to process AssignCredentials")
+	e := util.StringError("failed to process Assign")
 
-	fact, _ := op.Fact().(AssignCredentialsFact)
+	fact, _ := op.Fact().(AssignFact)
 	designs := map[string]types.Design{}
 	counters := map[string]*uint64{}
 	holders := map[string]*[]types.Holder{}
 
 	for _, it := range fact.Items() {
-		k := state.StateKeyDesign(it.Contract(), it.CredentialServiceID())
+		k := state.StateKeyDesign(it.Contract(), it.ServiceID())
 
 		if _, found := counters[k]; found {
 			continue
@@ -278,10 +278,10 @@ func (opp *AssignCredentialsProcessor) Process( // nolint:dupl
 	var sts []base.StateMergeValue // nolint:prealloc
 
 	for _, it := range fact.Items() {
-		ip := assignCredentialsItemProcessorPool.Get()
-		ipc, _ := ip.(*AssignCredentialsItemProcessor)
+		ip := assignItemProcessorPool.Get()
+		ipc, _ := ip.(*AssignItemProcessor)
 
-		k := state.StateKeyDesign(it.Contract(), it.CredentialServiceID())
+		k := state.StateKeyDesign(it.Contract(), it.ServiceID())
 
 		ipc.h = op.Hash()
 		ipc.sender = fact.Sender()
@@ -291,7 +291,7 @@ func (opp *AssignCredentialsProcessor) Process( // nolint:dupl
 
 		st, err := ipc.Process(ctx, op, getStateFunc)
 		if err != nil {
-			return nil, base.NewBaseOperationProcessReasonError("failed to process AssignCredentialsItem; %w", err), nil
+			return nil, base.NewBaseOperationProcessReasonError("failed to process AssignItem; %w", err), nil
 		}
 
 		sts = append(sts, st...)
@@ -340,8 +340,8 @@ func (opp *AssignCredentialsProcessor) Process( // nolint:dupl
 	return sts, nil, nil
 }
 
-func (opp *AssignCredentialsProcessor) Close() error {
-	assignCredentialsProcessorPool.Put(opp)
+func (opp *AssignProcessor) Close() error {
+	assignProcessorPool.Put(opp)
 
 	return nil
 }

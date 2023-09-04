@@ -10,18 +10,18 @@ import (
 	"github.com/pkg/errors"
 )
 
-type CreateCredentialServiceCommand struct {
+type CreateServiceCommand struct {
 	BaseCommand
 	currencycmds.OperationFlags
-	Sender            currencycmds.AddressFlag    `arg:"" name:"sender" help:"sender address" required:"true"`
-	Contract          currencycmds.AddressFlag    `arg:"" name:"contract" help:"contract address of credential" required:"true"`
-	CredentialService ServiceIDFlag               `arg:"" name:"credential-service-id" help:"credential id" required:"true"`
-	Currency          currencycmds.CurrencyIDFlag `arg:"" name:"currency-id" help:"currency id" required:"true"`
-	sender            base.Address
-	contract          base.Address
+	Sender    currencycmds.AddressFlag    `arg:"" name:"sender" help:"sender address" required:"true"`
+	Contract  currencycmds.AddressFlag    `arg:"" name:"contract" help:"contract address of credential" required:"true"`
+	ServiceID ServiceIDFlag               `arg:"" name:"service-id" help:"credential id" required:"true"`
+	Currency  currencycmds.CurrencyIDFlag `arg:"" name:"currency-id" help:"currency id" required:"true"`
+	sender    base.Address
+	contract  base.Address
 }
 
-func (cmd *CreateCredentialServiceCommand) Run(pctx context.Context) error { // nolint:dupl
+func (cmd *CreateServiceCommand) Run(pctx context.Context) error { // nolint:dupl
 	if _, err := cmd.prepare(pctx); err != nil {
 		return err
 	}
@@ -43,7 +43,7 @@ func (cmd *CreateCredentialServiceCommand) Run(pctx context.Context) error { // 
 	return nil
 }
 
-func (cmd *CreateCredentialServiceCommand) parseFlags() error {
+func (cmd *CreateServiceCommand) parseFlags() error {
 	if err := cmd.OperationFlags.IsValid(nil); err != nil {
 		return err
 	}
@@ -63,12 +63,12 @@ func (cmd *CreateCredentialServiceCommand) parseFlags() error {
 	return nil
 }
 
-func (cmd *CreateCredentialServiceCommand) createOperation() (base.Operation, error) { // nolint:dupl}
-	e := util.StringError("failed to create create-credential-service operation")
+func (cmd *CreateServiceCommand) createOperation() (base.Operation, error) { // nolint:dupl}
+	e := util.StringError("failed to create create-service operation")
 
-	fact := credential.NewCreateCredentialServiceFact([]byte(cmd.Token), cmd.sender, cmd.contract, cmd.CredentialService.ID, cmd.Currency.CID)
+	fact := credential.NewCreateServiceFact([]byte(cmd.Token), cmd.sender, cmd.contract, cmd.ServiceID.ID, cmd.Currency.CID)
 
-	op, err := credential.NewCreateCredentialService(fact)
+	op, err := credential.NewCreateService(fact)
 	if err != nil {
 		return nil, e.Wrap(err)
 	}

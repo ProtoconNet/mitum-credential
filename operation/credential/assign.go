@@ -2,7 +2,9 @@ package credential
 
 import (
 	"fmt"
+
 	"github.com/ProtoconNet/mitum-currency/v3/common"
+	currencytypes "github.com/ProtoconNet/mitum-currency/v3/types"
 
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
@@ -10,22 +12,28 @@ import (
 	"github.com/ProtoconNet/mitum2/util/valuehash"
 )
 
-var (
-	RevokeCredentialsFactHint = hint.MustNewHint("mitum-credential-revoke-credentials-operation-fact-v0.0.1")
-	RevokeCredentialsHint     = hint.MustNewHint("mitum-credential-revoke-credentials-operation-v0.0.1")
-)
-
-var MaxRevokeCredentialsItems uint = 10
-
-type RevokeCredentialsFact struct {
-	base.BaseFact
-	sender base.Address
-	items  []RevokeCredentialsItem
+type CredentialItem interface {
+	util.Byter
+	util.IsValider
+	Currency() currencytypes.CurrencyID
 }
 
-func NewRevokeCredentialsFact(token []byte, sender base.Address, items []RevokeCredentialsItem) RevokeCredentialsFact {
-	bf := base.NewBaseFact(RevokeCredentialsFactHint, token)
-	fact := RevokeCredentialsFact{
+var (
+	AssignFactHint = hint.MustNewHint("mitum-credential-assign-operation-fact-v0.0.1")
+	AssignHint     = hint.MustNewHint("mitum-credential-assign-operation-v0.0.1")
+)
+
+var MaxAssignItems uint = 10
+
+type AssignFact struct {
+	base.BaseFact
+	sender base.Address
+	items  []AssignItem
+}
+
+func NewAssignFact(token []byte, sender base.Address, items []AssignItem) AssignFact {
+	bf := base.NewBaseFact(AssignFactHint, token)
+	fact := AssignFact{
 		BaseFact: bf,
 		sender:   sender,
 		items:    items,
@@ -35,15 +43,15 @@ func NewRevokeCredentialsFact(token []byte, sender base.Address, items []RevokeC
 	return fact
 }
 
-func (fact RevokeCredentialsFact) Hash() util.Hash {
+func (fact AssignFact) Hash() util.Hash {
 	return fact.BaseFact.Hash()
 }
 
-func (fact RevokeCredentialsFact) GenerateHash() util.Hash {
+func (fact AssignFact) GenerateHash() util.Hash {
 	return valuehash.NewSHA256(fact.Bytes())
 }
 
-func (fact RevokeCredentialsFact) Bytes() []byte {
+func (fact AssignFact) Bytes() []byte {
 	is := make([][]byte, len(fact.items))
 	for i := range fact.items {
 		is[i] = fact.items[i].Bytes()
@@ -56,7 +64,7 @@ func (fact RevokeCredentialsFact) Bytes() []byte {
 	)
 }
 
-func (fact RevokeCredentialsFact) IsValid(b []byte) error {
+func (fact AssignFact) IsValid(b []byte) error {
 	if err := fact.BaseHinter.IsValid(nil); err != nil {
 		return err
 	}
@@ -67,8 +75,8 @@ func (fact RevokeCredentialsFact) IsValid(b []byte) error {
 
 	if n := len(fact.items); n < 1 {
 		return util.ErrInvalid.Errorf("empty items")
-	} else if n > int(MaxRevokeCredentialsItems) {
-		return util.ErrInvalid.Errorf("items, %d over max, %d", n, MaxRevokeCredentialsItems)
+	} else if n > int(MaxAssignItems) {
+		return util.ErrInvalid.Errorf("items, %d over max, %d", n, MaxAssignItems)
 	}
 
 	if err := fact.sender.IsValid(nil); err != nil {
@@ -85,31 +93,31 @@ func (fact RevokeCredentialsFact) IsValid(b []byte) error {
 			return util.ErrInvalid.Errorf("contract address is same with sender, %q", fact.sender)
 		}
 
-		k := fmt.Sprintf("%s-%s-%s", it.contract, it.credentialServiceID, it.id)
+		k := fmt.Sprintf("%s-%s-%s", it.contract, it.serviceID, it.id)
 
 		if _, found := founds[k]; found {
 			return util.ErrInvalid.Errorf("duplicate credential id found, %s", k)
 		}
 
-		founds[it.ID()] = struct{}{}
+		founds[k] = struct{}{}
 	}
 
 	return nil
 }
 
-func (fact RevokeCredentialsFact) Token() base.Token {
+func (fact AssignFact) Token() base.Token {
 	return fact.BaseFact.Token()
 }
 
-func (fact RevokeCredentialsFact) Sender() base.Address {
+func (fact AssignFact) Sender() base.Address {
 	return fact.sender
 }
 
-func (fact RevokeCredentialsFact) Items() []RevokeCredentialsItem {
+func (fact AssignFact) Items() []AssignItem {
 	return fact.items
 }
 
-func (fact RevokeCredentialsFact) Addresses() ([]base.Address, error) {
+func (fact AssignFact) Addresses() ([]base.Address, error) {
 	as := []base.Address{}
 
 	adrMap := make(map[string]struct{})
@@ -126,15 +134,15 @@ func (fact RevokeCredentialsFact) Addresses() ([]base.Address, error) {
 	return as, nil
 }
 
-type RevokeCredentials struct {
+type Assign struct {
 	common.BaseOperation
 }
 
-func NewRevokeCredentials(fact RevokeCredentialsFact) (RevokeCredentials, error) {
-	return RevokeCredentials{BaseOperation: common.NewBaseOperation(RevokeCredentialsHint, fact)}, nil
+func NewAssign(fact AssignFact) (Assign, error) {
+	return Assign{BaseOperation: common.NewBaseOperation(AssignHint, fact)}, nil
 }
 
-func (op *RevokeCredentials) HashSign(priv base.Privatekey, networkID base.NetworkID) error {
+func (op *Assign) HashSign(priv base.Privatekey, networkID base.NetworkID) error {
 	err := op.Sign(priv, networkID)
 	if err != nil {
 		return err

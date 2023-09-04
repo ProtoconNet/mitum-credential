@@ -7,8 +7,8 @@ import (
 	"github.com/pkg/errors"
 )
 
-func (fact *RevokeCredentialsFact) unpack(enc encoder.Encoder, sa string, bit []byte) error {
-	e := util.StringError("failed to unmarshal RevokeCredentialsFact")
+func (fact *AssignFact) unpack(enc encoder.Encoder, sa string, bit []byte) error {
+	e := util.StringError("failed to unmarshal AssignFact")
 
 	switch a, err := base.DecodeAddress(sa, enc); {
 	case err != nil:
@@ -22,11 +22,11 @@ func (fact *RevokeCredentialsFact) unpack(enc encoder.Encoder, sa string, bit []
 		return e.Wrap(err)
 	}
 
-	items := make([]RevokeCredentialsItem, len(hit))
+	items := make([]AssignItem, len(hit))
 	for i := range hit {
-		j, ok := hit[i].(RevokeCredentialsItem)
+		j, ok := hit[i].(AssignItem)
 		if !ok {
-			return e.Wrap(errors.Errorf("expected RevokeCredentialsItem, not %T", hit[i]))
+			return e.Wrap(errors.Errorf("expected AssignItem, not %T", hit[i]))
 		}
 
 		items[i] = j

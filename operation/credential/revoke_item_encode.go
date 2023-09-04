@@ -9,14 +9,14 @@ import (
 	"github.com/ProtoconNet/mitum2/util/hint"
 )
 
-func (it *RevokeCredentialsItem) unpack(enc encoder.Encoder, ht hint.Hint,
-	ca, csid, hd, tid string,
+func (it *RevokeItem) unpack(enc encoder.Encoder, ht hint.Hint,
+	ca, sid, hd, tid string,
 	id, cid string,
 ) error {
-	e := util.StringError("failed to unmarshal RevokeCredentialsItem")
+	e := util.StringError("failed to unmarshal RevokeItem")
 
 	it.BaseHinter = hint.NewBaseHinter(ht)
-	it.credentialServiceID = types.ServiceID(csid)
+	it.serviceID = types.ServiceID(sid)
 	it.id = id
 	it.currency = currencytypes.CurrencyID(cid)
 

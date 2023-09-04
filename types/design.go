@@ -9,22 +9,22 @@ var DesignHint = hint.MustNewHint("mitum-credential-design-v0.0.1")
 
 type Design struct {
 	hint.BaseHinter
-	credentialServiceID ServiceID
-	policy              Policy
+	serviceID ServiceID
+	policy    Policy
 }
 
-func NewDesign(credentialServiceID ServiceID, policy Policy) Design {
+func NewDesign(serviceID ServiceID, policy Policy) Design {
 	return Design{
-		BaseHinter:          hint.NewBaseHinter(DesignHint),
-		credentialServiceID: credentialServiceID,
-		policy:              policy,
+		BaseHinter: hint.NewBaseHinter(DesignHint),
+		serviceID:  serviceID,
+		policy:     policy,
 	}
 }
 
 func (de Design) IsValid([]byte) error {
 	if err := util.CheckIsValiders(nil, false,
 		de.BaseHinter,
-		de.credentialServiceID,
+		de.serviceID,
 		de.policy,
 	); err != nil {
 		return util.ErrInvalid.Errorf("invalid Design: %v", err)
@@ -35,13 +35,13 @@ func (de Design) IsValid([]byte) error {
 
 func (de Design) Bytes() []byte {
 	return util.ConcatBytesSlice(
-		de.credentialServiceID.Bytes(),
+		de.serviceID.Bytes(),
 		de.policy.Bytes(),
 	)
 }
 
 func (de Design) ServiceID() ServiceID {
-	return de.credentialServiceID
+	return de.serviceID
 }
 
 func (de Design) Policy() Policy {
