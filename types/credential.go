@@ -41,6 +41,17 @@ func NewCredential(
 }
 
 func (it Credential) Bytes() []byte {
+	if it.holder == nil {
+		return util.ConcatBytesSlice(
+			[]byte(it.templateID),
+			[]byte(it.id),
+			[]byte(it.value),
+			util.Uint64ToBytes(it.validFrom),
+			util.Uint64ToBytes(it.validUntil),
+			[]byte(it.did),
+		)
+	}
+
 	return util.ConcatBytesSlice(
 		it.holder.Bytes(),
 		[]byte(it.templateID),
