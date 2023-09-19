@@ -21,7 +21,6 @@ type AddTemplateFact struct {
 	base.BaseFact
 	sender         base.Address
 	contract       base.Address
-	serviceID      types.ServiceID
 	templateID     string
 	templateName   string
 	serviceDate    types.Date
@@ -39,7 +38,6 @@ func NewAddTemplateFact(
 	token []byte,
 	sender base.Address,
 	contract base.Address,
-	serviceID types.ServiceID,
 	templateID string,
 	templateName string,
 	serviceDate types.Date,
@@ -57,7 +55,6 @@ func NewAddTemplateFact(
 		BaseFact:       bf,
 		sender:         sender,
 		contract:       contract,
-		serviceID:      serviceID,
 		templateID:     templateID,
 		templateName:   templateName,
 		serviceDate:    serviceDate,
@@ -88,7 +85,6 @@ func (fact AddTemplateFact) Bytes() []byte {
 		fact.Token(),
 		fact.sender.Bytes(),
 		fact.contract.Bytes(),
-		fact.serviceID.Bytes(),
 		[]byte(fact.templateID),
 		[]byte(fact.templateName),
 		fact.serviceDate.Bytes(),
@@ -112,7 +108,6 @@ func (fact AddTemplateFact) IsValid(b []byte) error {
 		fact.BaseHinter,
 		fact.sender,
 		fact.contract,
-		fact.serviceID,
 		fact.serviceDate,
 		fact.expirationDate,
 		fact.currency,
@@ -148,7 +143,7 @@ func (fact AddTemplateFact) IsValid(b []byte) error {
 		return util.ErrInvalid.Errorf("contract address is same with creator, %q", fact.creator)
 	}
 
-	service, err := fact.serviceDate.Parse()
+	serviceDate, err := fact.serviceDate.Parse()
 	if err != nil {
 		return err
 	}
@@ -158,7 +153,7 @@ func (fact AddTemplateFact) IsValid(b []byte) error {
 		return err
 	}
 
-	if expire.UnixNano() < service.UnixNano() {
+	if expire.UnixNano() < serviceDate.UnixNano() {
 		return util.ErrInvalid.Errorf("expire date <= service date, %s <= %s", fact.expirationDate, fact.serviceDate)
 	}
 
@@ -175,10 +170,6 @@ func (fact AddTemplateFact) Sender() base.Address {
 
 func (fact AddTemplateFact) Contract() base.Address {
 	return fact.contract
-}
-
-func (fact AddTemplateFact) ServiceID() types.ServiceID {
-	return fact.serviceID
 }
 
 func (fact AddTemplateFact) TemplateID() string {

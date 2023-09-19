@@ -13,12 +13,11 @@ import (
 type CreateServiceCommand struct {
 	BaseCommand
 	currencycmds.OperationFlags
-	Sender    currencycmds.AddressFlag    `arg:"" name:"sender" help:"sender address" required:"true"`
-	Contract  currencycmds.AddressFlag    `arg:"" name:"contract" help:"contract address of credential" required:"true"`
-	ServiceID ServiceIDFlag               `arg:"" name:"service-id" help:"credential id" required:"true"`
-	Currency  currencycmds.CurrencyIDFlag `arg:"" name:"currency-id" help:"currency id" required:"true"`
-	sender    base.Address
-	contract  base.Address
+	Sender   currencycmds.AddressFlag    `arg:"" name:"sender" help:"sender address" required:"true"`
+	Contract currencycmds.AddressFlag    `arg:"" name:"contract" help:"contract address of credential" required:"true"`
+	Currency currencycmds.CurrencyIDFlag `arg:"" name:"currency-id" help:"currency id" required:"true"`
+	sender   base.Address
+	contract base.Address
 }
 
 func (cmd *CreateServiceCommand) Run(pctx context.Context) error { // nolint:dupl
@@ -66,7 +65,12 @@ func (cmd *CreateServiceCommand) parseFlags() error {
 func (cmd *CreateServiceCommand) createOperation() (base.Operation, error) { // nolint:dupl}
 	e := util.StringError("failed to create create-service operation")
 
-	fact := credential.NewCreateServiceFact([]byte(cmd.Token), cmd.sender, cmd.contract, cmd.ServiceID.ID, cmd.Currency.CID)
+	fact := credential.NewCreateServiceFact(
+		[]byte(cmd.Token),
+		cmd.sender,
+		cmd.contract,
+		cmd.Currency.CID,
+	)
 
 	op, err := credential.NewCreateService(fact)
 	if err != nil {

@@ -74,14 +74,17 @@ func (ipp *AssignItemProcessor) PreProcess(
 		return errors.Wrap(err, "failed to get contract account value from state")
 	}
 
-	if !ca.Owner().Equal(ipp.sender) {
-		return errors.Errorf("sender is not target contract owner, %s", ipp.sender)
+	if !(ca.Owner().Equal(ipp.sender) || ca.IsOperator(ipp.sender)) {
+		return errors.Errorf(
+			"sender is neither the owner nor the operator of the target contract account, %q",
+			ipp.sender,
+		)
 	}
 
-	if st, err := currencystate.ExistsState(state.StateKeyDesign(it.Contract(), it.ServiceID()), "key of design", getStateFunc); err != nil {
-		return errors.Wrapf(err, "failed to get design state of credential service %s", it.ServiceID())
+	if st, err := currencystate.ExistsState(state.StateKeyDesign(it.Contract()), "key of design", getStateFunc); err != nil {
+		return errors.Wrapf(err, "failed to get design state of credential service")
 	} else if _, err = state.StateDesignValue(st); err != nil {
-		return errors.Wrapf(err, "failed to get design value of credential service %s from state", it.ServiceID())
+		return errors.Wrapf(err, "failed to get design value of credential service from state")
 	}
 
 	return nil
@@ -94,7 +97,6 @@ func (ipp *AssignItemProcessor) Process(
 
 	if st, _ := currencystate.ExistsState(
 		state.StateKeyCredential(it.Contract(),
-			it.ServiceID(),
 			it.TemplateID(),
 			it.ID()), "key of credential",
 		getStateFunc,
@@ -117,12 +119,12 @@ func (ipp *AssignItemProcessor) Process(
 	}
 
 	sts[0] = state.NewStateMergeValue(
-		state.StateKeyCredential(it.Contract(), it.ServiceID(), it.TemplateID(), it.ID()),
+		state.StateKeyCredential(it.Contract(), it.TemplateID(), it.ID()),
 		state.NewCredentialStateValue(credential),
 	)
 
 	sts[1] = state.NewStateMergeValue(
-		state.StateKeyHolderDID(it.Contract(), it.ServiceID(), it.Holder()),
+		state.StateKeyHolderDID(it.Contract(), it.Holder()),
 		state.NewHolderDIDStateValue(it.DID()),
 	)
 
@@ -144,7 +146,7 @@ func (ipp *AssignItemProcessor) Process(
 	return sts, nil
 }
 
-func (ipp *AssignItemProcessor) Close() error {
+func (ipp *AssignItemProcessor) Close() {
 	ipp.h = nil
 	ipp.sender = nil
 	ipp.item = AssignItem{}
@@ -152,8 +154,6 @@ func (ipp *AssignItemProcessor) Close() error {
 	ipp.holders = nil
 
 	assignItemProcessorPool.Put(ipp)
-
-	return nil
 }
 
 type AssignProcessor struct {
@@ -258,7 +258,7 @@ func (opp *AssignProcessor) Process( // nolint:dupl
 	holders := map[string]*[]types.Holder{}
 
 	for _, it := range fact.Items() {
-		k := state.StateKeyDesign(it.Contract(), it.ServiceID())
+		k := state.StateKeyDesign(it.Contract())
 
 		if _, found := counters[k]; found {
 			continue
@@ -281,7 +281,7 @@ func (opp *AssignProcessor) Process( // nolint:dupl
 		ip := assignItemProcessorPool.Get()
 		ipc, _ := ip.(*AssignItemProcessor)
 
-		k := state.StateKeyDesign(it.Contract(), it.ServiceID())
+		k := state.StateKeyDesign(it.Contract())
 
 		ipc.h = op.Hash()
 		ipc.sender = fact.Sender()
@@ -301,7 +301,7 @@ func (opp *AssignProcessor) Process( // nolint:dupl
 
 	for k, de := range designs {
 		policy := types.NewPolicy(de.Policy().TemplateIDs(), *holders[k], *counters[k])
-		design := types.NewDesign(de.ServiceID(), policy)
+		design := types.NewDesign(policy)
 		if err := design.IsValid(nil); err != nil {
 			return nil, base.NewBaseOperationProcessReasonError("invalid design, %s; %w", k, err), nil
 		}

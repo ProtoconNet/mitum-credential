@@ -26,15 +26,8 @@ func (hd *Handlers) handleDIDIssuer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	service, err, status := parseRequest(w, r, "serviceid")
-	if err != nil {
-		currencydigest.HTTP2ProblemWithError(w, err, status)
-
-		return
-	}
-
 	if v, err, shared := hd.rg.Do(cacheKey, func() (interface{}, error) {
-		return hd.handleDIDIssuerInGroup(contract, service)
+		return hd.handleDIDIssuerInGroup(contract)
 	}); err != nil {
 		currencydigest.HTTP2HandleError(w, err)
 	} else {
@@ -45,14 +38,14 @@ func (hd *Handlers) handleDIDIssuer(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (hd *Handlers) handleDIDIssuerInGroup(contract, service string) (interface{}, error) {
-	switch design, err := DIDService(hd.database, contract, service); {
+func (hd *Handlers) handleDIDIssuerInGroup(contract string) (interface{}, error) {
+	switch design, err := DIDService(hd.database, contract); {
 	case err != nil:
 		return nil, err
 	case design == nil:
-		return nil, mitumutil.ErrNotFound.Errorf("issuer design, %v in handleDIDIssuer", service)
+		return nil, mitumutil.ErrNotFound.Errorf("issuer design, %v in handleDIDIssuer contract", contract)
 	default:
-		hal, err := hd.buildDIDServiceHal(contract, service, *design)
+		hal, err := hd.buildDIDServiceHal(contract, *design)
 		if err != nil {
 			return nil, err
 		}
@@ -60,8 +53,8 @@ func (hd *Handlers) handleDIDIssuerInGroup(contract, service string) (interface{
 	}
 }
 
-func (hd *Handlers) buildDIDServiceHal(contract, service string, design types.Design) (currencydigest.Hal, error) {
-	h, err := hd.combineURL(HandlerPathDIDIssuer, "contract", contract, "serviceid", service)
+func (hd *Handlers) buildDIDServiceHal(contract string, design types.Design) (currencydigest.Hal, error) {
+	h, err := hd.combineURL(HandlerPathDIDIssuer, "contract", contract)
 	if err != nil {
 		return nil, err
 	}
@@ -83,12 +76,6 @@ func (hd *Handlers) handleCredential(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	serviceID, err, status := parseRequest(w, r, "serviceid")
-	if err != nil {
-		currencydigest.HTTP2ProblemWithError(w, err, status)
-		return
-	}
-
 	templateID, err, status := parseRequest(w, r, "templateid")
 	if err != nil {
 		currencydigest.HTTP2ProblemWithError(w, err, status)
@@ -102,7 +89,7 @@ func (hd *Handlers) handleCredential(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if v, err, shared := hd.rg.Do(cacheKey, func() (interface{}, error) {
-		return hd.handleCredentialInGroup(contract, serviceID, templateID, credentialID)
+		return hd.handleCredentialInGroup(contract, templateID, credentialID)
 	}); err != nil {
 		currencydigest.HTTP2HandleError(w, err)
 	} else {
@@ -113,14 +100,14 @@ func (hd *Handlers) handleCredential(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (hd *Handlers) handleCredentialInGroup(contract, serviceID, templateID, credentialID string) (interface{}, error) {
-	switch credential, err := Credential(hd.database, contract, serviceID, templateID, credentialID); {
+func (hd *Handlers) handleCredentialInGroup(contract, templateID, credentialID string) (interface{}, error) {
+	switch credential, err := Credential(hd.database, contract, templateID, credentialID); {
 	case err != nil:
 		return nil, err
 	case credential == nil:
 		return nil, mitumutil.ErrNotFound.Errorf("credential, %v in handleCredential", credentialID)
 	default:
-		hal, err := hd.buildCredentialHal(contract, serviceID, templateID, *credential)
+		hal, err := hd.buildCredentialHal(contract, templateID, *credential)
 		if err != nil {
 			return nil, err
 		}
@@ -129,13 +116,12 @@ func (hd *Handlers) handleCredentialInGroup(contract, serviceID, templateID, cre
 }
 
 func (hd *Handlers) buildCredentialHal(
-	contract, serviceID, templateID string,
+	contract, templateID string,
 	credential types.Credential,
 ) (currencydigest.Hal, error) {
 	h, err := hd.combineURL(
 		HandlerPathDIDCredential,
 		"contract", contract,
-		"serviceid", serviceID,
 		"templateid", templateID,
 		"credentialid", credential.ID(),
 	)
@@ -165,12 +151,6 @@ func (hd *Handlers) handleCredentials(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	serviceID, err, status := parseRequest(w, r, "serviceid")
-	if err != nil {
-		currencydigest.HTTP2ProblemWithError(w, err, status)
-		return
-	}
-
 	templateID, err, status := parseRequest(w, r, "templateid")
 	if err != nil {
 		currencydigest.HTTP2ProblemWithError(w, err, status)
@@ -178,13 +158,13 @@ func (hd *Handlers) handleCredentials(w http.ResponseWriter, r *http.Request) {
 	}
 
 	v, err, shared := hd.rg.Do(cachekey, func() (interface{}, error) {
-		i, filled, err := hd.handleCredentialsInGroup(contract, serviceID, templateID, offset, reverse, limit)
+		i, filled, err := hd.handleCredentialsInGroup(contract, templateID, offset, reverse, limit)
 
 		return []interface{}{i, filled}, err
 	})
 
 	if err != nil {
-		hd.Log().Err(err).Str("Issuer service", serviceID).Msg("failed to get credentials")
+		hd.Log().Err(err).Str("Issuer", contract).Msg("failed to get credentials")
 		currencydigest.HTTP2HandleError(w, err)
 
 		return
@@ -211,7 +191,7 @@ func (hd *Handlers) handleCredentials(w http.ResponseWriter, r *http.Request) {
 }
 
 func (hd *Handlers) handleCredentialsInGroup(
-	contract, serviceID, templateID string,
+	contract, templateID string,
 	offset string,
 	reverse bool,
 	l int64,
@@ -225,9 +205,9 @@ func (hd *Handlers) handleCredentialsInGroup(
 
 	var vas []currencydigest.Hal
 	if err := CredentialsByServiceAndTemplate(
-		hd.database, contract, serviceID, templateID, reverse, offset, limit,
+		hd.database, contract, templateID, reverse, offset, limit,
 		func(credential types.Credential, st base.State) (bool, error) {
-			hal, err := hd.buildCredentialHal(contract, serviceID, templateID, credential)
+			hal, err := hd.buildCredentialHal(contract, templateID, credential)
 			if err != nil {
 				return false, err
 			}
@@ -241,7 +221,7 @@ func (hd *Handlers) handleCredentialsInGroup(
 		return nil, false, errors.Errorf("credentials not found")
 	}
 
-	i, err := hd.buildCredentialsHal(contract, serviceID, templateID, vas, offset, reverse)
+	i, err := hd.buildCredentialsHal(contract, templateID, vas, offset, reverse)
 	if err != nil {
 		return nil, false, err
 	}
@@ -251,19 +231,15 @@ func (hd *Handlers) handleCredentialsInGroup(
 }
 
 func (hd *Handlers) buildCredentialsHal(
-	contract, serviceID, templateID string,
+	contract, templateID string,
 	vas []currencydigest.Hal,
 	offset string,
 	reverse bool,
 ) (currencydigest.Hal, error) {
 	baseSelf, err := hd.combineURL(
 		HandlerPathDIDCredentials,
-		"contract",
-		contract,
-		"serviceid",
-		serviceID,
-		"templateid",
-		templateID,
+		"contract", contract,
+		"templateid", templateID,
 	)
 	if err != nil {
 		return nil, err
@@ -280,7 +256,7 @@ func (hd *Handlers) buildCredentialsHal(
 	var hal currencydigest.Hal
 	hal = currencydigest.NewBaseHal(vas, currencydigest.NewHalLink(self, nil))
 
-	h, err := hd.combineURL(HandlerPathDIDIssuer, "contract", contract, "serviceid", serviceID)
+	h, err := hd.combineURL(HandlerPathDIDIssuer, "contract", contract)
 	if err != nil {
 		return nil, err
 	}
@@ -321,12 +297,6 @@ func (hd *Handlers) handleHolderDID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	serviceID, err, status := parseRequest(w, r, "serviceid")
-	if err != nil {
-		currencydigest.HTTP2ProblemWithError(w, err, status)
-		return
-	}
-
 	holder, err, status := parseRequest(w, r, "holder")
 	if err != nil {
 		currencydigest.HTTP2ProblemWithError(w, err, status)
@@ -334,7 +304,7 @@ func (hd *Handlers) handleHolderDID(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if v, err, shared := hd.rg.Do(cacheKey, func() (interface{}, error) {
-		return hd.handleHolderDIDInGroup(contract, serviceID, holder)
+		return hd.handleHolderDIDInGroup(contract, holder)
 	}); err != nil {
 		currencydigest.HTTP2HandleError(w, err)
 	} else {
@@ -345,14 +315,14 @@ func (hd *Handlers) handleHolderDID(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (hd *Handlers) handleHolderDIDInGroup(contract, serviceID, holder string) (interface{}, error) {
-	switch did, err := HolderDID(hd.database, contract, serviceID, holder); {
+func (hd *Handlers) handleHolderDIDInGroup(contract, holder string) (interface{}, error) {
+	switch did, err := HolderDID(hd.database, contract, holder); {
 	case err != nil:
 		return nil, err
 	case did == "":
 		return nil, mitumutil.ErrNotFound.Errorf("DID for holder, %v in handleHolderDID", holder)
 	default:
-		hal, err := hd.buildHolderDIDHal(contract, serviceID, holder, did)
+		hal, err := hd.buildHolderDIDHal(contract, holder, did)
 		if err != nil {
 			return nil, err
 		}
@@ -361,9 +331,9 @@ func (hd *Handlers) handleHolderDIDInGroup(contract, serviceID, holder string) (
 }
 
 func (hd *Handlers) buildHolderDIDHal(
-	contract, serviceID, holder, did string,
+	contract, holder, did string,
 ) (currencydigest.Hal, error) {
-	h, err := hd.combineURL(HandlerPathDIDHolder, "contract", contract, "serviceid", serviceID, "holder", holder)
+	h, err := hd.combineURL(HandlerPathDIDHolder, "contract", contract, "holder", holder)
 	if err != nil {
 		return nil, err
 	}
@@ -385,12 +355,6 @@ func (hd *Handlers) handleTemplate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	serviceID, err, status := parseRequest(w, r, "serviceid")
-	if err != nil {
-		currencydigest.HTTP2ProblemWithError(w, err, status)
-		return
-	}
-
 	templateID, err, status := parseRequest(w, r, "templateid")
 	if err != nil {
 		currencydigest.HTTP2ProblemWithError(w, err, status)
@@ -398,7 +362,7 @@ func (hd *Handlers) handleTemplate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if v, err, shared := hd.rg.Do(cacheKey, func() (interface{}, error) {
-		return hd.handleTemplateInGroup(contract, serviceID, templateID)
+		return hd.handleTemplateInGroup(contract, templateID)
 	}); err != nil {
 		currencydigest.HTTP2HandleError(w, err)
 	} else {
@@ -409,14 +373,14 @@ func (hd *Handlers) handleTemplate(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (hd *Handlers) handleTemplateInGroup(contract, serviceID, templateID string) (interface{}, error) {
-	switch template, err := Template(hd.database, contract, serviceID, templateID); {
+func (hd *Handlers) handleTemplateInGroup(contract, templateID string) (interface{}, error) {
+	switch template, err := Template(hd.database, contract, templateID); {
 	case err != nil:
 		return nil, err
 	case template == nil:
 		return nil, mitumutil.ErrNotFound.Errorf("template, %v in handleTemplate", templateID)
 	default:
-		hal, err := hd.buildTemplateHal(contract, serviceID, templateID, *template)
+		hal, err := hd.buildTemplateHal(contract, templateID, *template)
 		if err != nil {
 			return nil, err
 		}
@@ -425,13 +389,12 @@ func (hd *Handlers) handleTemplateInGroup(contract, serviceID, templateID string
 }
 
 func (hd *Handlers) buildTemplateHal(
-	contract, serviceID, templateID string,
+	contract, templateID string,
 	template types.Template,
 ) (currencydigest.Hal, error) {
 	h, err := hd.combineURL(
 		HandlerPathDIDTemplate,
 		"contract", contract,
-		"serviceid", serviceID,
 		"templateid", templateID,
 	)
 	if err != nil {

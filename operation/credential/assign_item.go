@@ -3,7 +3,6 @@ package credential
 import (
 	"unicode/utf8"
 
-	"github.com/ProtoconNet/mitum-credential/types"
 	currencytypes "github.com/ProtoconNet/mitum-currency/v3/types"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
@@ -15,7 +14,6 @@ var AssignItemHint = hint.MustNewHint("mitum-credential-assign-item-v0.0.1")
 type AssignItem struct {
 	hint.BaseHinter
 	contract   base.Address
-	serviceID  types.ServiceID
 	holder     base.Address
 	templateID string
 	id         string
@@ -28,7 +26,6 @@ type AssignItem struct {
 
 func NewAssignItem(
 	contract base.Address,
-	serviceID types.ServiceID,
 	holder base.Address,
 	templateID string,
 	id string,
@@ -41,7 +38,6 @@ func NewAssignItem(
 	return AssignItem{
 		BaseHinter: hint.NewBaseHinter(AssignItemHint),
 		contract:   contract,
-		serviceID:  serviceID,
 		holder:     holder,
 		templateID: templateID,
 		id:         id,
@@ -56,7 +52,6 @@ func NewAssignItem(
 func (it AssignItem) Bytes() []byte {
 	return util.ConcatBytesSlice(
 		it.contract.Bytes(),
-		it.serviceID.Bytes(),
 		it.holder.Bytes(),
 		[]byte(it.templateID),
 		[]byte(it.id),
@@ -71,7 +66,6 @@ func (it AssignItem) Bytes() []byte {
 func (it AssignItem) IsValid([]byte) error {
 	if err := util.CheckIsValiders(nil, false,
 		it.BaseHinter,
-		it.serviceID,
 		it.contract,
 		it.holder,
 		it.currency,
@@ -104,10 +98,6 @@ func (it AssignItem) IsValid([]byte) error {
 	}
 
 	return nil
-}
-
-func (it AssignItem) ServiceID() types.ServiceID {
-	return it.serviceID
 }
 
 func (it AssignItem) Contract() base.Address {

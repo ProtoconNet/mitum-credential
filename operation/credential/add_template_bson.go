@@ -16,7 +16,6 @@ func (fact AddTemplateFact) MarshalBSON() ([]byte, error) {
 			"_hint":           fact.Hint().String(),
 			"sender":          fact.sender,
 			"contract":        fact.contract,
-			"service_id":      fact.serviceID,
 			"template_id":     fact.templateID,
 			"template_name":   fact.templateName,
 			"service_date":    fact.serviceDate,
@@ -38,7 +37,6 @@ type AddTemplateFactBSONUnmarshaler struct {
 	Hint           string `bson:"_hint"`
 	Sender         string `bson:"sender"`
 	Contract       string `bson:"contract"`
-	ServiceID      string `bson:"service_id"`
 	TemplateID     string `bson:"template_id"`
 	TemplateName   string `bson:"template_name"`
 	ServiceDate    string `bson:"service_date"`
@@ -78,7 +76,6 @@ func (fact *AddTemplateFact) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
 	return fact.unpack(enc,
 		uf.Sender,
 		uf.Contract,
-		uf.ServiceID,
 		uf.TemplateID,
 		uf.TemplateName,
 		uf.ServiceDate,

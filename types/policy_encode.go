@@ -8,30 +8,30 @@ import (
 	"github.com/pkg/errors"
 )
 
-func (h *Holder) unpack(enc encoder.Encoder, ht hint.Hint, as string, ccount uint64) error {
+func (h *Holder) unpack(enc encoder.Encoder, ht hint.Hint, adr string, count uint64) error {
 	e := util.StringError("failed to unpack of Holder")
 
 	h.BaseHinter = hint.NewBaseHinter(ht)
 
-	switch a, err := base.DecodeAddress(as, enc); {
+	switch a, err := base.DecodeAddress(adr, enc); {
 	case err != nil:
 		return e.Wrap(err)
 	default:
 		h.address = a
 	}
 
-	h.credentialCount = ccount
+	h.credentialCount = count
 
 	return nil
 }
 
-func (po *Policy) unpack(enc encoder.Encoder, ht hint.Hint, ts []string, bhd []byte, ccount uint64) error {
+func (po *Policy) unpack(enc encoder.Encoder, ht hint.Hint, tmplIDs []string, bHolders []byte, count uint64) error {
 	e := util.StringError("failed to unpack of Policy")
 
 	po.BaseHinter = hint.NewBaseHinter(ht)
-	po.templateIDs = ts
+	po.templateIDs = tmplIDs
 
-	hds, err := enc.DecodeSlice(bhd)
+	hds, err := enc.DecodeSlice(bHolders)
 	if err != nil {
 		return e.Wrap(err)
 	}
@@ -46,7 +46,7 @@ func (po *Policy) unpack(enc encoder.Encoder, ht hint.Hint, ts []string, bhd []b
 		holders[i] = j
 	}
 	po.holders = holders
-	po.credentialCount = ccount
+	po.credentialCount = count
 
 	return nil
 }

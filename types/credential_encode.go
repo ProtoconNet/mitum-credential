@@ -8,9 +8,9 @@ import (
 )
 
 func (t *Credential) unpack(enc encoder.Encoder, ht hint.Hint,
-	hd, tid string,
+	holder, tmplID string,
 	id, v string,
-	vf, vu uint64,
+	vFrom, vUntil uint64,
 	did string,
 ) error {
 	e := util.StringError("failed to unpack of Credential")
@@ -20,16 +20,16 @@ func (t *Credential) unpack(enc encoder.Encoder, ht hint.Hint,
 	t.value = v
 	t.did = did
 
-	switch a, err := base.DecodeAddress(hd, enc); {
+	switch a, err := base.DecodeAddress(holder, enc); {
 	case err != nil:
 		return e.Wrap(err)
 	default:
 		t.holder = a
 	}
 
-	t.templateID = tid
-	t.validFrom = vf
-	t.validUntil = vu
+	t.templateID = tmplID
+	t.validFrom = vFrom
+	t.validUntil = vUntil
 
 	return nil
 }

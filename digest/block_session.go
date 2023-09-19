@@ -249,7 +249,7 @@ func (bs *BlockSession) prepareOperations() error {
 			bs.block.Manifest().Height(),
 			bs.block.SignedAt(),
 			inState,
-			reason,
+			reason.Msg(),
 			uint64(i),
 		)
 		if err != nil {

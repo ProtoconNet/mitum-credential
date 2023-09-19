@@ -78,17 +78,17 @@ func (t Template) IsValid([]byte) error {
 		return util.ErrInvalid.Errorf("empty subject key")
 	}
 
-	service, err := t.serviceDate.Parse()
+	serviceDate, err := t.serviceDate.Parse()
 	if err != nil {
 		return err
 	}
 
-	expire, err := t.serviceDate.Parse()
+	expireDate, err := t.expirationDate.Parse()
 	if err != nil {
 		return err
 	}
 
-	if expire.UnixNano() < service.UnixNano() {
+	if expireDate.UnixNano() < serviceDate.UnixNano() {
 		return util.ErrInvalid.Errorf("expire date <= service date, %s <= %s", t.expirationDate, t.serviceDate)
 	}
 

@@ -9,40 +9,39 @@ import (
 )
 
 func (fact *AddTemplateFact) unpack(enc encoder.Encoder,
-	sa, ca, sid, tid string,
-	tname, sd, ed string,
-	ts, ma bool,
-	dn, sk, desc, cr, cid string,
+	sAdr, cAdr, tmplID string,
+	tmplName, svcDate, expDate string,
+	tmplShr, ma bool,
+	dpName, subjKey, desc, crAdr, cid string,
 ) error {
 	e := util.StringError("failed to unmarshal AddTemplateFact")
 
-	fact.serviceID = types.ServiceID(sid)
-	fact.templateName = tname
-	fact.serviceDate = types.Date(sd)
-	fact.expirationDate = types.Date(ed)
-	fact.templateShare = types.Bool(ts)
+	fact.templateName = tmplName
+	fact.serviceDate = types.Date(svcDate)
+	fact.expirationDate = types.Date(expDate)
+	fact.templateShare = types.Bool(tmplShr)
 	fact.multiAudit = types.Bool(ma)
-	fact.displayName = dn
-	fact.subjectKey = sk
+	fact.displayName = dpName
+	fact.subjectKey = subjKey
 	fact.description = desc
 	fact.currency = currencytypes.CurrencyID(cid)
-	fact.templateID = tid
+	fact.templateID = tmplID
 
-	switch a, err := base.DecodeAddress(sa, enc); {
+	switch a, err := base.DecodeAddress(sAdr, enc); {
 	case err != nil:
 		return e.Wrap(err)
 	default:
 		fact.sender = a
 	}
 
-	switch a, err := base.DecodeAddress(ca, enc); {
+	switch a, err := base.DecodeAddress(cAdr, enc); {
 	case err != nil:
 		return e.Wrap(err)
 	default:
 		fact.contract = a
 	}
 
-	switch a, err := base.DecodeAddress(cr, enc); {
+	switch a, err := base.DecodeAddress(crAdr, enc); {
 	case err != nil:
 		return e.Wrap(err)
 	default:

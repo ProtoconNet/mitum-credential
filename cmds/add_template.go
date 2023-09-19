@@ -16,7 +16,6 @@ type AddTemplateCommand struct {
 	currencycmds.OperationFlags
 	Sender         currencycmds.AddressFlag    `arg:"" name:"sender" help:"sender address" required:"true"`
 	Contract       currencycmds.AddressFlag    `arg:"" name:"contract" help:"contract address of credential" required:"true"`
-	ServiceID      ServiceIDFlag               `arg:"" name:"service-id" help:"credential id" required:"true"`
 	TemplateID     string                      `arg:"" name:"template-id" help:"template id" required:"true"`
 	TemplateName   string                      `arg:"" name:"template-name" help:"template name"  required:"true"`
 	ServiceDate    string                      `arg:"" name:"service-date" help:"service date; yyyy-MM-dd" required:"true"`
@@ -30,7 +29,7 @@ type AddTemplateCommand struct {
 	Currency       currencycmds.CurrencyIDFlag `arg:"" name:"currency-id" help:"currency id" required:"true"`
 	sender         base.Address
 	contract       base.Address
-	service        types.Date
+	serviceDate    types.Date
 	expiration     types.Date
 	creator        base.Address
 }
@@ -80,14 +79,14 @@ func (cmd *AddTemplateCommand) parseFlags() error {
 	}
 	cmd.creator = creator
 
-	service, expiration := types.Date(cmd.ServiceDate), types.Date(cmd.ExpirationDate)
-	if err := service.IsValid(nil); err != nil {
+	serviceDate, expiration := types.Date(cmd.ServiceDate), types.Date(cmd.ExpirationDate)
+	if err := serviceDate.IsValid(nil); err != nil {
 		return errors.Wrapf(err, "invalid service date format, %q", cmd.ServiceDate)
 	}
 	if err := expiration.IsValid(nil); err != nil {
 		return errors.Wrapf(err, "invalid expiration date format, %q", cmd.ExpirationDate)
 	}
-	cmd.service = service
+	cmd.serviceDate = serviceDate
 	cmd.expiration = expiration
 
 	return nil
@@ -100,10 +99,9 @@ func (cmd *AddTemplateCommand) createOperation() (base.Operation, error) { // no
 		[]byte(cmd.Token),
 		cmd.sender,
 		cmd.contract,
-		cmd.ServiceID.ID,
 		cmd.TemplateID,
 		cmd.TemplateName,
-		cmd.service,
+		cmd.serviceDate,
 		cmd.expiration,
 		types.Bool(cmd.TemplateShare),
 		types.Bool(cmd.MultiAudit),

@@ -1,7 +1,6 @@
 package credential
 
 import (
-	"github.com/ProtoconNet/mitum-credential/types"
 	"github.com/ProtoconNet/mitum-currency/v3/common"
 	currencytypes "github.com/ProtoconNet/mitum-currency/v3/types"
 	"github.com/ProtoconNet/mitum2/base"
@@ -11,10 +10,9 @@ import (
 
 type CreateServiceFactJSONMarshaler struct {
 	base.BaseFactJSONMarshaler
-	Owner     base.Address             `json:"sender"`
-	Contract  base.Address             `json:"contract"`
-	ServiceID types.ServiceID          `json:"service_id"`
-	Currency  currencytypes.CurrencyID `json:"currency"`
+	Owner    base.Address             `json:"sender"`
+	Contract base.Address             `json:"contract"`
+	Currency currencytypes.CurrencyID `json:"currency"`
 }
 
 func (fact CreateServiceFact) MarshalJSON() ([]byte, error) {
@@ -22,17 +20,15 @@ func (fact CreateServiceFact) MarshalJSON() ([]byte, error) {
 		BaseFactJSONMarshaler: fact.BaseFact.JSONMarshaler(),
 		Owner:                 fact.sender,
 		Contract:              fact.contract,
-		ServiceID:             fact.serviceID,
 		Currency:              fact.currency,
 	})
 }
 
 type CreateServiceFactJSONUnMarshaler struct {
 	base.BaseFactJSONUnmarshaler
-	Owner     string `json:"sender"`
-	Contract  string `json:"contract"`
-	ServiceID string `json:"service_id"`
-	Currency  string `json:"currency"`
+	Owner    string `json:"sender"`
+	Contract string `json:"contract"`
+	Currency string `json:"currency"`
 }
 
 func (fact *CreateServiceFact) DecodeJSON(b []byte, enc *jsonenc.Encoder) error {
@@ -45,7 +41,7 @@ func (fact *CreateServiceFact) DecodeJSON(b []byte, enc *jsonenc.Encoder) error 
 
 	fact.BaseFact.SetJSONUnmarshaler(uf.BaseFactJSONUnmarshaler)
 
-	return fact.unpack(enc, uf.Owner, uf.Contract, uf.ServiceID, uf.Currency)
+	return fact.unpack(enc, uf.Owner, uf.Contract, uf.Currency)
 }
 
 type CreateServiceMarshaler struct {

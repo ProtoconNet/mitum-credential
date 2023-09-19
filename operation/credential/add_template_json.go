@@ -13,7 +13,6 @@ type AddTemplateFactJSONMarshaler struct {
 	base.BaseFactJSONMarshaler
 	Owner          base.Address             `json:"sender"`
 	Contract       base.Address             `json:"contract"`
-	ServiceID      types.ServiceID          `json:"service_id"`
 	TemplateID     string                   `json:"template_id"`
 	TemplateName   string                   `json:"template_name"`
 	ServiceDate    types.Date               `json:"service_date"`
@@ -32,7 +31,6 @@ func (fact AddTemplateFact) MarshalJSON() ([]byte, error) {
 		BaseFactJSONMarshaler: fact.BaseFact.JSONMarshaler(),
 		Owner:                 fact.sender,
 		Contract:              fact.contract,
-		ServiceID:             fact.serviceID,
 		TemplateID:            fact.templateID,
 		TemplateName:          fact.templateName,
 		ServiceDate:           fact.serviceDate,
@@ -51,7 +49,6 @@ type AddTemplateFactJSONUnMarshaler struct {
 	base.BaseFactJSONUnmarshaler
 	Owner          string `json:"sender"`
 	Contract       string `json:"contract"`
-	ServiceID      string `json:"service_id"`
 	TemplateID     string `json:"template_id"`
 	TemplateName   string `json:"template_name"`
 	ServiceDate    string `json:"service_date"`
@@ -78,7 +75,6 @@ func (fact *AddTemplateFact) DecodeJSON(b []byte, enc *jsonenc.Encoder) error {
 	return fact.unpack(enc,
 		uf.Owner,
 		uf.Contract,
-		uf.ServiceID,
 		uf.TemplateID,
 		uf.TemplateName,
 		uf.ServiceDate,

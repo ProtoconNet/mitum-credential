@@ -10,22 +10,19 @@ import (
 
 type DesignJSONMarshaler struct {
 	hint.BaseHinter
-	ServiceID ServiceID `json:"service_id"`
-	Policy    Policy    `json:"policy"`
+	Policy Policy `json:"policy"`
 }
 
 func (de Design) MarshalJSON() ([]byte, error) {
 	return util.MarshalJSON(DesignJSONMarshaler{
 		BaseHinter: de.BaseHinter,
-		ServiceID:  de.serviceID,
 		Policy:     de.policy,
 	})
 }
 
 type DesignJSONUnmarshaler struct {
-	Hint      hint.Hint       `json:"_hint"`
-	ServiceID string          `json:"service_id"`
-	Policy    json.RawMessage `json:"policy"`
+	Hint   hint.Hint       `json:"_hint"`
+	Policy json.RawMessage `json:"policy"`
 }
 
 func (de *Design) DecodeJSON(b []byte, enc *jsonenc.Encoder) error {
@@ -36,5 +33,5 @@ func (de *Design) DecodeJSON(b []byte, enc *jsonenc.Encoder) error {
 		return e.Wrap(err)
 	}
 
-	return de.unpack(enc, ud.Hint, ud.ServiceID, ud.Policy)
+	return de.unpack(enc, ud.Hint, ud.Policy)
 }

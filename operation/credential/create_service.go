@@ -1,7 +1,6 @@
 package credential
 
 import (
-	"github.com/ProtoconNet/mitum-credential/types"
 	"github.com/ProtoconNet/mitum-currency/v3/common"
 	currencytypes "github.com/ProtoconNet/mitum-currency/v3/types"
 	"github.com/ProtoconNet/mitum2/base"
@@ -17,26 +16,23 @@ var (
 
 type CreateServiceFact struct {
 	base.BaseFact
-	sender    base.Address
-	contract  base.Address
-	serviceID types.ServiceID
-	currency  currencytypes.CurrencyID
+	sender   base.Address
+	contract base.Address
+	currency currencytypes.CurrencyID
 }
 
 func NewCreateServiceFact(
 	token []byte,
 	sender base.Address,
 	contract base.Address,
-	serviceID types.ServiceID,
 	currency currencytypes.CurrencyID,
 ) CreateServiceFact {
 	bf := base.NewBaseFact(CreateServiceFactHint, token)
 	fact := CreateServiceFact{
-		BaseFact:  bf,
-		sender:    sender,
-		contract:  contract,
-		serviceID: serviceID,
-		currency:  currency,
+		BaseFact: bf,
+		sender:   sender,
+		contract: contract,
+		currency: currency,
 	}
 	fact.SetHash(fact.GenerateHash())
 
@@ -56,7 +52,6 @@ func (fact CreateServiceFact) Bytes() []byte {
 		fact.Token(),
 		fact.sender.Bytes(),
 		fact.contract.Bytes(),
-		fact.serviceID.Bytes(),
 		fact.currency.Bytes(),
 	)
 }
@@ -74,7 +69,6 @@ func (fact CreateServiceFact) IsValid(b []byte) error {
 		nil,
 		false,
 		fact.sender,
-		fact.serviceID,
 		fact.contract,
 		fact.currency,
 	); err != nil {
@@ -98,10 +92,6 @@ func (fact CreateServiceFact) Sender() base.Address {
 
 func (fact CreateServiceFact) Contract() base.Address {
 	return fact.contract
-}
-
-func (fact CreateServiceFact) ServiceID() types.ServiceID {
-	return fact.serviceID
 }
 
 func (fact CreateServiceFact) Currency() currencytypes.CurrencyID {

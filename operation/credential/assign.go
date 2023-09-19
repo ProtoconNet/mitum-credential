@@ -93,7 +93,7 @@ func (fact AssignFact) IsValid(b []byte) error {
 			return util.ErrInvalid.Errorf("contract address is same with sender, %q", fact.sender)
 		}
 
-		k := fmt.Sprintf("%s-%s-%s", it.contract, it.serviceID, it.id)
+		k := fmt.Sprintf("%s-%s", it.contract, it.id)
 
 		if _, found := founds[k]; found {
 			return util.ErrInvalid.Errorf("duplicate credential id found, %s", k)

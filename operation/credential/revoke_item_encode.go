@@ -1,7 +1,6 @@
 package credential
 
 import (
-	"github.com/ProtoconNet/mitum-credential/types"
 	currencytypes "github.com/ProtoconNet/mitum-currency/v3/types"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
@@ -10,31 +9,30 @@ import (
 )
 
 func (it *RevokeItem) unpack(enc encoder.Encoder, ht hint.Hint,
-	ca, sid, hd, tid string,
+	cAdr, hAdr, tmplID string,
 	id, cid string,
 ) error {
 	e := util.StringError("failed to unmarshal RevokeItem")
 
 	it.BaseHinter = hint.NewBaseHinter(ht)
-	it.serviceID = types.ServiceID(sid)
 	it.id = id
 	it.currency = currencytypes.CurrencyID(cid)
 
-	switch a, err := base.DecodeAddress(ca, enc); {
+	switch a, err := base.DecodeAddress(cAdr, enc); {
 	case err != nil:
 		return e.Wrap(err)
 	default:
 		it.contract = a
 	}
 
-	switch a, err := base.DecodeAddress(hd, enc); {
+	switch a, err := base.DecodeAddress(hAdr, enc); {
 	case err != nil:
 		return e.Wrap(err)
 	default:
 		it.holder = a
 	}
 
-	it.templateID = tid
+	it.templateID = tmplID
 
 	return nil
 }

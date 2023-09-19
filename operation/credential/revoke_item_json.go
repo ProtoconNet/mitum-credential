@@ -1,7 +1,6 @@
 package credential
 
 import (
-	"github.com/ProtoconNet/mitum-credential/types"
 	currencytypes "github.com/ProtoconNet/mitum-currency/v3/types"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
@@ -12,7 +11,6 @@ import (
 type RevokeItemJSONMarshaler struct {
 	hint.BaseHinter
 	Contract   base.Address             `json:"contract"`
-	ServiceID  types.ServiceID          `json:"service_id"`
 	Holder     base.Address             `json:"holder"`
 	TemplateID string                   `json:"template_id"`
 	ID         string                   `json:"id"`
@@ -23,7 +21,6 @@ func (it RevokeItem) MarshalJSON() ([]byte, error) {
 	return util.MarshalJSON(RevokeItemJSONMarshaler{
 		BaseHinter: it.BaseHinter,
 		Contract:   it.contract,
-		ServiceID:  it.serviceID,
 		Holder:     it.holder,
 		TemplateID: it.templateID,
 		ID:         it.id,
@@ -34,7 +31,6 @@ func (it RevokeItem) MarshalJSON() ([]byte, error) {
 type RevokeItemJSONUnmarshaler struct {
 	Hint       hint.Hint `json:"_hint"`
 	Contract   string    `json:"contract"`
-	ServiceID  string    `json:"service_id"`
 	Holder     string    `json:"holder"`
 	TemplateID string    `json:"template_id"`
 	ID         string    `json:"id"`
@@ -52,7 +48,6 @@ func (it *RevokeItem) DecodeJSON(b []byte, enc *jsonenc.Encoder) error {
 	return it.unpack(enc,
 		uit.Hint,
 		uit.Contract,
-		uit.ServiceID,
 		uit.Holder,
 		uit.TemplateID,
 		uit.ID,

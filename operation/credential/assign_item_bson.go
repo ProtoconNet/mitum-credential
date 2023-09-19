@@ -12,7 +12,6 @@ func (it AssignItem) MarshalBSON() ([]byte, error) {
 		bson.M{
 			"_hint":       it.Hint().String(),
 			"contract":    it.contract,
-			"service_id":  it.serviceID,
 			"holder":      it.holder,
 			"template_id": it.templateID,
 			"id":          it.id,
@@ -28,7 +27,6 @@ func (it AssignItem) MarshalBSON() ([]byte, error) {
 type AssignItemBSONUnmarshaler struct {
 	Hint       string `bson:"_hint"`
 	Contract   string `bson:"contract"`
-	ServiceID  string `json:"service_id"`
 	Holder     string `json:"holder"`
 	TemplateID string `json:"template_id"`
 	ID         string `json:"id"`
@@ -54,7 +52,6 @@ func (it *AssignItem) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
 
 	return it.unpack(enc, ht,
 		uit.Contract,
-		uit.ServiceID,
 		uit.Holder,
 		uit.TemplateID,
 		uit.ID,

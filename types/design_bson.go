@@ -11,17 +11,15 @@ import (
 func (de Design) MarshalBSON() ([]byte, error) {
 	return bsonenc.Marshal(
 		bson.M{
-			"_hint":      de.Hint().String(),
-			"service_id": de.serviceID,
-			"policy":     de.policy,
+			"_hint":  de.Hint().String(),
+			"policy": de.policy,
 		},
 	)
 }
 
 type DesignBSONUnmarshaler struct {
-	Hint      string   `bson:"_hint"`
-	ServiceID string   `bson:"service_id"`
-	Policy    bson.Raw `bson:"policy"`
+	Hint   string   `bson:"_hint"`
+	Policy bson.Raw `bson:"policy"`
 }
 
 func (de *Design) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
@@ -37,5 +35,5 @@ func (de *Design) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
 		return e.Wrap(err)
 	}
 
-	return de.unpack(enc, ht, ud.ServiceID, ud.Policy)
+	return de.unpack(enc, ht, ud.Policy)
 }

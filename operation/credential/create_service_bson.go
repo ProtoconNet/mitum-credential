@@ -13,23 +13,21 @@ import (
 func (fact CreateServiceFact) MarshalBSON() ([]byte, error) {
 	return bsonenc.Marshal(
 		bson.M{
-			"_hint":      fact.Hint().String(),
-			"sender":     fact.sender,
-			"contract":   fact.contract,
-			"service_id": fact.serviceID,
-			"currency":   fact.currency,
-			"hash":       fact.BaseFact.Hash().String(),
-			"token":      fact.BaseFact.Token(),
+			"_hint":    fact.Hint().String(),
+			"sender":   fact.sender,
+			"contract": fact.contract,
+			"currency": fact.currency,
+			"hash":     fact.BaseFact.Hash().String(),
+			"token":    fact.BaseFact.Token(),
 		},
 	)
 }
 
 type CreateServiceFactBSONUnmarshaler struct {
-	Hint      string `bson:"_hint"`
-	Sender    string `bson:"sender"`
-	Contract  string `bson:"contract"`
-	ServiceID string `bson:"service_id"`
-	Currency  string `bson:"currency"`
+	Hint     string `bson:"_hint"`
+	Sender   string `bson:"sender"`
+	Contract string `bson:"contract"`
+	Currency string `bson:"currency"`
 }
 
 func (fact *CreateServiceFact) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
@@ -55,7 +53,7 @@ func (fact *CreateServiceFact) DecodeBSON(b []byte, enc *bsonenc.Encoder) error 
 	}
 	fact.BaseHinter = hint.NewBaseHinter(ht)
 
-	return fact.unpack(enc, uf.Sender, uf.Contract, uf.ServiceID, uf.Currency)
+	return fact.unpack(enc, uf.Sender, uf.Contract, uf.Currency)
 }
 
 func (op CreateService) MarshalBSON() ([]byte, error) {

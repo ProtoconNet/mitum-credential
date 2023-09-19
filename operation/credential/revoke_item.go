@@ -3,7 +3,6 @@ package credential
 import (
 	"unicode/utf8"
 
-	"github.com/ProtoconNet/mitum-credential/types"
 	currencytypes "github.com/ProtoconNet/mitum-currency/v3/types"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
@@ -15,7 +14,6 @@ var RevokeItemHint = hint.MustNewHint("mitum-credential-item-v0.0.1")
 type RevokeItem struct {
 	hint.BaseHinter
 	contract   base.Address
-	serviceID  types.ServiceID
 	holder     base.Address
 	templateID string
 	id         string
@@ -24,7 +22,6 @@ type RevokeItem struct {
 
 func NewRevokeItem(
 	contract base.Address,
-	serviceID types.ServiceID,
 	holder base.Address,
 	templateID, id string,
 	currency currencytypes.CurrencyID,
@@ -32,7 +29,6 @@ func NewRevokeItem(
 	return RevokeItem{
 		BaseHinter: hint.NewBaseHinter(RevokeItemHint),
 		contract:   contract,
-		serviceID:  serviceID,
 		holder:     holder,
 		templateID: templateID,
 		id:         id,
@@ -43,7 +39,6 @@ func NewRevokeItem(
 func (it RevokeItem) Bytes() []byte {
 	return util.ConcatBytesSlice(
 		it.contract.Bytes(),
-		it.serviceID.Bytes(),
 		it.holder.Bytes(),
 		[]byte(it.templateID),
 		[]byte(it.id),
@@ -54,7 +49,6 @@ func (it RevokeItem) Bytes() []byte {
 func (it RevokeItem) IsValid([]byte) error {
 	if err := util.CheckIsValiders(nil, false,
 		it.BaseHinter,
-		it.serviceID,
 		it.contract,
 		it.holder,
 		it.currency,
@@ -75,10 +69,6 @@ func (it RevokeItem) IsValid([]byte) error {
 	}
 
 	return nil
-}
-
-func (it RevokeItem) ServiceID() types.ServiceID {
-	return it.serviceID
 }
 
 func (it RevokeItem) Contract() base.Address {

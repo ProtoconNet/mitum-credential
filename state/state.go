@@ -42,8 +42,8 @@ func NewStateMergeValue(key string, stv base.StateValue) base.StateMergeValue {
 	)
 }
 
-func StateKeyCredentialPrefix(contract base.Address, serviceID types.ServiceID) string {
-	return fmt.Sprintf("%s%s:%s", CredentialPrefix, contract.String(), serviceID)
+func StateKeyCredentialPrefix(contract base.Address) string {
+	return fmt.Sprintf("%s%s", CredentialPrefix, contract.String())
 }
 
 type DesignStateValue struct {
@@ -98,8 +98,8 @@ func IsStateDesignKey(key string) bool {
 	return strings.HasPrefix(key, CredentialPrefix) && strings.HasSuffix(key, DesignSuffix)
 }
 
-func StateKeyDesign(contract base.Address, serviceID types.ServiceID) string {
-	return fmt.Sprintf("%s%s", StateKeyCredentialPrefix(contract, serviceID), DesignSuffix)
+func StateKeyDesign(contract base.Address) string {
+	return fmt.Sprintf("%s%s", StateKeyCredentialPrefix(contract), DesignSuffix)
 }
 
 var (
@@ -141,9 +141,9 @@ func (sv TemplateStateValue) HashBytes() []byte {
 	return sv.Template.Bytes()
 }
 
-func StateKeyTemplate(contract base.Address, serviceID types.ServiceID, templateID string) string {
+func StateKeyTemplate(contract base.Address, templateID string) string {
 	return fmt.Sprintf("%s:%s%s",
-		StateKeyCredentialPrefix(contract, serviceID),
+		StateKeyCredentialPrefix(contract),
 		templateID,
 		TemplateSuffix,
 	)
@@ -206,10 +206,10 @@ func (sv CredentialStateValue) HashBytes() []byte {
 	return sv.Credential.Bytes()
 }
 
-func StateKeyCredential(contract base.Address, serviceID types.ServiceID, templateID string, id string) string {
+func StateKeyCredential(contract base.Address, templateID string, id string) string {
 	return fmt.Sprintf(
 		"%s:%s:%s%s",
-		StateKeyCredentialPrefix(contract, serviceID), templateID,
+		StateKeyCredentialPrefix(contract), templateID,
 		id,
 		CredentialSuffix,
 	)
@@ -286,8 +286,8 @@ func IsStateHolderDIDKey(key string) bool {
 	return strings.HasPrefix(key, CredentialPrefix) && strings.HasSuffix(key, HolderDIDSuffix)
 }
 
-func StateKeyHolderDID(contract base.Address, serviceID types.ServiceID, holder base.Address) string {
-	return fmt.Sprintf("%s:%s%s", StateKeyCredentialPrefix(contract, serviceID), holder.String(), HolderDIDSuffix)
+func StateKeyHolderDID(contract base.Address, holder base.Address) string {
+	return fmt.Sprintf("%s:%s%s", StateKeyCredentialPrefix(contract), holder.String(), HolderDIDSuffix)
 }
 
 func ParseStateKey(key string, Prefix string) ([]string, error) {

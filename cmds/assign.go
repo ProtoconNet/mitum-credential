@@ -14,7 +14,6 @@ type AssignCommand struct {
 	currencycmds.OperationFlags
 	Sender     currencycmds.AddressFlag    `arg:"" name:"sender" help:"sender address" required:"true"`
 	Contract   currencycmds.AddressFlag    `arg:"" name:"contract" help:"contract account address" required:"true"`
-	ServiceID  ServiceIDFlag               `arg:"" name:"service-id" help:"credential id" required:"true"`
 	Holder     currencycmds.AddressFlag    `arg:"" name:"holder" help:"credential holder" required:"true"`
 	TemplateID string                      `arg:"" name:"template-id" help:"template id" required:"true"`
 	ID         string                      `arg:"" name:"id" help:"credential id" required:"true"`
@@ -81,7 +80,6 @@ func (cmd *AssignCommand) createOperation() (base.Operation, error) { // nolint:
 
 	item := credential.NewAssignItem(
 		cmd.contract,
-		cmd.ServiceID.ID,
 		cmd.holder,
 		cmd.TemplateID,
 		cmd.ID,

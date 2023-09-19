@@ -8,22 +8,22 @@ import (
 )
 
 func (t *Template) unpack(enc encoder.Encoder, ht hint.Hint,
-	tid string,
-	name, service, expire string,
+	tmplID string,
+	tmplName, svcDate, expDate string,
 	share, audit bool,
-	dname, sjk, desc, creator string,
+	dpName, subjKey, desc, creator string,
 ) error {
 	e := util.StringError("failed to unpack of Template")
 
 	t.BaseHinter = hint.NewBaseHinter(ht)
-	t.templateID = tid
-	t.templateName = name
-	t.serviceDate = Date(service)
-	t.expirationDate = Date(expire)
+	t.templateID = tmplID
+	t.templateName = tmplName
+	t.serviceDate = Date(svcDate)
+	t.expirationDate = Date(expDate)
 	t.templateShare = Bool(share)
 	t.multiAudit = Bool(audit)
-	t.displayName = dname
-	t.subjectKey = sjk
+	t.displayName = dpName
+	t.subjectKey = subjKey
 	t.description = desc
 
 	switch a, err := base.DecodeAddress(creator, enc); {

@@ -27,9 +27,8 @@ var (
 
 var maxLimit int64 = 50
 
-func DIDService(st *currencydigest.Database, contract, svc string) (*types.Design, error) {
+func DIDService(st *currencydigest.Database, contract string) (*types.Design, error) {
 	filter := util.NewBSONFilter("contract", contract)
-	filter = filter.Add("service", svc)
 
 	var design *types.Design
 	var sta mitumbase.State
@@ -59,9 +58,8 @@ func DIDService(st *currencydigest.Database, contract, svc string) (*types.Desig
 	return design, nil
 }
 
-func Credential(st *currencydigest.Database, contract, svc, tid, id string) (*types.Credential, error) {
+func Credential(st *currencydigest.Database, contract, tid, id string) (*types.Credential, error) {
 	filter := util.NewBSONFilter("contract", contract)
-	filter = filter.Add("service", svc)
 	filter = filter.Add("template", tid)
 	filter = filter.Add("credential_id", id)
 
@@ -91,9 +89,8 @@ func Credential(st *currencydigest.Database, contract, svc, tid, id string) (*ty
 	return credential, nil
 }
 
-func Template(st *currencydigest.Database, contract, svc, tid string) (*types.Template, error) {
+func Template(st *currencydigest.Database, contract, tid string) (*types.Template, error) {
 	filter := util.NewBSONFilter("contract", contract)
-	filter = filter.Add("service", svc)
 	filter = filter.Add("template", tid)
 
 	var template *types.Template
@@ -122,9 +119,8 @@ func Template(st *currencydigest.Database, contract, svc, tid string) (*types.Te
 	return template, nil
 }
 
-func HolderDID(st *currencydigest.Database, contract, svc, address string) (string, error) {
+func HolderDID(st *currencydigest.Database, contract, address string) (string, error) {
 	filter := util.NewBSONFilter("contract", contract)
-	filter = filter.Add("service", svc)
 	filter = filter.Add("holder", address)
 
 	var did string
@@ -156,13 +152,13 @@ func HolderDID(st *currencydigest.Database, contract, svc, address string) (stri
 func CredentialsByServiceAndTemplate(
 	st *currencydigest.Database,
 	contract,
-	serviceID, templateID string,
+	templateID string,
 	reverse bool,
 	offset string,
 	limit int64,
 	callback func(types.Credential, mitumbase.State) (bool, error),
 ) error {
-	filter, err := buildCredentialFilterByService(contract, serviceID, templateID, offset, reverse)
+	filter, err := buildCredentialFilterByService(contract, templateID, offset, reverse)
 	if err != nil {
 		return err
 	}
@@ -203,14 +199,12 @@ func CredentialsByServiceAndTemplate(
 	)
 }
 
-func buildCredentialFilterByService(contract, col, templateID string, offset string, reverse bool) (bson.D, error) {
+func buildCredentialFilterByService(contract, templateID string, offset string, reverse bool) (bson.D, error) {
 	filterA := bson.A{}
 
 	// filter fot matching collection
 	filterContract := bson.D{{"contract", bson.D{{"$in", []string{contract}}}}}
-	filterSymbol := bson.D{{"service", bson.D{{"$in", []string{col}}}}}
 	filterTemplate := bson.D{{"template", bson.D{{"$in", []string{templateID}}}}}
-	filterA = append(filterA, filterSymbol)
 	filterA = append(filterA, filterContract)
 	filterA = append(filterA, filterTemplate)
 

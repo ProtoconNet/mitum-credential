@@ -19,11 +19,11 @@ import (
 )
 
 var (
-	HandlerPathDIDIssuer      = `/did/{contract:.+}/issuer/{serviceid:.+}`
-	HandlerPathDIDCredential  = `/did/{contract:.+}/issuer/{serviceid:.+}/template/{templateid:.+}/credential/{credentialid:.+}`
-	HandlerPathDIDTemplate    = `/did/{contract:.+}/issuer/{serviceid:.+}/template/{templateid:.+}`
-	HandlerPathDIDCredentials = `/did/{contract:.+}/issuer/{serviceid:.+}/template/{templateid:.+}/credentials`
-	HandlerPathDIDHolder      = `/did/{contract:.+}/issuer/{serviceid:.+}/holder/{holder:(?i)` + base.REStringAddressString + `}` // revive:disable-line:line-length-limit
+	HandlerPathDIDIssuer      = `/did/{contract:.+}/issuer`
+	HandlerPathDIDCredential  = `/did/{contract:.+}/template/{templateid:.+}/credential/{credentialid:.+}`
+	HandlerPathDIDTemplate    = `/did/{contract:.+}/template/{templateid:.+}`
+	HandlerPathDIDCredentials = `/did/{contract:.+}/template/{templateid:.+}/credentials`
+	HandlerPathDIDHolder      = `/did/{contract:.+}/holder/{holder:(?i)` + base.REStringAddressString + `}` // revive:disable-line:line-length-limit
 )
 
 func init() {
