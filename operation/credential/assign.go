@@ -141,11 +141,3 @@ type Assign struct {
 func NewAssign(fact AssignFact) (Assign, error) {
 	return Assign{BaseOperation: common.NewBaseOperation(AssignHint, fact)}, nil
 }
-
-func (op *Assign) HashSign(priv base.Privatekey, networkID base.NetworkID) error {
-	err := op.Sign(priv, networkID)
-	if err != nil {
-		return err
-	}
-	return nil
-}

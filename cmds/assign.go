@@ -2,6 +2,7 @@ package cmds
 
 import (
 	"context"
+	"github.com/ProtoconNet/mitum2/util"
 
 	"github.com/ProtoconNet/mitum-credential/operation/credential"
 	currencycmds "github.com/ProtoconNet/mitum-currency/v3/cmds"
@@ -76,8 +77,9 @@ func (cmd *AssignCommand) parseFlags() error {
 }
 
 func (cmd *AssignCommand) createOperation() (base.Operation, error) { // nolint:dupl
-	var items []credential.AssignItem
+	e := util.StringError("failed to create assign operation")
 
+	var items []credential.AssignItem
 	item := credential.NewAssignItem(
 		cmd.contract,
 		cmd.holder,
@@ -100,9 +102,10 @@ func (cmd *AssignCommand) createOperation() (base.Operation, error) { // nolint:
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to assign operation")
 	}
-	err = op.HashSign(cmd.Privatekey, cmd.NetworkID.NetworkID())
+
+	err = op.Sign(cmd.Privatekey, cmd.NetworkID.NetworkID())
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to assign operation")
+		return nil, e.Wrap(err)
 	}
 
 	return op, nil

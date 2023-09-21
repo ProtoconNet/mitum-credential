@@ -92,7 +92,7 @@ func (cmd *RevokeCredentialsCommand) createOperation() (base.Operation, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to revoke operation")
 	}
-	err = op.HashSign(cmd.Privatekey, cmd.NetworkID.NetworkID())
+	err = op.Sign(cmd.Privatekey, cmd.NetworkID.NetworkID())
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to revoke operation")
 	}

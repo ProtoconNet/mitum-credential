@@ -134,11 +134,3 @@ type Revoke struct {
 func NewRevoke(fact RevokeFact) (Revoke, error) {
 	return Revoke{BaseOperation: common.NewBaseOperation(RevokeHint, fact)}, nil
 }
-
-func (op *Revoke) HashSign(priv base.Privatekey, networkID base.NetworkID) error {
-	err := op.Sign(priv, networkID)
-	if err != nil {
-		return err
-	}
-	return nil
-}

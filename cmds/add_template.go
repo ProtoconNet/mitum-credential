@@ -117,7 +117,7 @@ func (cmd *AddTemplateCommand) createOperation() (base.Operation, error) { // no
 		return nil, e.Wrap(err)
 	}
 
-	err = op.HashSign(cmd.Privatekey, cmd.NetworkID.NetworkID())
+	err = op.Sign(cmd.Privatekey, cmd.NetworkID.NetworkID())
 	if err != nil {
 		return nil, e.Wrap(err)
 	}

@@ -232,14 +232,6 @@ func NewAddTemplate(fact AddTemplateFact) (AddTemplate, error) {
 	return AddTemplate{BaseOperation: common.NewBaseOperation(AddTemplateHint, fact)}, nil
 }
 
-func (op *AddTemplate) HashSign(priv base.Privatekey, networkID base.NetworkID) error {
-	err := op.Sign(priv, networkID)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
 var (
 	MaxLengthTemplateID      = 20
 	MaxLengthCredentialID    = 20
