@@ -9,7 +9,7 @@ import (
 	"github.com/ProtoconNet/mitum2/util/hint"
 )
 
-var RevokeItemHint = hint.MustNewHint("mitum-credential-item-v0.0.1")
+var RevokeItemHint = hint.MustNewHint("mitum-credential-revoke-item-v0.0.1")
 
 type RevokeItem struct {
 	hint.BaseHinter
