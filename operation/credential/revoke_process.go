@@ -273,12 +273,12 @@ func (opp *RevokeProcessor) Process( // nolint:dupl
 
 		st, err := currencystate.ExistsState(k, "key of design", getStateFunc)
 		if err != nil {
-			return nil, base.NewBaseOperationProcessReasonError("credential service not found, %s:%w", it.Contract(), err), nil
+			return nil, base.NewBaseOperationProcessReasonError("credential service not found, %s; %w", it.Contract(), err), nil
 		}
 
 		design, err := state.StateDesignValue(st)
 		if err != nil {
-			return nil, base.NewBaseOperationProcessReasonError("credential service value not found, %s:%w", it.Contract(), err), nil
+			return nil, base.NewBaseOperationProcessReasonError("credential service value not found, %s; %w", it.Contract(), err), nil
 		}
 
 		designs[k] = design

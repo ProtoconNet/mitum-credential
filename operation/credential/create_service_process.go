@@ -97,9 +97,7 @@ func (opp *CreateServiceProcessor) PreProcess(
 
 	if !(ca.Owner().Equal(fact.sender) || ca.IsOperator(fact.Sender())) {
 		return nil, base.NewBaseOperationProcessReasonError(
-			"sender is neither the owner nor the operator of the target contract account, %q",
-			fact.sender,
-		), nil
+			"sender is neither the owner nor the operator of the target contract account, %q", fact.sender), nil
 	}
 
 	if ca.IsActive() {
@@ -111,7 +109,7 @@ func (opp *CreateServiceProcessor) PreProcess(
 
 	if err := currencystate.CheckNotExistsState(state.StateKeyDesign(fact.Contract()), getStateFunc); err != nil {
 		return nil, base.NewBaseOperationProcessReasonError(
-			"credential service already exists, %s-%s; %w",
+			"credential service already exists, %s; %w",
 			fact.Contract(),
 			err,
 		), nil
