@@ -14,15 +14,16 @@ import (
 )
 
 var (
-	defaultColNameAccount       = "digest_ac"
-	defaultColNameBalance       = "digest_bl"
-	defaultColNameCurrency      = "digest_cr"
-	defaultColNameOperation     = "digest_op"
-	defaultColNameBlock         = "digest_bm"
-	defaultColNameDIDIssuer     = "digest_did_issuer"
-	defaultColNameDIDCredential = "digest_did_credential"
-	defaultColNameHolderDID     = "digest_did_holder_did"
-	defaultColNameTemplate      = "digest_did_template"
+	defaultColNameAccount         = "digest_ac"
+	defaultColNameContractAccount = "digest_ca"
+	defaultColNameBalance         = "digest_bl"
+	defaultColNameCurrency        = "digest_cr"
+	defaultColNameOperation       = "digest_op"
+	defaultColNameBlock           = "digest_bm"
+	defaultColNameDIDIssuer       = "digest_did_issuer"
+	defaultColNameDIDCredential   = "digest_did_credential"
+	defaultColNameHolderDID       = "digest_did_holder_did"
+	defaultColNameTemplate        = "digest_did_template"
 )
 
 var maxLimit int64 = 50
