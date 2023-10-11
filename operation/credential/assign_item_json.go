@@ -29,8 +29,8 @@ func (it AssignItem) MarshalJSON() ([]byte, error) {
 		TemplateID: it.templateID,
 		ID:         it.id,
 		Value:      it.value,
-		ValidFrom:  it.validfrom,
-		ValidUntil: it.validuntil,
+		ValidFrom:  it.validFrom,
+		ValidUntil: it.validUntil,
 		DID:        it.did,
 		Currency:   it.currency,
 	})

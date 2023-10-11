@@ -18,8 +18,8 @@ type AssignItem struct {
 	templateID string
 	id         string
 	value      string
-	validfrom  uint64
-	validuntil uint64
+	validFrom  uint64
+	validUntil uint64
 	did        string
 	currency   currencytypes.CurrencyID
 }
@@ -30,8 +30,8 @@ func NewAssignItem(
 	templateID string,
 	id string,
 	value string,
-	validfrom uint64,
-	validuntil uint64,
+	validFrom uint64,
+	validUntil uint64,
 	did string,
 	currency currencytypes.CurrencyID,
 ) AssignItem {
@@ -42,8 +42,8 @@ func NewAssignItem(
 		templateID: templateID,
 		id:         id,
 		value:      value,
-		validfrom:  validfrom,
-		validuntil: validuntil,
+		validFrom:  validFrom,
+		validUntil: validUntil,
 		did:        did,
 		currency:   currency,
 	}
@@ -56,8 +56,8 @@ func (it AssignItem) Bytes() []byte {
 		[]byte(it.templateID),
 		[]byte(it.id),
 		[]byte(it.value),
-		util.Uint64ToBytes(it.validfrom),
-		util.Uint64ToBytes(it.validuntil),
+		util.Uint64ToBytes(it.validFrom),
+		util.Uint64ToBytes(it.validUntil),
 		[]byte(it.did),
 		it.currency.Bytes(),
 	)
@@ -77,8 +77,8 @@ func (it AssignItem) IsValid([]byte) error {
 		return util.ErrInvalid.Errorf("contract address is same with sender, %q", it.holder)
 	}
 
-	if it.validuntil <= it.validfrom {
-		return util.ErrInvalid.Errorf("valid until <= valid from, %q <= %q", it.validuntil, it.validfrom)
+	if it.validUntil <= it.validFrom {
+		return util.ErrInvalid.Errorf("valid until <= valid from, %q <= %q", it.validUntil, it.validFrom)
 	}
 
 	if l := utf8.RuneCountInString(it.templateID); l < 1 || l > MaxLengthTemplateID {
@@ -113,11 +113,11 @@ func (it AssignItem) TemplateID() string {
 }
 
 func (it AssignItem) ValidFrom() uint64 {
-	return it.validfrom
+	return it.validFrom
 }
 
 func (it AssignItem) ValidUntil() uint64 {
-	return it.validuntil
+	return it.validUntil
 }
 
 func (it AssignItem) ID() string {

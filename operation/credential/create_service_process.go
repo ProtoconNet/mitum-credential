@@ -162,11 +162,11 @@ func (opp *CreateServiceProcessor) Process(
 	if err != nil {
 		return nil, base.NewBaseOperationProcessReasonError("failed to get state value of contract account, %q; %w", fact.Contract(), err), nil
 	}
-	ca.SetIsActive(true)
+	nca := ca.SetIsActive(true)
 
 	sts[1] = currencystate.NewStateMergeValue(
 		extensioncurrency.StateKeyContractAccount(fact.Contract()),
-		extensioncurrency.NewContractAccountStateValue(ca),
+		extensioncurrency.NewContractAccountStateValue(nca),
 	)
 
 	currencyPolicy, err := currencystate.ExistsCurrencyPolicy(fact.Currency(), getStateFunc)

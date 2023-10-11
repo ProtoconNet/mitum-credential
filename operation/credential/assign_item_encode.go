@@ -38,8 +38,8 @@ func (it *AssignItem) unpack(enc encoder.Encoder, ht hint.Hint,
 	}
 
 	it.templateID = tmplID
-	it.validfrom = vFrom
-	it.validuntil = vUntil
+	it.validFrom = vFrom
+	it.validUntil = vUntil
 
 	return nil
 }
