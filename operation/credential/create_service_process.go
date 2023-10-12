@@ -148,7 +148,7 @@ func (opp *CreateServiceProcessor) Process(
 
 	sts := make([]base.StateMergeValue, 3)
 
-	sts[0] = state.NewStateMergeValue(
+	sts[0] = currencystate.NewStateMergeValue(
 		state.StateKeyDesign(fact.Contract()),
 		state.NewDesignStateValue(design),
 	)
@@ -183,7 +183,7 @@ func (opp *CreateServiceProcessor) Process(
 	if err != nil {
 		return nil, base.NewBaseOperationProcessReasonError("sender balance not found, %q; %w", fact.Sender(), err), nil
 	}
-	sb := state.NewStateMergeValue(st.Key(), st.Value())
+	sb := currencystate.NewStateMergeValue(st.Key(), st.Value())
 
 	switch b, err := currency.StateBalanceValue(st); {
 	case err != nil:
@@ -196,7 +196,7 @@ func (opp *CreateServiceProcessor) Process(
 	if !ok {
 		return nil, base.NewBaseOperationProcessReasonError("expected BalanceStateValue, not %T", sb.Value()), nil
 	}
-	sts[2] = state.NewStateMergeValue(sb.Key(), currency.NewBalanceStateValue(v.Amount.WithBig(v.Amount.Big().Sub(fee))))
+	sts[2] = currencystate.NewStateMergeValue(sb.Key(), currency.NewBalanceStateValue(v.Amount.WithBig(v.Amount.Big().Sub(fee))))
 
 	return sts, nil, nil
 }

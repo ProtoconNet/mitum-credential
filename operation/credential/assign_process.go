@@ -118,12 +118,12 @@ func (ipp *AssignItemProcessor) Process(
 		return nil, err
 	}
 
-	sts[0] = state.NewStateMergeValue(
+	sts[0] = currencystate.NewStateMergeValue(
 		state.StateKeyCredential(it.Contract(), it.TemplateID(), it.ID()),
 		state.NewCredentialStateValue(credential),
 	)
 
-	sts[1] = state.NewStateMergeValue(
+	sts[1] = currencystate.NewStateMergeValue(
 		state.StateKeyHolderDID(it.Contract(), it.Holder()),
 		state.NewHolderDIDStateValue(it.DID()),
 	)
@@ -307,7 +307,7 @@ func (opp *AssignProcessor) Process( // nolint:dupl
 		}
 
 		sts = append(sts,
-			state.NewStateMergeValue(
+			currencystate.NewStateMergeValue(
 				k,
 				state.NewDesignStateValue(design),
 			),
@@ -334,7 +334,7 @@ func (opp *AssignProcessor) Process( // nolint:dupl
 			return nil, nil, e.Errorf("expected BalanceStateValue, not %T", sb[i].Value())
 		}
 		stv := statecurrency.NewBalanceStateValue(v.Amount.WithBig(v.Amount.Big().Sub(required[i][0])))
-		sts = append(sts, state.NewStateMergeValue(sb[i].Key(), stv))
+		sts = append(sts, currencystate.NewStateMergeValue(sb[i].Key(), stv))
 	}
 
 	return sts, nil, nil

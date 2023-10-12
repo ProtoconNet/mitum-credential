@@ -3,7 +3,6 @@ package state
 import (
 	"fmt"
 	"github.com/ProtoconNet/mitum-credential/types"
-	"github.com/ProtoconNet/mitum-currency/v3/common"
 	"strings"
 
 	"github.com/ProtoconNet/mitum2/base"
@@ -17,30 +16,6 @@ var (
 	DesignStateValueHint = hint.MustNewHint("mitum-credential-design-state-value-v0.0.1")
 	DesignSuffix         = ":design"
 )
-
-type StateValueMerger struct {
-	*common.BaseStateValueMerger
-}
-
-func NewStateValueMerger(height base.Height, key string, st base.State) *StateValueMerger {
-	s := &StateValueMerger{
-		BaseStateValueMerger: common.NewBaseStateValueMerger(height, key, st),
-	}
-
-	return s
-}
-
-func NewStateMergeValue(key string, stv base.StateValue) base.StateMergeValue {
-	StateValueMergerFunc := func(height base.Height, st base.State) base.StateValueMerger {
-		return NewStateValueMerger(height, key, st)
-	}
-
-	return base.NewBaseStateMergeValue(
-		key,
-		stv,
-		StateValueMergerFunc,
-	)
-}
 
 func StateKeyCredentialPrefix(contract base.Address) string {
 	return fmt.Sprintf("%s%s", CredentialPrefix, contract.String())
