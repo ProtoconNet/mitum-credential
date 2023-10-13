@@ -100,10 +100,6 @@ func (fact AddTemplateFact) Bytes() []byte {
 }
 
 func (fact AddTemplateFact) IsValid(b []byte) error {
-	if err := common.IsValidOperationFact(fact, b); err != nil {
-		return err
-	}
-
 	if err := util.CheckIsValiders(nil, false,
 		fact.BaseHinter,
 		fact.sender,
@@ -155,6 +151,10 @@ func (fact AddTemplateFact) IsValid(b []byte) error {
 
 	if expire.UnixNano() < serviceDate.UnixNano() {
 		return util.ErrInvalid.Errorf("expire date <= service date, %s <= %s", fact.expirationDate, fact.serviceDate)
+	}
+
+	if err := common.IsValidOperationFact(fact, b); err != nil {
+		return err
 	}
 
 	return nil

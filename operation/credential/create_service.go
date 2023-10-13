@@ -61,10 +61,6 @@ func (fact CreateServiceFact) IsValid(b []byte) error {
 		return err
 	}
 
-	if err := common.IsValidOperationFact(fact, b); err != nil {
-		return err
-	}
-
 	if err := util.CheckIsValiders(
 		nil,
 		false,
@@ -77,6 +73,10 @@ func (fact CreateServiceFact) IsValid(b []byte) error {
 
 	if fact.sender.Equal(fact.contract) {
 		return util.ErrInvalid.Errorf("contract address is same with sender, %q", fact.sender)
+	}
+
+	if err := common.IsValidOperationFact(fact, b); err != nil {
+		return err
 	}
 
 	return nil
