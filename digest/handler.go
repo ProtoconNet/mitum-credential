@@ -19,7 +19,7 @@ import (
 )
 
 var (
-	HandlerPathDIDIssuer      = `/did/{contract:.+}/issuer`
+	HandlerPathDIDService     = `/did/{contract:.+}/service`
 	HandlerPathDIDCredential  = `/did/{contract:.+}/template/{templateid:.+}/credential/{credentialid:.+}`
 	HandlerPathDIDTemplate    = `/did/{contract:.+}/template/{templateid:.+}`
 	HandlerPathDIDCredentials = `/did/{contract:.+}/template/{templateid:.+}/credentials`
@@ -113,7 +113,7 @@ func (hd *Handlers) Handler() http.Handler {
 }
 
 func (hd *Handlers) setHandlers() {
-	_ = hd.setHandler(HandlerPathDIDIssuer, hd.handleDIDIssuer, true).
+	_ = hd.setHandler(HandlerPathDIDService, hd.handleCredentialService, true).
 		Methods(http.MethodOptions, "GET")
 	_ = hd.setHandler(HandlerPathDIDCredentials, hd.handleCredentials, true).
 		Methods(http.MethodOptions, "GET")

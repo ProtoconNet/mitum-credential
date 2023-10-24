@@ -75,7 +75,7 @@ func (opp *AddTemplateProcessor) PreProcess(
 	}
 
 	if err := currencystate.CheckExistsState(currency.StateKeyAccount(fact.Sender()), getStateFunc); err != nil {
-		return nil, base.NewBaseOperationProcessReasonError("sender state not found, %q; %w", fact.Sender(), err), nil
+		return nil, base.NewBaseOperationProcessReasonError("sender account state not found, %q; %w", fact.Sender(), err), nil
 	}
 
 	if err := currencystate.CheckExistsState(currency.StateKeyCurrencyDesign(fact.Currency()), getStateFunc); err != nil {
@@ -83,15 +83,15 @@ func (opp *AddTemplateProcessor) PreProcess(
 	}
 
 	if err := currencystate.CheckNotExistsState(extensioncurrency.StateKeyContractAccount(fact.Sender()), getStateFunc); err != nil {
-		return nil, base.NewBaseOperationProcessReasonError("sender is contract account and contract account cannot add template, %q; %w", fact.Sender(), err), nil
+		return nil, base.NewBaseOperationProcessReasonError("sender account is contract account, %q; %w", fact.Sender(), err), nil
 	}
 
 	if err := currencystate.CheckExistsState(currency.StateKeyAccount(fact.Creator()), getStateFunc); err != nil {
-		return nil, base.NewBaseOperationProcessReasonError("creator not found, %q; %w", fact.Creator(), err), nil
+		return nil, base.NewBaseOperationProcessReasonError("creator account state not found, %q; %w", fact.Creator(), err), nil
 	}
 
 	if err := currencystate.CheckNotExistsState(extensioncurrency.StateKeyContractAccount(fact.Creator()), getStateFunc); err != nil {
-		return nil, base.NewBaseOperationProcessReasonError("creator is contract account and contract account cannot be creator, %q; %w", fact.Creator(), err), nil
+		return nil, base.NewBaseOperationProcessReasonError("creator account is contract account, %q; %w", fact.Creator(), err), nil
 	}
 
 	st, err := currencystate.ExistsState(extensioncurrency.StateKeyContractAccount(fact.Contract()), "key of contract account", getStateFunc)
@@ -105,7 +105,7 @@ func (opp *AddTemplateProcessor) PreProcess(
 	}
 
 	if !(ca.Owner().Equal(fact.sender) || ca.IsOperator(fact.Sender())) {
-		return nil, base.NewBaseOperationProcessReasonError("sender is neither the owner nor the operator of the target contract account, %q", fact.sender), nil
+		return nil, base.NewBaseOperationProcessReasonError("sender account is neither the owner nor the operator of the target contract account, %q", fact.sender), nil
 	}
 
 	st, err = currencystate.ExistsState(state.StateKeyDesign(fact.Contract()), "key of design", getStateFunc)

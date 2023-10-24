@@ -2,7 +2,6 @@ package digest
 
 import (
 	"context"
-
 	"github.com/ProtoconNet/mitum-credential/state"
 	"github.com/ProtoconNet/mitum-credential/types"
 	currencydigest "github.com/ProtoconNet/mitum-currency/v3/digest"
@@ -14,28 +13,28 @@ import (
 )
 
 var (
-	defaultColNameAccount         = "digest_ac"
-	defaultColNameContractAccount = "digest_ca"
-	defaultColNameBalance         = "digest_bl"
-	defaultColNameCurrency        = "digest_cr"
-	defaultColNameOperation       = "digest_op"
-	defaultColNameBlock           = "digest_bm"
-	defaultColNameDIDIssuer       = "digest_did_issuer"
-	defaultColNameDIDCredential   = "digest_did_credential"
-	defaultColNameHolderDID       = "digest_did_holder_did"
-	defaultColNameTemplate        = "digest_did_template"
+	defaultColNameAccount              = "digest_ac"
+	defaultColNameContractAccount      = "digest_ca"
+	defaultColNameBalance              = "digest_bl"
+	defaultColNameCurrency             = "digest_cr"
+	defaultColNameOperation            = "digest_op"
+	defaultColNameBlock                = "digest_bm"
+	defaultColNameDIDCredentialService = "digest_did_issuer"
+	defaultColNameDIDCredential        = "digest_did_credential"
+	defaultColNameHolderDID            = "digest_did_holder_did"
+	defaultColNameTemplate             = "digest_did_template"
 )
 
 var maxLimit int64 = 50
 
-func DIDService(st *currencydigest.Database, contract string) (*types.Design, error) {
+func CredentialService(st *currencydigest.Database, contract string) (*types.Design, error) {
 	filter := util.NewBSONFilter("contract", contract)
 
 	var design *types.Design
 	var sta mitumbase.State
 	var err error
 	if err := st.DatabaseClient().GetByFilter(
-		defaultColNameDIDIssuer,
+		defaultColNameDIDCredentialService,
 		filter.D(),
 		func(res *mongo.SingleResult) error {
 			sta, err = currencydigest.LoadState(res.Decode, st.DatabaseEncoders())
@@ -59,10 +58,10 @@ func DIDService(st *currencydigest.Database, contract string) (*types.Design, er
 	return design, nil
 }
 
-func Credential(st *currencydigest.Database, contract, tid, id string) (*types.Credential, error) {
+func Credential(st *currencydigest.Database, contract, templateID, credentialID string) (*types.Credential, error) {
 	filter := util.NewBSONFilter("contract", contract)
-	filter = filter.Add("template", tid)
-	filter = filter.Add("credential_id", id)
+	filter = filter.Add("template", templateID)
+	filter = filter.Add("credential_id", credentialID)
 
 	var credential *types.Credential
 	var sta mitumbase.State
@@ -90,9 +89,9 @@ func Credential(st *currencydigest.Database, contract, tid, id string) (*types.C
 	return credential, nil
 }
 
-func Template(st *currencydigest.Database, contract, tid string) (*types.Template, error) {
+func Template(st *currencydigest.Database, contract, templateID string) (*types.Template, error) {
 	filter := util.NewBSONFilter("contract", contract)
-	filter = filter.Add("template", tid)
+	filter = filter.Add("template", templateID)
 
 	var template *types.Template
 	var sta mitumbase.State
@@ -120,9 +119,9 @@ func Template(st *currencydigest.Database, contract, tid string) (*types.Templat
 	return template, nil
 }
 
-func HolderDID(st *currencydigest.Database, contract, address string) (string, error) {
+func HolderDID(st *currencydigest.Database, contract, holder string) (string, error) {
 	filter := util.NewBSONFilter("contract", contract)
-	filter = filter.Add("holder", address)
+	filter = filter.Add("holder", holder)
 
 	var did string
 	var sta mitumbase.State
