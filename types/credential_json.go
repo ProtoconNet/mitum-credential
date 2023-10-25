@@ -27,6 +27,7 @@ func (cd Credential) MarshalJSON() ([]byte, error) {
 		Value:      cd.value,
 		ValidFrom:  cd.validFrom,
 		ValidUntil: cd.validUntil,
+		DID:        cd.did,
 	})
 }
 

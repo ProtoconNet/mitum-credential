@@ -66,6 +66,10 @@ func (it Credential) Bytes() []byte {
 func (it Credential) IsValid([]byte) error {
 	if err := util.CheckIsValiders(nil, false,
 		it.BaseHinter,
+	); err != nil {
+		return err
+	}
+	if err := util.CheckIsValiders(nil, true,
 		it.holder,
 	); err != nil {
 		return err

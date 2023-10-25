@@ -38,7 +38,7 @@ func (hd DesignStateValue) Hint() hint.Hint {
 }
 
 func (hd DesignStateValue) IsValid([]byte) error {
-	e := util.ErrInvalid.Errorf("invalid DesignStateValue")
+	e := util.ErrInvalid.Errorf("invalid credential DesignStateValue")
 
 	if err := hd.BaseHinter.IsValid(DesignStateValueHint.Type().Bytes()); err != nil {
 		return e.Wrap(err)
@@ -99,7 +99,7 @@ func (sv TemplateStateValue) Hint() hint.Hint {
 }
 
 func (sv TemplateStateValue) IsValid([]byte) error {
-	e := util.ErrInvalid.Errorf("invalid TemplateStateValue")
+	e := util.ErrInvalid.Errorf("invalid credential TemplateStateValue")
 
 	if err := sv.BaseHinter.IsValid(TemplateStateValueHint.Type().Bytes()); err != nil {
 		return e.Wrap(err)
@@ -234,6 +234,10 @@ func (hd HolderDIDStateValue) IsValid([]byte) error {
 
 	if err := hd.BaseHinter.IsValid(HolderDIDStateValueHint.Type().Bytes()); err != nil {
 		return e.Wrap(err)
+	}
+
+	if len(hd.did) < 1 {
+		return e.Errorf("empty did")
 	}
 
 	return nil

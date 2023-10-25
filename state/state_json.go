@@ -22,6 +22,7 @@ func (de DesignStateValue) MarshalJSON() ([]byte, error) {
 }
 
 type DesignStateValueJSONUnmarshaler struct {
+	Hint              hint.Hint       `json:"_hint"`
 	CredentialService json.RawMessage `json:"credential_service"`
 }
 
@@ -33,6 +34,8 @@ func (de *DesignStateValue) DecodeJSON(b []byte, enc *jsonenc.Encoder) error {
 		return e.Wrap(err)
 	}
 
+	de.BaseHinter = hint.NewBaseHinter(u.Hint)
+
 	var design types.Design
 
 	if err := design.DecodeJSON(u.CredentialService, enc); err != nil {
@@ -40,6 +43,10 @@ func (de *DesignStateValue) DecodeJSON(b []byte, enc *jsonenc.Encoder) error {
 	}
 
 	de.Design = design
+
+	if err := de.IsValid(nil); err != nil {
+		return e.Wrap(err)
+	}
 
 	return nil
 }
@@ -57,6 +64,7 @@ func (t TemplateStateValue) MarshalJSON() ([]byte, error) {
 }
 
 type TemplateStateValueJSONUnmarshaler struct {
+	Hint     hint.Hint       `json:"_hint"`
 	Template json.RawMessage `json:"template"`
 }
 
@@ -68,6 +76,8 @@ func (t *TemplateStateValue) DecodeJSON(b []byte, enc *jsonenc.Encoder) error {
 		return e.Wrap(err)
 	}
 
+	t.BaseHinter = hint.NewBaseHinter(u.Hint)
+
 	var template types.Template
 
 	if err := template.DecodeJSON(u.Template, enc); err != nil {
@@ -76,6 +86,9 @@ func (t *TemplateStateValue) DecodeJSON(b []byte, enc *jsonenc.Encoder) error {
 
 	t.Template = template
 
+	if err := t.IsValid(nil); err != nil {
+		return e.Wrap(err)
+	}
 	return nil
 }
 
@@ -92,6 +105,7 @@ func (cd CredentialStateValue) MarshalJSON() ([]byte, error) {
 }
 
 type CredentialStateValueJSONUnmarshaler struct {
+	Hint       hint.Hint       `json:"_hint"`
 	Credential json.RawMessage `json:"credential"`
 }
 
@@ -103,6 +117,8 @@ func (cd *CredentialStateValue) DecodeJSON(b []byte, enc *jsonenc.Encoder) error
 		return e.Wrap(err)
 	}
 
+	cd.BaseHinter = hint.NewBaseHinter(u.Hint)
+
 	var credential types.Credential
 
 	if err := credential.DecodeJSON(u.Credential, enc); err != nil {
@@ -111,6 +127,9 @@ func (cd *CredentialStateValue) DecodeJSON(b []byte, enc *jsonenc.Encoder) error
 
 	cd.Credential = credential
 
+	if err := cd.IsValid(nil); err != nil {
+		return e.Wrap(err)
+	}
 	return nil
 }
 
@@ -127,7 +146,8 @@ func (hd HolderDIDStateValue) MarshalJSON() ([]byte, error) {
 }
 
 type HolderDIDStateValueJSONUnmarshaler struct {
-	DID string `json:"did"`
+	Hint hint.Hint `json:"_hint"`
+	DID  string    `json:"did"`
 }
 
 func (hd *HolderDIDStateValue) DecodeJSON(b []byte, enc *jsonenc.Encoder) error {
@@ -138,7 +158,12 @@ func (hd *HolderDIDStateValue) DecodeJSON(b []byte, enc *jsonenc.Encoder) error 
 		return e.Wrap(err)
 	}
 
+	hd.BaseHinter = hint.NewBaseHinter(u.Hint)
+
 	hd.did = u.DID
 
+	if err := hd.IsValid(nil); err != nil {
+		return e.Wrap(err)
+	}
 	return nil
 }

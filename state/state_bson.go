@@ -44,6 +44,10 @@ func (de *DesignStateValue) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
 
 	de.Design = design
 
+	if err := de.IsValid(nil); err != nil {
+		return e.Wrap(err)
+	}
+
 	return nil
 }
 
@@ -83,6 +87,10 @@ func (t *TemplateStateValue) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
 
 	t.Template = template
 
+	if err := t.IsValid(nil); err != nil {
+		return e.Wrap(err)
+	}
+
 	return nil
 }
 
@@ -100,7 +108,7 @@ type CredentialStateValueBSONUnmarshaler struct {
 	Credential bson.Raw `bson:"credential"`
 }
 
-func (t *CredentialStateValue) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
+func (cd *CredentialStateValue) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
 	e := util.StringError("failed to decode bson of CredentialStateValue")
 
 	var u CredentialStateValueBSONUnmarshaler
@@ -113,15 +121,18 @@ func (t *CredentialStateValue) DecodeBSON(b []byte, enc *bsonenc.Encoder) error 
 		return e.Wrap(err)
 	}
 
-	t.BaseHinter = hint.NewBaseHinter(ht)
+	cd.BaseHinter = hint.NewBaseHinter(ht)
 
 	var credential types.Credential
 	if err := credential.DecodeBSON(u.Credential, enc); err != nil {
 		return e.Wrap(err)
 	}
 
-	t.Credential = credential
+	cd.Credential = credential
 
+	if err := cd.IsValid(nil); err != nil {
+		return e.Wrap(err)
+	}
 	return nil
 }
 
@@ -154,6 +165,10 @@ func (hd *HolderDIDStateValue) DecodeBSON(b []byte, enc *bsonenc.Encoder) error 
 
 	hd.BaseHinter = hint.NewBaseHinter(ht)
 	hd.did = u.DID
+
+	if err := hd.IsValid(nil); err != nil {
+		return e.Wrap(err)
+	}
 
 	return nil
 }

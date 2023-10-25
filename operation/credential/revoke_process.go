@@ -106,15 +106,8 @@ func (ipp *RevokeItemProcessor) Process(
 ) ([]base.StateMergeValue, error) {
 	it := ipp.item
 
-	st, err := currencystate.ExistsState(state.StateKeyCredential(it.Contract(), it.TemplateID(), it.ID()), "key of credential", getStateFunc)
-	if err != nil {
-		return nil, err
-	}
-
-	credential, err := state.StateCredentialValue(st)
-	if err != nil {
-		return nil, err
-	}
+	st, _ := currencystate.ExistsState(state.StateKeyCredential(it.Contract(), it.TemplateID(), it.ID()), "key of credential", getStateFunc)
+	credential, _ := state.StateCredentialValue(st)
 
 	credential = types.NewCredential(nil, credential.TemplateID(), credential.ID(), credential.Value(), credential.ValidFrom(), credential.ValidUntil(), credential.DID())
 	if err := credential.IsValid(nil); err != nil {
@@ -132,7 +125,7 @@ func (ipp *RevokeItemProcessor) Process(
 
 	holders := *ipp.holders
 
-	if len(holders) == 0 {
+	if len(holders) < 1 {
 		return nil, errors.Errorf("empty holders, %s", it.Contract())
 	}
 
