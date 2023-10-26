@@ -27,13 +27,13 @@ func (it AssignItem) MarshalBSON() ([]byte, error) {
 type AssignItemBSONUnmarshaler struct {
 	Hint       string `bson:"_hint"`
 	Contract   string `bson:"contract"`
-	Holder     string `json:"holder"`
-	TemplateID string `json:"template_id"`
-	ID         string `json:"id"`
-	Value      string `json:"value"`
-	ValidFrom  uint64 `json:"valid_from"`
-	ValidUntil uint64 `json:"valid_until"`
-	DID        string `json:"did"`
+	Holder     string `bson:"holder"`
+	TemplateID string `bson:"template_id"`
+	ID         string `bson:"id"`
+	Value      string `bson:"value"`
+	ValidFrom  uint64 `bson:"valid_from"`
+	ValidUntil uint64 `bson:"valid_until"`
+	DID        string `bson:"did"`
 	Currency   string `bson:"currency"`
 }
 

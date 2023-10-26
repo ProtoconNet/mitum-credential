@@ -23,9 +23,9 @@ func (it RevokeItem) MarshalBSON() ([]byte, error) {
 type RevokeItemBSONUnmarshaler struct {
 	Hint       string `bson:"_hint"`
 	Contract   string `bson:"contract"`
-	Holder     string `json:"holder"`
-	TemplateID string `json:"template_id"`
-	ID         string `json:"id"`
+	Holder     string `bson:"holder"`
+	TemplateID string `bson:"template_id"`
+	ID         string `bson:"id"`
 	Currency   string `bson:"currency"`
 }
 
