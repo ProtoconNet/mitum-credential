@@ -99,6 +99,7 @@ func (cd CredentialStateValue) MarshalBSON() ([]byte, error) {
 		bson.M{
 			"_hint":      cd.Hint().String(),
 			"credential": cd.Credential,
+			"is_active":  cd.IsActive,
 		},
 	)
 }
@@ -106,6 +107,7 @@ func (cd CredentialStateValue) MarshalBSON() ([]byte, error) {
 type CredentialStateValueBSONUnmarshaler struct {
 	Hint       string   `bson:"_hint"`
 	Credential bson.Raw `bson:"credential"`
+	IsActive   bool     `bson:"is_active"`
 }
 
 func (cd *CredentialStateValue) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
@@ -129,6 +131,7 @@ func (cd *CredentialStateValue) DecodeBSON(b []byte, enc *bsonenc.Encoder) error
 	}
 
 	cd.Credential = credential
+	cd.IsActive = u.IsActive
 
 	if err := cd.IsValid(nil); err != nil {
 		return e.Wrap(err)

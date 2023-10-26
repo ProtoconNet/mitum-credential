@@ -150,12 +150,14 @@ var (
 type CredentialStateValue struct {
 	hint.BaseHinter
 	Credential types.Credential
+	IsActive   bool
 }
 
-func NewCredentialStateValue(credential types.Credential) CredentialStateValue {
+func NewCredentialStateValue(credential types.Credential, isActive bool) CredentialStateValue {
 	return CredentialStateValue{
 		BaseHinter: hint.NewBaseHinter(CredentialStateValueHint),
 		Credential: credential,
+		IsActive:   isActive,
 	}
 }
 
@@ -178,7 +180,11 @@ func (sv CredentialStateValue) IsValid([]byte) error {
 }
 
 func (sv CredentialStateValue) HashBytes() []byte {
-	return sv.Credential.Bytes()
+	var v int8
+	if sv.IsActive {
+		v = 1
+	}
+	return util.ConcatBytesSlice([]byte{byte(v)}, sv.Credential.Bytes())
 }
 
 func StateKeyCredential(contract base.Address, templateID string, id string) string {
@@ -194,18 +200,18 @@ func IsStateCredentialKey(key string) bool {
 	return strings.HasPrefix(key, CredentialPrefix) && strings.HasSuffix(key, CredentialSuffix)
 }
 
-func StateCredentialValue(st base.State) (types.Credential, error) {
+func StateCredentialValue(st base.State) (types.Credential, bool, error) {
 	v := st.Value()
 	if v == nil {
-		return types.Credential{}, util.ErrNotFound.Errorf("crednetial not found in State")
+		return types.Credential{}, false, util.ErrNotFound.Errorf("credential not found in State")
 	}
 
 	c, ok := v.(CredentialStateValue)
 	if !ok {
-		return types.Credential{}, errors.Errorf("invalid credential value found, %T", v)
+		return types.Credential{}, false, errors.Errorf("invalid credential value found, %T", v)
 	}
 
-	return c.Credential, nil
+	return c.Credential, c.IsActive, nil
 }
 
 var (

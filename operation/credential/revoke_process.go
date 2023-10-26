@@ -76,8 +76,22 @@ func (ipp *RevokeItemProcessor) PreProcess(
 		)
 	}
 
-	if err := currencystate.CheckExistsState(state.StateKeyDesign(it.Contract()), getStateFunc); err != nil {
-		return err
+	if st, err := currencystate.ExistsState(state.StateKeyDesign(it.Contract()), "key of design", getStateFunc); err != nil {
+		return errors.Wrapf(err, "failed to get design state of credential service")
+	} else if de, err := state.StateDesignValue(st); err != nil {
+		return errors.Wrapf(err, "failed to get design value of credential service from state")
+	} else {
+		if err := de.IsValid(nil); err != nil {
+			return err
+		}
+		for i, v := range de.Policy().TemplateIDs() {
+			if it.templateID == v {
+				break
+			}
+			if i == len(de.Policy().TemplateIDs())-1 {
+				return errors.Errorf("templateID not found")
+			}
+		}
 	}
 
 	st, err = currencystate.ExistsState(state.StateKeyCredential(it.Contract(), it.TemplateID(), it.ID()), "key of credential", getStateFunc)
@@ -85,13 +99,13 @@ func (ipp *RevokeItemProcessor) PreProcess(
 		return err
 	}
 
-	c, err := state.StateCredentialValue(st)
+	credential, isActive, err := state.StateCredentialValue(st)
 	if err != nil {
 		return err
 	}
 
-	if c.Holder() == nil {
-		return errors.Errorf("already revoked credential, %s-%s, %s", it.Contract(), it.ID(), c.Holder())
+	if !isActive {
+		return errors.Errorf("already revoked credential, %s-%s, %s", it.Contract(), it.ID(), credential.Holder())
 	}
 
 	if err := currencystate.CheckExistsState(statecurrency.StateKeyCurrencyDesign(it.Currency()), getStateFunc); err != nil {
@@ -104,12 +118,20 @@ func (ipp *RevokeItemProcessor) PreProcess(
 func (ipp *RevokeItemProcessor) Process(
 	_ context.Context, _ base.Operation, getStateFunc base.GetStateFunc,
 ) ([]base.StateMergeValue, error) {
+	if *ipp.credentialCount < 1 {
+		return nil, errors.Errorf("no credentials to revoke")
+	}
 	it := ipp.item
 
-	st, _ := currencystate.ExistsState(state.StateKeyCredential(it.Contract(), it.TemplateID(), it.ID()), "key of credential", getStateFunc)
-	credential, _ := state.StateCredentialValue(st)
+	*ipp.credentialCount--
 
-	credential = types.NewCredential(nil, credential.TemplateID(), credential.ID(), credential.Value(), credential.ValidFrom(), credential.ValidUntil(), credential.DID())
+	if len(*ipp.holders) < 1 {
+		return nil, errors.Errorf("empty holders, %s", it.Contract())
+	}
+
+	st, _ := currencystate.ExistsState(state.StateKeyCredential(it.Contract(), it.TemplateID(), it.ID()), "key of credential", getStateFunc)
+	credential, _, _ := state.StateCredentialValue(st)
+
 	if err := credential.IsValid(nil); err != nil {
 		return nil, err
 	}
@@ -117,27 +139,19 @@ func (ipp *RevokeItemProcessor) Process(
 	sts := []base.StateMergeValue{
 		currencystate.NewStateMergeValue(
 			state.StateKeyCredential(it.Contract(), it.TemplateID(), it.ID()),
-			state.NewCredentialStateValue(credential),
+			state.NewCredentialStateValue(credential, false),
 		),
 	}
 
-	*ipp.credentialCount--
-
-	holders := *ipp.holders
-
-	if len(holders) < 1 {
-		return nil, errors.Errorf("empty holders, %s", it.Contract())
-	}
-
-	for i, h := range holders {
+	var holders []types.Holder
+	for i, h := range *ipp.holders {
 		if h.Address().Equal(it.Holder()) {
 			if h.CredentialCount()-1 == 0 {
-				if i < len(holders)-1 {
-					copy(holders[i:], holders[i+1:])
-				}
-				holders = holders[:len(holders)-1]
+				copy(holders, (*ipp.holders)[:i])
+				copy(holders, (*ipp.holders)[i+1:])
+				ipp.holders = &holders
 			} else {
-				holders[i] = types.NewHolder(h.Address(), h.CredentialCount()-1)
+				(*ipp.holders)[i] = types.NewHolder(h.Address(), h.CredentialCount()-1)
 			}
 			break
 		}
@@ -146,9 +160,6 @@ func (ipp *RevokeItemProcessor) Process(
 			return nil, errors.Errorf("holder not found in credential service holders, %s, %s", it.Contract(), it.Holder())
 		}
 	}
-
-	ipp.holders = &holders
-
 	return sts, nil
 }
 
@@ -264,10 +275,7 @@ func (opp *RevokeProcessor) Process( // nolint:dupl
 			continue
 		}
 
-		st, err := currencystate.ExistsState(k, "key of design", getStateFunc)
-		if err != nil {
-			return nil, base.NewBaseOperationProcessReasonError("credential service not found, %s; %w", it.Contract(), err), nil
-		}
+		st, _ := currencystate.ExistsState(k, "key of design", getStateFunc)
 
 		design, err := state.StateDesignValue(st)
 		if err != nil {
@@ -305,8 +313,8 @@ func (opp *RevokeProcessor) Process( // nolint:dupl
 			return nil, base.NewBaseOperationProcessReasonError("failed to process RevokeItem; %w", err), nil
 		}
 
+		holders[k] = ipc.holders
 		sts = append(sts, st...)
-
 		ipc.Close()
 	}
 
@@ -325,10 +333,9 @@ func (opp *RevokeProcessor) Process( // nolint:dupl
 		)
 	}
 
-	fitems := fact.Items()
-	items := make([]CredentialItem, len(fitems))
+	items := make([]CredentialItem, len(fact.Items()))
 	for i := range fact.Items() {
-		items[i] = fitems[i]
+		items[i] = fact.Items()[i]
 	}
 
 	required, err := calculateCredentialItemsFee(getStateFunc, items)

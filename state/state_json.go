@@ -95,18 +95,21 @@ func (t *TemplateStateValue) DecodeJSON(b []byte, enc *jsonenc.Encoder) error {
 type CredentialStateValueJSONMarshaler struct {
 	hint.BaseHinter
 	Credential types.Credential `json:"credential"`
+	IsActive   bool             `json:"is_active"`
 }
 
 func (cd CredentialStateValue) MarshalJSON() ([]byte, error) {
 	return util.MarshalJSON(CredentialStateValueJSONMarshaler{
 		BaseHinter: cd.BaseHinter,
 		Credential: cd.Credential,
+		IsActive:   cd.IsActive,
 	})
 }
 
 type CredentialStateValueJSONUnmarshaler struct {
 	Hint       hint.Hint       `json:"_hint"`
 	Credential json.RawMessage `json:"credential"`
+	IsActive   bool            `json:"is_active"`
 }
 
 func (cd *CredentialStateValue) DecodeJSON(b []byte, enc *jsonenc.Encoder) error {
@@ -126,6 +129,7 @@ func (cd *CredentialStateValue) DecodeJSON(b []byte, enc *jsonenc.Encoder) error
 	}
 
 	cd.Credential = credential
+	cd.IsActive = u.IsActive
 
 	if err := cd.IsValid(nil); err != nil {
 		return e.Wrap(err)

@@ -67,7 +67,7 @@ func (opp *AddTemplateProcessor) PreProcess(
 
 	fact, ok := op.Fact().(AddTemplateFact)
 	if !ok {
-		return ctx, nil, e.Errorf("not AddTemplateFact, %T", op.Fact())
+		return ctx, nil, e.Errorf("not %T, %T", AddTemplateFact{}, op.Fact())
 	}
 
 	if err := fact.IsValid(nil); err != nil {

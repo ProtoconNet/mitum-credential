@@ -83,8 +83,37 @@ func (ipp *AssignItemProcessor) PreProcess(
 
 	if st, err := currencystate.ExistsState(state.StateKeyDesign(it.Contract()), "key of design", getStateFunc); err != nil {
 		return errors.Wrapf(err, "failed to get design state of credential service")
-	} else if _, err = state.StateDesignValue(st); err != nil {
+	} else if de, err := state.StateDesignValue(st); err != nil {
 		return errors.Wrapf(err, "failed to get design value of credential service from state")
+	} else {
+		if err := de.IsValid(nil); err != nil {
+			return err
+		}
+		for i, v := range de.Policy().TemplateIDs() {
+			if it.templateID == v {
+				break
+			}
+			if i == len(de.Policy().TemplateIDs())-1 {
+				return errors.Errorf("templateID not found")
+			}
+		}
+	}
+
+	switch st, found, err := getStateFunc(state.StateKeyCredential(it.Contract(),
+		it.TemplateID(),
+		it.ID())); {
+	case err != nil:
+		return errors.Wrapf(err, "failed to get credential state")
+	case !found:
+	default:
+		if credential, isActive, err := state.StateCredentialValue(st); err != nil {
+			return errors.Wrapf(err, "failed to get credential state")
+		} else if isActive {
+			return errors.Errorf(
+				"credential already assigned to holder account, %q",
+				credential.Holder(),
+			)
+		}
 	}
 
 	return nil
@@ -95,21 +124,7 @@ func (ipp *AssignItemProcessor) Process(
 ) ([]base.StateMergeValue, error) {
 	it := ipp.item
 
-	if st, _ := currencystate.ExistsState(
-		state.StateKeyCredential(it.Contract(),
-			it.TemplateID(),
-			it.ID()), "key of credential",
-		getStateFunc,
-	); st != nil {
-		credential, err := state.StateCredentialValue(st)
-		if err != nil {
-			return nil, err
-		}
-
-		if credential.Holder() == nil {
-			*ipp.credentialCount++
-		}
-	}
+	*ipp.credentialCount++
 
 	sts := make([]base.StateMergeValue, 2)
 
@@ -120,7 +135,7 @@ func (ipp *AssignItemProcessor) Process(
 
 	sts[0] = currencystate.NewStateMergeValue(
 		state.StateKeyCredential(it.Contract(), it.TemplateID(), it.ID()),
-		state.NewCredentialStateValue(credential),
+		state.NewCredentialStateValue(credential, true),
 	)
 
 	sts[1] = currencystate.NewStateMergeValue(
@@ -194,7 +209,7 @@ func (opp *AssignProcessor) PreProcess(
 
 	fact, ok := op.Fact().(AssignFact)
 	if !ok {
-		return ctx, nil, e.Errorf("expected AssignFact, not %T", op.Fact())
+		return ctx, nil, e.Errorf("expected %T, not %T", AssignFact{}, op.Fact())
 	}
 
 	if err := fact.IsValid(nil); err != nil {
