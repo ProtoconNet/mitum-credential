@@ -1,6 +1,7 @@
 package processor
 
 import (
+	"fmt"
 	"github.com/ProtoconNet/mitum-credential/operation/credential"
 	"github.com/ProtoconNet/mitum-currency/v3/operation/currency"
 	extensioncurrency "github.com/ProtoconNet/mitum-currency/v3/operation/extension"
@@ -11,9 +12,10 @@ import (
 )
 
 const (
-	DuplicationTypeSender   currencytypes.DuplicationType = "sender"
-	DuplicationTypeCurrency currencytypes.DuplicationType = "currency"
-	DuplicationTypeContract currencytypes.DuplicationType = "contract"
+	DuplicationTypeSender     currencytypes.DuplicationType = "sender"
+	DuplicationTypeCurrency   currencytypes.DuplicationType = "currency"
+	DuplicationTypeContract   currencytypes.DuplicationType = "contract"
+	DuplicationTypeCredential currencytypes.DuplicationType = "credential"
 )
 
 func CheckDuplication(opr *currencyprocessor.OperationProcessor, op base.Operation) error {
@@ -22,6 +24,7 @@ func CheckDuplication(opr *currencyprocessor.OperationProcessor, op base.Operati
 
 	var duplicationTypeSenderID string
 	var duplicationTypeCurrencyID string
+	var duplicationTypeCredentialID []string
 	var duplicationTypeContract string
 	var newAddresses []base.Address
 
@@ -98,12 +101,22 @@ func CheckDuplication(opr *currencyprocessor.OperationProcessor, op base.Operati
 			return errors.Errorf("expected AssignFact, not %T", t.Fact())
 		}
 		duplicationTypeSenderID = fact.Sender().String()
+		var credentials []string
+		for _, v := range fact.Items() {
+			credentials = append(credentials, fmt.Sprintf("%s-%s-%s", v.Contract().String(), v.TemplateID(), v.ID()))
+		}
+		duplicationTypeCredentialID = credentials
 	case credential.Revoke:
 		fact, ok := t.Fact().(credential.RevokeFact)
 		if !ok {
 			return errors.Errorf("expected RevokeFact, not %T", t.Fact())
 		}
 		duplicationTypeSenderID = fact.Sender().String()
+		var credentials []string
+		for _, v := range fact.Items() {
+			credentials = append(credentials, fmt.Sprintf("%s-%s-%s", v.Contract().String(), v.TemplateID(), v.ID()))
+		}
+		duplicationTypeCredentialID = credentials
 	default:
 		return nil
 	}
@@ -134,6 +147,17 @@ func CheckDuplication(opr *currencyprocessor.OperationProcessor, op base.Operati
 		}
 
 		opr.Duplicated[duplicationTypeContract] = DuplicationTypeContract
+	}
+	if len(duplicationTypeCredentialID) > 0 {
+		for _, v := range duplicationTypeCredentialID {
+			if _, found := opr.Duplicated[v]; found {
+				return errors.Errorf(
+					"cannot use a duplicated contract-template-credential for credential model , %v within a proposal",
+					v,
+				)
+			}
+			opr.Duplicated[v] = DuplicationTypeCredential
+		}
 	}
 
 	if len(newAddresses) > 0 {

@@ -60,12 +60,13 @@ func NewBlockSession(
 	}
 
 	return &BlockSession{
-		st:          nst,
-		block:       blk,
-		ops:         ops,
-		opstree:     opstree,
-		sts:         sts,
-		statesValue: &sync.Map{},
+		st:            nst,
+		block:         blk,
+		ops:           ops,
+		opstree:       opstree,
+		sts:           sts,
+		statesValue:   &sync.Map{},
+		credentialMap: map[string]struct{}{},
 	}, nil
 }
 
@@ -405,6 +406,7 @@ func (bs *BlockSession) close() error {
 	bs.didCredentialModels = nil
 	bs.didHolderDIDModels = nil
 	bs.didTemplateModels = nil
+	bs.credentialMap = nil
 
 	return bs.st.Close()
 }
