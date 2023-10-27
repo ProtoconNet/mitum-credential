@@ -272,8 +272,14 @@ func (hd *Handlers) buildCredentialsHal(
 	var nextOffset string
 
 	if len(vas) > 0 {
-		va := vas[len(vas)-1].Interface().(types.Credential)
-		nextOffset = va.ID()
+		va, ok := vas[len(vas)-1].Interface().(struct {
+			Credential types.Credential `json:"credential"`
+			IsActive   bool             `json:"is_active"`
+		})
+		if !ok {
+			return nil, errors.Errorf("failed to build credentials hal")
+		}
+		nextOffset = va.Credential.ID()
 	}
 
 	if len(nextOffset) > 0 {
