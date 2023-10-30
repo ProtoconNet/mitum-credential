@@ -19,8 +19,15 @@ func (h *Holder) unpack(enc encoder.Encoder, ht hint.Hint, adr string, count uin
 	default:
 		h.address = a
 	}
+	if err := h.IsValid(nil); err != nil {
+		return e.Wrap(err)
+	}
 
 	h.credentialCount = count
+
+	if err := h.IsValid(nil); err != nil {
+		return e.Wrap(err)
+	}
 
 	return nil
 }
@@ -47,6 +54,9 @@ func (po *Policy) unpack(enc encoder.Encoder, ht hint.Hint, tmplIDs []string, bH
 	}
 	po.holders = holders
 	po.credentialCount = count
+	if err := po.IsValid(nil); err != nil {
+		return e.Wrap(err)
+	}
 
 	return nil
 }

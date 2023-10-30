@@ -19,6 +19,9 @@ func (de *Design) unpack(enc encoder.Encoder, ht hint.Hint, bPcy []byte) error {
 	} else {
 		de.policy = po
 	}
+	if err := de.IsValid(nil); err != nil {
+		return e.Wrap(err)
+	}
 
 	return nil
 }

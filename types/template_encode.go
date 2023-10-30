@@ -32,6 +32,9 @@ func (t *Template) unpack(enc encoder.Encoder, ht hint.Hint,
 	default:
 		t.creator = a
 	}
+	if err := t.IsValid(nil); err != nil {
+		return e.Wrap(err)
+	}
 
 	return nil
 }

@@ -30,6 +30,9 @@ func (t *Credential) unpack(enc encoder.Encoder, ht hint.Hint,
 	t.templateID = tmplID
 	t.validFrom = vFrom
 	t.validUntil = vUntil
+	if err := t.IsValid(nil); err != nil {
+		return e.Wrap(err)
+	}
 
 	return nil
 }
