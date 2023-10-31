@@ -32,6 +32,7 @@ func (bs *BlockSession) prepareDID() error {
 				return err
 			}
 			bs.credentialMap[cre.ID()] = struct{}{}
+			bs.templateMap[cre.TemplateID()] = struct{}{}
 			didCredentialModels = append(didCredentialModels, j...)
 
 		case state.IsStateHolderDIDKey(st.Key()):
