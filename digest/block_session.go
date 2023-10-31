@@ -3,9 +3,10 @@ package digest
 import (
 	"context"
 	"fmt"
-	stateextension "github.com/ProtoconNet/mitum-currency/v3/state/extension"
 	"sync"
 	"time"
+
+	stateextension "github.com/ProtoconNet/mitum-currency/v3/state/extension"
 
 	currencydigest "github.com/ProtoconNet/mitum-currency/v3/digest"
 	"github.com/ProtoconNet/mitum-currency/v3/digest/isaac"
@@ -42,6 +43,7 @@ type BlockSession struct {
 	statesValue           *sync.Map
 	balanceAddressList    []string
 	credentialMap         map[string]struct{}
+	templateMap           map[string]struct{}
 }
 
 func NewBlockSession(
@@ -70,6 +72,7 @@ func NewBlockSession(
 		proposal:      proposal,
 		statesValue:   &sync.Map{},
 		credentialMap: map[string]struct{}{},
+		templateMap:   map[string]struct{}{},
 	}, nil
 }
 
@@ -148,15 +151,17 @@ func (bs *BlockSession) Commit(ctx context.Context) error {
 
 	if len(bs.didCredentialModels) > 0 {
 		for credential := range bs.credentialMap {
-			err := bs.st.CleanByHeightColName(
-				ctx,
-				bs.block.Manifest().Height(),
-				defaultColNameDIDCredential,
-				"credential_id",
-				credential,
-			)
-			if err != nil {
-				return err
+			for template := range bs.templateMap {
+				err := bs.st.CleanByHeightColName(
+					ctx,
+					bs.block.Manifest().Height(),
+					defaultColNameDIDCredential,
+					"credential_id::template",
+					credential+"::"+template,
+				)
+				if err != nil {
+					return err
+				}
 			}
 		}
 
@@ -410,6 +415,7 @@ func (bs *BlockSession) close() error {
 	bs.didHolderDIDModels = nil
 	bs.didTemplateModels = nil
 	bs.credentialMap = nil
+	bs.templateMap = nil
 
 	return bs.st.Close()
 }
