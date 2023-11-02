@@ -3,6 +3,7 @@ package digest
 import (
 	"context"
 	"fmt"
+	"github.com/ProtoconNet/mitum-credential/state"
 	stateextension "github.com/ProtoconNet/mitum-currency/v3/state/extension"
 	"sync"
 	"time"
@@ -147,13 +148,18 @@ func (bs *BlockSession) Commit(ctx context.Context) error {
 	}
 
 	if len(bs.didCredentialModels) > 0 {
-		for credential := range bs.credentialMap {
-			err := bs.st.CleanByHeightColName(
+		for key := range bs.credentialMap {
+			parsedKey, err := state.ParseStateKey(key, state.CredentialPrefix)
+			if err != nil {
+				return err
+			}
+			err = bs.st.CleanByHeightColName(
 				ctx,
 				bs.block.Manifest().Height(),
 				defaultColNameDIDCredential,
-				"credential_id",
-				credential,
+				"contract", parsedKey[1],
+				"template", parsedKey[2],
+				"credential_id", parsedKey[3],
 			)
 			if err != nil {
 				return err
