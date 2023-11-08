@@ -62,41 +62,45 @@ func POperationProcessorsMap(pctx context.Context) (context.Context, error) {
 		return pctx, err
 	}
 
-	_ = set.Add(credential.CreateServiceHint, func(height base.Height) (base.OperationProcessor, error) {
-		return opr.New(
-			height,
-			db.State,
-			nil,
-			nil,
-		)
-	})
+	_ = set.Add(credential.CreateServiceHint,
+		func(height base.Height, getStatef base.GetStateFunc) (base.OperationProcessor, error) {
+			return opr.New(
+				height,
+				getStatef,
+				nil,
+				nil,
+			)
+		})
 
-	_ = set.Add(credential.AddTemplateHint, func(height base.Height) (base.OperationProcessor, error) {
-		return opr.New(
-			height,
-			db.State,
-			nil,
-			nil,
-		)
-	})
+	_ = set.Add(credential.AddTemplateHint,
+		func(height base.Height, getStatef base.GetStateFunc) (base.OperationProcessor, error) {
+			return opr.New(
+				height,
+				getStatef,
+				nil,
+				nil,
+			)
+		})
 
-	_ = set.Add(credential.AssignHint, func(height base.Height) (base.OperationProcessor, error) {
-		return opr.New(
-			height,
-			db.State,
-			nil,
-			nil,
-		)
-	})
+	_ = set.Add(credential.AssignHint,
+		func(height base.Height, getStatef base.GetStateFunc) (base.OperationProcessor, error) {
+			return opr.New(
+				height,
+				getStatef,
+				nil,
+				nil,
+			)
+		})
 
-	_ = set.Add(credential.RevokeHint, func(height base.Height) (base.OperationProcessor, error) {
-		return opr.New(
-			height,
-			db.State,
-			nil,
-			nil,
-		)
-	})
+	_ = set.Add(credential.RevokeHint,
+		func(height base.Height, getStatef base.GetStateFunc) (base.OperationProcessor, error) {
+			return opr.New(
+				height,
+				getStatef,
+				nil,
+				nil,
+			)
+		})
 
 	var f currencycmds.ProposalOperationFactHintFunc = IsSupportedProposalOperationFactHintFunc
 

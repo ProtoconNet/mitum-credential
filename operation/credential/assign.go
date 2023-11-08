@@ -23,7 +23,7 @@ var (
 	AssignHint     = hint.MustNewHint("mitum-credential-assign-operation-v0.0.1")
 )
 
-var MaxAssignItems uint = 10
+var MaxAssignItems uint = 5000
 
 type AssignFact struct {
 	base.BaseFact
