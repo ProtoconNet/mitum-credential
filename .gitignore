@@ -30,3 +30,7 @@ tests/*/*/coverage/
 /openapi
 /sh
 .envrc
+/yml
+.golangci.excludes.txt
+/config.yml
+/genesis.yml
