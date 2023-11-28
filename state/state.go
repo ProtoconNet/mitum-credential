@@ -12,13 +12,13 @@ import (
 )
 
 var (
-	CredentialPrefix     = "credential:"
+	CredentialPrefix     = "credential"
 	DesignStateValueHint = hint.MustNewHint("mitum-credential-design-state-value-v0.0.1")
-	DesignSuffix         = ":design"
+	DesignSuffix         = "design"
 )
 
 func StateKeyCredentialPrefix(contract base.Address) string {
-	return fmt.Sprintf("%s%s", CredentialPrefix, contract.String())
+	return fmt.Sprintf("%s:%s", CredentialPrefix, contract.String())
 }
 
 type DesignStateValue struct {
@@ -74,12 +74,12 @@ func IsStateDesignKey(key string) bool {
 }
 
 func StateKeyDesign(contract base.Address) string {
-	return fmt.Sprintf("%s%s", StateKeyCredentialPrefix(contract), DesignSuffix)
+	return fmt.Sprintf("%s:%s", StateKeyCredentialPrefix(contract), DesignSuffix)
 }
 
 var (
 	TemplateStateValueHint = hint.MustNewHint("mitum-credential-template-state-value-v0.0.1")
-	TemplateSuffix         = ":template"
+	TemplateSuffix         = "template"
 )
 
 type TemplateStateValue struct {
@@ -117,7 +117,7 @@ func (sv TemplateStateValue) HashBytes() []byte {
 }
 
 func StateKeyTemplate(contract base.Address, templateID string) string {
-	return fmt.Sprintf("%s:%s%s",
+	return fmt.Sprintf("%s:%s:%s",
 		StateKeyCredentialPrefix(contract),
 		templateID,
 		TemplateSuffix,
@@ -144,7 +144,7 @@ func StateTemplateValue(st base.State) (types.Template, error) {
 
 var (
 	CredentialStateValueHint = hint.MustNewHint("mitum-credential-credential-state-value-v0.0.1")
-	CredentialSuffix         = ":credential"
+	CredentialSuffix         = "credential"
 )
 
 type CredentialStateValue struct {
@@ -189,7 +189,7 @@ func (sv CredentialStateValue) HashBytes() []byte {
 
 func StateKeyCredential(contract base.Address, templateID string, id string) string {
 	return fmt.Sprintf(
-		"%s:%s:%s%s",
+		"%s:%s:%s:%s",
 		StateKeyCredentialPrefix(contract), templateID,
 		id,
 		CredentialSuffix,
@@ -216,7 +216,7 @@ func StateCredentialValue(st base.State) (types.Credential, bool, error) {
 
 var (
 	HolderDIDStateValueHint = hint.MustNewHint("mitum-credential-holder-did-state-value-v0.0.1")
-	HolderDIDSuffix         = ":holder-did"
+	HolderDIDSuffix         = "holder-did"
 )
 
 type HolderDIDStateValue struct {
@@ -272,16 +272,16 @@ func IsStateHolderDIDKey(key string) bool {
 }
 
 func StateKeyHolderDID(contract base.Address, holder base.Address) string {
-	return fmt.Sprintf("%s:%s%s", StateKeyCredentialPrefix(contract), holder.String(), HolderDIDSuffix)
+	return fmt.Sprintf("%s:%s:%s", StateKeyCredentialPrefix(contract), holder.String(), HolderDIDSuffix)
 }
 
-func ParseStateKey(key string, Prefix string) ([]string, error) {
+func ParseStateKey(key string, Prefix string, expected int) ([]string, error) {
 	parsedKey := strings.Split(key, ":")
 	if parsedKey[0] != Prefix[:len(Prefix)-1] {
 		return nil, errors.Errorf("State Key not include Prefix, %s", parsedKey)
 	}
-	if len(parsedKey) < 3 {
-		return nil, errors.Errorf("parsing State Key string failed, %s", parsedKey)
+	if len(parsedKey) < expected {
+		return nil, errors.Errorf("parsed State Key length under %v", expected)
 	} else {
 		return parsedKey, nil
 	}
