@@ -54,6 +54,7 @@ func (t Template) IsValid([]byte) error {
 		t.BaseHinter,
 		t.serviceDate,
 		t.expirationDate,
+		t.creator,
 	); err != nil {
 		return err
 	}
