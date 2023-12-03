@@ -3,7 +3,8 @@ package credential
 import (
 	"unicode/utf8"
 
-	currencytypes "github.com/ProtoconNet/mitum-currency/v3/types"
+	"github.com/ProtoconNet/mitum-credential/types"
+	crcytypes "github.com/ProtoconNet/mitum-currency/v3/types"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
@@ -17,14 +18,14 @@ type RevokeItem struct {
 	holder     base.Address
 	templateID string
 	id         string
-	currency   currencytypes.CurrencyID
+	currency   crcytypes.CurrencyID
 }
 
 func NewRevokeItem(
 	contract base.Address,
 	holder base.Address,
 	templateID, id string,
-	currency currencytypes.CurrencyID,
+	currency crcytypes.CurrencyID,
 ) RevokeItem {
 	return RevokeItem{
 		BaseHinter: hint.NewBaseHinter(RevokeItemHint),
@@ -60,12 +61,20 @@ func (it RevokeItem) IsValid([]byte) error {
 		return util.ErrInvalid.Errorf("contract address is same with sender, %q", it.holder)
 	}
 
-	if l := utf8.RuneCountInString(it.templateID); l < 1 || l > MaxLengthTemplateID {
-		return util.ErrInvalid.Errorf("invalid length of template ID, 0 <= length <= %d", MaxLengthTemplateID)
+	if l := utf8.RuneCountInString(it.templateID); l < 1 || l > types.MaxLengthTemplateID {
+		return util.ErrInvalid.Errorf("invalid length of template ID, 0 <= length <= %d", types.MaxLengthTemplateID)
 	}
 
-	if l := utf8.RuneCountInString(it.id); l < 1 || l > MaxLengthCredentialID {
-		return util.ErrInvalid.Errorf("invalid length of ID, 0 <= length <= %d", MaxLengthCredentialID)
+	if !crcytypes.ReSpcecialChar.Match([]byte(it.templateID)) {
+		return util.ErrInvalid.Errorf("invalid template ID due to the inclusion of special characters")
+	}
+
+	if l := utf8.RuneCountInString(it.id); l < 1 || l > types.MaxLengthCredentialID {
+		return util.ErrInvalid.Errorf("invalid length of credential ID, 0 <= length <= %d", types.MaxLengthCredentialID)
+	}
+
+	if !crcytypes.ReSpcecialChar.Match([]byte(it.id)) {
+		return util.ErrInvalid.Errorf("invalid credential ID due to the inclusion of special characters")
 	}
 
 	return nil
@@ -87,7 +96,7 @@ func (it RevokeItem) ID() string {
 	return it.id
 }
 
-func (it RevokeItem) Currency() currencytypes.CurrencyID {
+func (it RevokeItem) Currency() crcytypes.CurrencyID {
 	return it.currency
 }
 

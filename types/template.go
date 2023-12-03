@@ -1,12 +1,24 @@
 package types
 
 import (
+	crcytypes "github.com/ProtoconNet/mitum-currency/v3/types"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
+	"unicode/utf8"
 )
 
 var TemplateHint = hint.MustNewHint("mitum-credential-template-v0.0.1")
+
+var (
+	MaxLengthTemplateID      = 20
+	MaxLengthCredentialID    = 20
+	MaxLengthTemplateName    = 20
+	MaxLengthDisplayName     = 20
+	MaxLengthSubjectKey      = 256
+	MaxLengthCredentialValue = 1024
+	MaxLengthDescription     = 1024
+)
 
 type Template struct {
 	hint.BaseHinter
@@ -59,12 +71,12 @@ func (t Template) IsValid([]byte) error {
 		return err
 	}
 
-	if len(t.templateID) == 0 {
-		return util.ErrInvalid.Errorf("empty template id")
+	if l := utf8.RuneCountInString(t.templateID); l < 1 || l > MaxLengthTemplateID {
+		return util.ErrInvalid.Errorf("invalid length of credential ID, 0 <= length <= %d", MaxLengthTemplateID)
 	}
 
-	if len(t.templateID) > 20 {
-		return util.ErrInvalid.Errorf("invalid length of template id, length < %d", MaxLengthContractID)
+	if !crcytypes.ReSpcecialChar.Match([]byte(t.templateID)) {
+		return util.ErrInvalid.Errorf("invalid templateID due to the inclusion of special characters")
 	}
 
 	if len(t.templateName) == 0 {

@@ -108,6 +108,30 @@ func (bs *BlockSession) Commit(ctx context.Context) error {
 		_ = bs.close()
 	}()
 
+	if len(bs.didCredentialModels) > 0 {
+		for key := range bs.credentialMap {
+			parsedKey, err := crcystate.ParseStateKey(key, state.CredentialPrefix, 5)
+			if err != nil {
+				return err
+			}
+			err = bs.st.CleanByHeightColName(
+				ctx,
+				bs.block.Manifest().Height(),
+				defaultColNameDIDCredential,
+				"contract", parsedKey[1],
+				"template", parsedKey[2],
+				"credential_id", parsedKey[3],
+			)
+			if err != nil {
+				return err
+			}
+		}
+
+		if err := bs.writeModels(ctx, defaultColNameDIDCredential, bs.didCredentialModels); err != nil {
+			return err
+		}
+	}
+
 	if err := bs.writeModels(ctx, defaultColNameBlock, bs.blockModels); err != nil {
 		return err
 	}
@@ -144,30 +168,6 @@ func (bs *BlockSession) Commit(ctx context.Context) error {
 
 	if len(bs.didIssuerModels) > 0 {
 		if err := bs.writeModels(ctx, defaultColNameDIDCredentialService, bs.didIssuerModels); err != nil {
-			return err
-		}
-	}
-
-	if len(bs.didCredentialModels) > 0 {
-		for key := range bs.credentialMap {
-			parsedKey, err := crcystate.ParseStateKey(key, state.CredentialPrefix, 5)
-			if err != nil {
-				return err
-			}
-			err = bs.st.CleanByHeightColName(
-				ctx,
-				bs.block.Manifest().Height(),
-				defaultColNameDIDCredential,
-				"contract", parsedKey[1],
-				"template", parsedKey[2],
-				"credential_id", parsedKey[3],
-			)
-			if err != nil {
-				return err
-			}
-		}
-
-		if err := bs.writeModels(ctx, defaultColNameDIDCredential, bs.didCredentialModels); err != nil {
 			return err
 		}
 	}

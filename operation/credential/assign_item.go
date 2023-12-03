@@ -3,7 +3,8 @@ package credential
 import (
 	"unicode/utf8"
 
-	currencytypes "github.com/ProtoconNet/mitum-currency/v3/types"
+	"github.com/ProtoconNet/mitum-credential/types"
+	crcytypes "github.com/ProtoconNet/mitum-currency/v3/types"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
@@ -21,7 +22,7 @@ type AssignItem struct {
 	validFrom  uint64
 	validUntil uint64
 	did        string
-	currency   currencytypes.CurrencyID
+	currency   crcytypes.CurrencyID
 }
 
 func NewAssignItem(
@@ -33,7 +34,7 @@ func NewAssignItem(
 	validFrom uint64,
 	validUntil uint64,
 	did string,
-	currency currencytypes.CurrencyID,
+	currency crcytypes.CurrencyID,
 ) AssignItem {
 	return AssignItem{
 		BaseHinter: hint.NewBaseHinter(AssignItemHint),
@@ -81,20 +82,28 @@ func (it AssignItem) IsValid([]byte) error {
 		return util.ErrInvalid.Errorf("valid until <= valid from, %q <= %q", it.validUntil, it.validFrom)
 	}
 
-	if l := utf8.RuneCountInString(it.templateID); l < 1 || l > MaxLengthTemplateID {
-		return util.ErrInvalid.Errorf("invalid length of template ID, 0 <= length <= %d", MaxLengthTemplateID)
+	if l := utf8.RuneCountInString(it.templateID); l < 1 || l > types.MaxLengthTemplateID {
+		return util.ErrInvalid.Errorf("invalid length of template ID, 0 <= length <= %d", types.MaxLengthTemplateID)
 	}
 
-	if l := utf8.RuneCountInString(it.id); l < 1 || l > MaxLengthCredentialID {
-		return util.ErrInvalid.Errorf("invalid length of ID, 0 <= length <= %d", MaxLengthCredentialID)
+	if !crcytypes.ReSpcecialChar.Match([]byte(it.templateID)) {
+		return util.ErrInvalid.Errorf("invalid templateID due to the inclusion of special characters")
+	}
+
+	if l := utf8.RuneCountInString(it.id); l < 1 || l > types.MaxLengthCredentialID {
+		return util.ErrInvalid.Errorf("invalid length of credential ID, 0 <= length <= %d", types.MaxLengthCredentialID)
+	}
+
+	if !crcytypes.ReSpcecialChar.Match([]byte(it.id)) {
+		return util.ErrInvalid.Errorf("invalid credential ID due to the inclusion of special characters")
 	}
 
 	if len(it.did) == 0 {
 		return util.ErrInvalid.Errorf("empty did")
 	}
 
-	if l := utf8.RuneCountInString(it.value); l < 1 || l > MaxLengthCredentialValue {
-		return util.ErrInvalid.Errorf("invalid length of value, 0 <= length <= %d", MaxLengthCredentialValue)
+	if l := utf8.RuneCountInString(it.value); l < 1 || l > types.MaxLengthCredentialValue {
+		return util.ErrInvalid.Errorf("invalid length of value, 0 <= length <= %d", types.MaxLengthCredentialValue)
 	}
 
 	return nil
@@ -132,7 +141,7 @@ func (it AssignItem) DID() string {
 	return it.did
 }
 
-func (it AssignItem) Currency() currencytypes.CurrencyID {
+func (it AssignItem) Currency() crcytypes.CurrencyID {
 	return it.currency
 }
 

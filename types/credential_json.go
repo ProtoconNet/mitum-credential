@@ -18,16 +18,16 @@ type CredentialJSONMarshaler struct {
 	DID        string       `json:"did"`
 }
 
-func (cd Credential) MarshalJSON() ([]byte, error) {
+func (c Credential) MarshalJSON() ([]byte, error) {
 	return util.MarshalJSON(CredentialJSONMarshaler{
-		BaseHinter: cd.BaseHinter,
-		Holder:     cd.holder,
-		TemplateID: cd.templateID,
-		ID:         cd.id,
-		Value:      cd.value,
-		ValidFrom:  cd.validFrom,
-		ValidUntil: cd.validUntil,
-		DID:        cd.did,
+		BaseHinter: c.BaseHinter,
+		Holder:     c.holder,
+		TemplateID: c.templateID,
+		ID:         c.id,
+		Value:      c.value,
+		ValidFrom:  c.validFrom,
+		ValidUntil: c.validUntil,
+		DID:        c.did,
 	})
 }
 
@@ -42,7 +42,7 @@ type CredentialJSONUnmarshaler struct {
 	DID        string    `json:"did"`
 }
 
-func (cd *Credential) DecodeJSON(b []byte, enc *jsonenc.Encoder) error {
+func (c *Credential) DecodeJSON(b []byte, enc *jsonenc.Encoder) error {
 	e := util.StringError("failed to decode json of Credential")
 
 	var u CredentialJSONUnmarshaler
@@ -50,7 +50,7 @@ func (cd *Credential) DecodeJSON(b []byte, enc *jsonenc.Encoder) error {
 		return e.Wrap(err)
 	}
 
-	return cd.unpack(enc, u.Hint,
+	return c.unpack(enc, u.Hint,
 		u.Holder,
 		u.TemplateID,
 		u.ID,

@@ -1,9 +1,11 @@
 package types
 
 import (
+	crcytypes "github.com/ProtoconNet/mitum-currency/v3/types"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
+	"unicode/utf8"
 )
 
 var CredentialHint = hint.MustNewHint("mitum-credential-credential-v0.0.1")
@@ -40,84 +42,96 @@ func NewCredential(
 	}
 }
 
-func (it Credential) Bytes() []byte {
-	if it.holder == nil {
+func (c Credential) Bytes() []byte {
+	if c.holder == nil {
 		return util.ConcatBytesSlice(
-			[]byte(it.templateID),
-			[]byte(it.id),
-			[]byte(it.value),
-			util.Uint64ToBytes(it.validFrom),
-			util.Uint64ToBytes(it.validUntil),
-			[]byte(it.did),
+			[]byte(c.templateID),
+			[]byte(c.id),
+			[]byte(c.value),
+			util.Uint64ToBytes(c.validFrom),
+			util.Uint64ToBytes(c.validUntil),
+			[]byte(c.did),
 		)
 	}
 
 	return util.ConcatBytesSlice(
-		it.holder.Bytes(),
-		[]byte(it.templateID),
-		[]byte(it.id),
-		[]byte(it.value),
-		util.Uint64ToBytes(it.validFrom),
-		util.Uint64ToBytes(it.validUntil),
-		[]byte(it.did),
+		c.holder.Bytes(),
+		[]byte(c.templateID),
+		[]byte(c.id),
+		[]byte(c.value),
+		util.Uint64ToBytes(c.validFrom),
+		util.Uint64ToBytes(c.validUntil),
+		[]byte(c.did),
 	)
 }
 
-func (it Credential) IsValid([]byte) error {
+func (c Credential) IsValid([]byte) error {
 	if err := util.CheckIsValiders(nil, false,
-		it.BaseHinter,
+		c.BaseHinter,
 	); err != nil {
 		return err
 	}
 	if err := util.CheckIsValiders(nil, true,
-		it.holder,
+		c.holder,
 	); err != nil {
 		return err
 	}
 
-	if it.validUntil <= it.validFrom {
-		return util.ErrInvalid.Errorf("valid until <= valid from, %q <= %q", it.validUntil, it.validFrom)
+	if c.validUntil <= c.validFrom {
+		return util.ErrInvalid.Errorf("valid until <= valid from, %q <= %q", c.validUntil, c.validFrom)
 	}
 
-	if len(it.id) == 0 {
-		return util.ErrInvalid.Errorf("empty id")
+	if l := utf8.RuneCountInString(c.templateID); l < 1 || l > MaxLengthTemplateID {
+		return util.ErrInvalid.Errorf("invalid length of credential ID, 0 <= length <= %d", MaxLengthTemplateID)
 	}
 
-	if len(it.did) == 0 {
+	if !crcytypes.ReSpcecialChar.Match([]byte(c.templateID)) {
+		return util.ErrInvalid.Errorf("invalid template ID due to the inclusion of special characters")
+	}
+
+	if l := utf8.RuneCountInString(c.id); l < 1 || l > MaxLengthCredentialID {
+		return util.ErrInvalid.Errorf("invalid length of credential ID, 0 <= length <= %d", MaxLengthCredentialID)
+	}
+
+	if !crcytypes.ReSpcecialChar.Match([]byte(c.id)) {
+		return util.ErrInvalid.Errorf("invalid credential ID due to the inclusion of special characters")
+	}
+
+	if len(c.did) == 0 {
 		return util.ErrInvalid.Errorf("empty did")
 	}
 
-	if len(it.value) == 0 {
+	if len(c.value) == 0 {
 		return util.ErrInvalid.Errorf("empty value")
 	}
 
 	return nil
 }
 
-func (it Credential) Holder() base.Address {
-	return it.holder
+func (c Credential) Holder() base.Address {
+	return c.holder
 }
 
-func (it Credential) TemplateID() string {
-	return it.templateID
+func (c Credential) TemplateID() string {
+	return c.templateID
 }
 
-func (it Credential) ValidFrom() uint64 {
-	return it.validFrom
+func (c Credential) ValidFrom() uint64 {
+	return c.validFrom
 }
 
-func (it Credential) ValidUntil() uint64 {
-	return it.validUntil
+func (c Credential) ValidUntil() uint64 {
+	return c.validUntil
 }
 
-func (it Credential) ID() string {
-	return it.id
+func (c Credential) ID() string {
+	return c.id
 }
 
-func (it Credential) Value() string {
-	return it.value
+func (c Credential) Value() string {
+	return c.value
 }
 
-func (it Credential) DID() string {
-	return it.did
+func (c Credential) DID() string {
+	return c.did
 }

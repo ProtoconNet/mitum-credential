@@ -5,7 +5,7 @@ import (
 
 	"github.com/ProtoconNet/mitum-credential/types"
 	"github.com/ProtoconNet/mitum-currency/v3/common"
-	currencytypes "github.com/ProtoconNet/mitum-currency/v3/types"
+	crcytypes "github.com/ProtoconNet/mitum-currency/v3/types"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
@@ -31,7 +31,7 @@ type AddTemplateFact struct {
 	subjectKey     string
 	description    string
 	creator        base.Address
-	currency       currencytypes.CurrencyID
+	currency       crcytypes.CurrencyID
 }
 
 func NewAddTemplateFact(
@@ -48,7 +48,7 @@ func NewAddTemplateFact(
 	subjectKey string,
 	description string,
 	creator base.Address,
-	currency currencytypes.CurrencyID,
+	currency crcytypes.CurrencyID,
 ) AddTemplateFact {
 	bf := base.NewBaseFact(AddTemplateFactHint, token)
 	fact := AddTemplateFact{
@@ -111,24 +111,28 @@ func (fact AddTemplateFact) IsValid(b []byte) error {
 		return err
 	}
 
-	if l := utf8.RuneCountInString(fact.templateID); l < 1 || l > MaxLengthTemplateID {
-		return util.ErrInvalid.Errorf("invalid length of template ID, 0 <= length <= %d", MaxLengthTemplateID)
+	if l := utf8.RuneCountInString(fact.templateID); l < 1 || l > types.MaxLengthTemplateID {
+		return util.ErrInvalid.Errorf("invalid length of template ID, 0 <= length <= %d", types.MaxLengthTemplateID)
 	}
 
-	if l := utf8.RuneCountInString(fact.templateName); l < 1 || l > MaxLengthTemplateName {
-		return util.ErrInvalid.Errorf("invalid length of template name, 0 <= length <= %d", MaxLengthTemplateName)
+	if !crcytypes.ReSpcecialChar.Match([]byte(fact.templateID)) {
+		return util.ErrInvalid.Errorf("invalid templateID due to the inclusion of special characters")
 	}
 
-	if l := utf8.RuneCountInString(fact.displayName); l < 1 || l > MaxLengthDisplayName {
-		return util.ErrInvalid.Errorf("invalid length of display name, 0 <= length <= %d", MaxLengthDisplayName)
+	if l := utf8.RuneCountInString(fact.templateName); l < 1 || l > types.MaxLengthTemplateName {
+		return util.ErrInvalid.Errorf("invalid length of template name, 0 <= length <= %d", types.MaxLengthTemplateName)
 	}
 
-	if l := utf8.RuneCountInString(fact.subjectKey); l < 1 || l > MaxLengthSubjectKey {
-		return util.ErrInvalid.Errorf("invalid length of subjectKey, 0 <= length <= %d", MaxLengthSubjectKey)
+	if l := utf8.RuneCountInString(fact.displayName); l < 1 || l > types.MaxLengthDisplayName {
+		return util.ErrInvalid.Errorf("invalid length of display name, 0 <= length <= %d", types.MaxLengthDisplayName)
 	}
 
-	if l := utf8.RuneCountInString(fact.description); l < 1 || l > MaxLengthDescription {
-		return util.ErrInvalid.Errorf("invalid length of description, 0 <= length <= %d", MaxLengthDescription)
+	if l := utf8.RuneCountInString(fact.subjectKey); l < 1 || l > types.MaxLengthSubjectKey {
+		return util.ErrInvalid.Errorf("invalid length of subjectKey, 0 <= length <= %d", types.MaxLengthSubjectKey)
+	}
+
+	if l := utf8.RuneCountInString(fact.description); l < 1 || l > types.MaxLengthDescription {
+		return util.ErrInvalid.Errorf("invalid length of description, 0 <= length <= %d", types.MaxLengthDescription)
 	}
 
 	if fact.sender.Equal(fact.contract) {
@@ -212,7 +216,7 @@ func (fact AddTemplateFact) Creator() base.Address {
 	return fact.creator
 }
 
-func (fact AddTemplateFact) Currency() currencytypes.CurrencyID {
+func (fact AddTemplateFact) Currency() crcytypes.CurrencyID {
 	return fact.currency
 }
 
@@ -231,13 +235,3 @@ type AddTemplate struct {
 func NewAddTemplate(fact AddTemplateFact) (AddTemplate, error) {
 	return AddTemplate{BaseOperation: common.NewBaseOperation(AddTemplateHint, fact)}, nil
 }
-
-var (
-	MaxLengthTemplateID      = 20
-	MaxLengthCredentialID    = 20
-	MaxLengthTemplateName    = 20
-	MaxLengthDisplayName     = 20
-	MaxLengthSubjectKey      = 256
-	MaxLengthCredentialValue = 1024
-	MaxLengthDescription     = 1024
-)

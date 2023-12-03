@@ -8,17 +8,17 @@ import (
 	"github.com/ProtoconNet/mitum2/util/hint"
 )
 
-func (cd Credential) MarshalBSON() ([]byte, error) {
+func (c Credential) MarshalBSON() ([]byte, error) {
 	return bsonenc.Marshal(
 		bson.M{
-			"_hint":       cd.Hint().String(),
-			"holder":      cd.holder,
-			"template_id": cd.templateID,
-			"id":          cd.id,
-			"value":       cd.value,
-			"valid_from":  cd.validFrom,
-			"valid_until": cd.validUntil,
-			"did":         cd.did,
+			"_hint":       c.Hint().String(),
+			"holder":      c.holder,
+			"template_id": c.templateID,
+			"id":          c.id,
+			"value":       c.value,
+			"valid_from":  c.validFrom,
+			"valid_until": c.validUntil,
+			"did":         c.did,
 		},
 	)
 }
@@ -34,7 +34,7 @@ type CredentialBSONUnmarshaler struct {
 	DID        string `bson:"did"`
 }
 
-func (cd *Credential) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
+func (c *Credential) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
 	e := util.StringError("failed to decode bson of Credential")
 
 	var u CredentialBSONUnmarshaler
@@ -47,7 +47,7 @@ func (cd *Credential) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
 		return e.Wrap(err)
 	}
 
-	return cd.unpack(enc, ht,
+	return c.unpack(enc, ht,
 		u.Holder,
 		u.TemplateID,
 		u.ID,
