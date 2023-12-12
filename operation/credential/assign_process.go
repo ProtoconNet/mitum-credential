@@ -334,7 +334,7 @@ func (opp *AssignProcessor) Process( // nolint:dupl
 		items[i] = fact.Items()[i]
 	}
 
-	required, err := calculateCredentialItemsFee(getStateFunc, items)
+	feeReceiveBalSts, required, err := calculateCredentialItemsFee(getStateFunc, items)
 	if err != nil {
 		return nil, base.NewBaseOperationProcessReasonError("failed to calculate fee; %w", err), nil
 	}
@@ -343,13 +343,38 @@ func (opp *AssignProcessor) Process( // nolint:dupl
 		return nil, base.NewBaseOperationProcessReasonError("failed to check enough balance; %w", err), nil
 	}
 
-	for i := range sb {
-		v, ok := sb[i].Value().(statecurrency.BalanceStateValue)
+	for cid := range sb {
+		v, ok := sb[cid].Value().(statecurrency.BalanceStateValue)
 		if !ok {
-			return nil, nil, e.Errorf("expected BalanceStateValue, not %T", sb[i].Value())
+			return nil, nil, e.Errorf("expected BalanceStateValue, not %T", sb[cid].Value())
 		}
-		stv := statecurrency.NewBalanceStateValue(v.Amount.WithBig(v.Amount.Big().Sub(required[i][0])))
-		sts = append(sts, currencystate.NewStateMergeValue(sb[i].Key(), stv))
+
+		if sb[cid].Key() != feeReceiveBalSts[cid].Key() {
+			stmv := common.NewBaseStateMergeValue(
+				sb[cid].Key(),
+				statecurrency.NewDeductBalanceStateValue(v.Amount.WithBig(required[cid][1])),
+				func(height base.Height, st base.State) base.StateValueMerger {
+					return statecurrency.NewBalanceStateValueMerger(height, sb[cid].Key(), cid, st)
+				},
+			)
+
+			r, ok := feeReceiveBalSts[cid].Value().(statecurrency.BalanceStateValue)
+			if !ok {
+				return nil, base.NewBaseOperationProcessReasonError("expected %T, not %T", statecurrency.BalanceStateValue{}, feeReceiveBalSts[cid].Value()), nil
+			}
+			sts = append(
+				sts,
+				common.NewBaseStateMergeValue(
+					feeReceiveBalSts[cid].Key(),
+					statecurrency.NewAddBalanceStateValue(r.Amount.WithBig(required[cid][1])),
+					func(height base.Height, st base.State) base.StateValueMerger {
+						return statecurrency.NewBalanceStateValueMerger(height, feeReceiveBalSts[cid].Key(), cid, st)
+					},
+				),
+			)
+
+			sts = append(sts, stmv)
+		}
 	}
 
 	return sts, nil, nil
@@ -361,7 +386,9 @@ func (opp *AssignProcessor) Close() error {
 	return nil
 }
 
-func calculateCredentialItemsFee(getStateFunc base.GetStateFunc, items []CredentialItem) (map[currencytypes.CurrencyID][2]common.Big, error) {
+func calculateCredentialItemsFee(getStateFunc base.GetStateFunc, items []CredentialItem) (
+	map[currencytypes.CurrencyID]base.State, map[currencytypes.CurrencyID][2]common.Big, error) {
+	feeReceiveSts := map[currencytypes.CurrencyID]base.State{}
 	required := map[currencytypes.CurrencyID][2]common.Big{}
 
 	for _, item := range items {
@@ -373,20 +400,34 @@ func calculateCredentialItemsFee(getStateFunc base.GetStateFunc, items []Credent
 
 		policy, err := currencystate.ExistsCurrencyPolicy(item.Currency(), getStateFunc)
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 
 		switch k, err := policy.Feeer().Fee(common.ZeroBig); {
 		case err != nil:
-			return nil, err
+			return nil, nil, err
 		case !k.OverZero():
 			required[item.Currency()] = [2]common.Big{rq[0], rq[1]}
 		default:
 			required[item.Currency()] = [2]common.Big{rq[0].Add(k), rq[1].Add(k)}
 		}
 
+		if policy.Feeer().Receiver() == nil {
+			continue
+		}
+
+		if err := currencystate.CheckExistsState(statecurrency.StateKeyAccount(policy.Feeer().Receiver()), getStateFunc); err != nil {
+			return nil, nil, err
+		} else if st, found, err := getStateFunc(statecurrency.StateKeyBalance(policy.Feeer().Receiver(), item.Currency())); err != nil {
+			return nil, nil, err
+		} else if !found {
+			return nil, nil, errors.Errorf("feeer receiver account not found, %s", policy.Feeer().Receiver())
+		} else {
+			feeReceiveSts[item.Currency()] = st
+		}
+
 	}
 
-	return required, nil
+	return feeReceiveSts, required, nil
 
 }

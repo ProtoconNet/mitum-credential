@@ -2,6 +2,7 @@ package credential
 
 import (
 	"context"
+	"github.com/ProtoconNet/mitum-currency/v3/common"
 	"sync"
 
 	"github.com/ProtoconNet/mitum-credential/state"
@@ -338,7 +339,7 @@ func (opp *RevokeProcessor) Process( // nolint:dupl
 		items[i] = fact.Items()[i]
 	}
 
-	required, err := calculateCredentialItemsFee(getStateFunc, items)
+	feeReceiveBalSts, required, err := calculateCredentialItemsFee(getStateFunc, items)
 	if err != nil {
 		return nil, base.NewBaseOperationProcessReasonError("failed to calculate fee; %w", err), nil
 	}
@@ -347,13 +348,38 @@ func (opp *RevokeProcessor) Process( // nolint:dupl
 		return nil, base.NewBaseOperationProcessReasonError("failed to check enough balance; %w", err), nil
 	}
 
-	for i := range sb {
-		v, ok := sb[i].Value().(statecurrency.BalanceStateValue)
+	for cid := range sb {
+		v, ok := sb[cid].Value().(statecurrency.BalanceStateValue)
 		if !ok {
-			return nil, nil, e.Errorf("expected BalanceStateValue, not %T", sb[i].Value())
+			return nil, nil, e.Errorf("expected BalanceStateValue, not %T", sb[cid].Value())
 		}
-		stv := statecurrency.NewBalanceStateValue(v.Amount.WithBig(v.Amount.Big().Sub(required[i][0])))
-		sts = append(sts, currencystate.NewStateMergeValue(sb[i].Key(), stv))
+
+		if sb[cid].Key() != feeReceiveBalSts[cid].Key() {
+			stmv := common.NewBaseStateMergeValue(
+				sb[cid].Key(),
+				statecurrency.NewDeductBalanceStateValue(v.Amount.WithBig(required[cid][1])),
+				func(height base.Height, st base.State) base.StateValueMerger {
+					return statecurrency.NewBalanceStateValueMerger(height, sb[cid].Key(), cid, st)
+				},
+			)
+
+			r, ok := feeReceiveBalSts[cid].Value().(statecurrency.BalanceStateValue)
+			if !ok {
+				return nil, base.NewBaseOperationProcessReasonError("expected %T, not %T", statecurrency.BalanceStateValue{}, feeReceiveBalSts[cid].Value()), nil
+			}
+			sts = append(
+				sts,
+				common.NewBaseStateMergeValue(
+					feeReceiveBalSts[cid].Key(),
+					statecurrency.NewAddBalanceStateValue(r.Amount.WithBig(required[cid][1])),
+					func(height base.Height, st base.State) base.StateValueMerger {
+						return statecurrency.NewBalanceStateValueMerger(height, feeReceiveBalSts[cid].Key(), cid, st)
+					},
+				),
+			)
+
+			sts = append(sts, stmv)
+		}
 	}
 
 	return sts, nil, nil
