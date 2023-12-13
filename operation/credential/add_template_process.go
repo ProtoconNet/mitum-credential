@@ -179,6 +179,10 @@ func (opp *AddTemplateProcessor) Process(
 		return nil, base.NewBaseOperationProcessReasonError("currency not found, %q; %w", fact.Currency(), err), nil
 	}
 
+	if currencyPolicy.Feeer().Receiver() == nil {
+		return sts, nil, nil
+	}
+
 	fee, err := currencyPolicy.Feeer().Fee(common.ZeroBig)
 	if err != nil {
 		return nil, base.NewBaseOperationProcessReasonError(
@@ -220,36 +224,34 @@ func (opp *AddTemplateProcessor) Process(
 		return nil, base.NewBaseOperationProcessReasonError("expected BalanceStateValue, not %T", senderBalSt.Value()), nil
 	}
 
-	if currencyPolicy.Feeer().Receiver() != nil {
-		if err := currencystate.CheckExistsState(currency.StateKeyAccount(currencyPolicy.Feeer().Receiver()), getStateFunc); err != nil {
-			return nil, nil, err
-		} else if feeRcvrSt, found, err := getStateFunc(currency.StateKeyBalance(currencyPolicy.Feeer().Receiver(), fact.currency)); err != nil {
-			return nil, nil, err
-		} else if !found {
-			return nil, nil, errors.Errorf("feeer receiver %s not found", currencyPolicy.Feeer().Receiver())
-		} else if feeRcvrSt.Key() != senderBalSt.Key() {
-			r, ok := feeRcvrSt.Value().(currency.BalanceStateValue)
-			if !ok {
-				return nil, nil, errors.Errorf("expected %T, not %T", currency.BalanceStateValue{}, feeRcvrSt.Value())
-			}
-			sts = append(sts, common.NewBaseStateMergeValue(
-				feeRcvrSt.Key(),
-				currency.NewAddBalanceStateValue(r.Amount.WithBig(fee)),
-				func(height base.Height, st base.State) base.StateValueMerger {
-					return currency.NewBalanceStateValueMerger(height, feeRcvrSt.Key(), fact.currency, st)
-				},
-			))
-
-			sts = append(sts, common.NewBaseStateMergeValue(
-				senderBalSt.Key(),
-				currency.NewDeductBalanceStateValue(v.Amount.WithBig(fee)),
-				func(height base.Height, st base.State) base.StateValueMerger {
-					return currency.NewBalanceStateValueMerger(height, senderBalSt.Key(), fact.currency, st)
-				},
-			))
+	if err := currencystate.CheckExistsState(currency.StateKeyAccount(currencyPolicy.Feeer().Receiver()), getStateFunc); err != nil {
+		return nil, nil, err
+	} else if feeRcvrSt, found, err := getStateFunc(currency.StateKeyBalance(currencyPolicy.Feeer().Receiver(), fact.currency)); err != nil {
+		return nil, nil, err
+	} else if !found {
+		return nil, nil, errors.Errorf("feeer receiver %s not found", currencyPolicy.Feeer().Receiver())
+	} else if feeRcvrSt.Key() != senderBalSt.Key() {
+		r, ok := feeRcvrSt.Value().(currency.BalanceStateValue)
+		if !ok {
+			return nil, nil, errors.Errorf("expected %T, not %T", currency.BalanceStateValue{}, feeRcvrSt.Value())
 		}
-	}
+		sts = append(sts, common.NewBaseStateMergeValue(
+			feeRcvrSt.Key(),
+			currency.NewAddBalanceStateValue(r.Amount.WithBig(fee)),
+			func(height base.Height, st base.State) base.StateValueMerger {
+				return currency.NewBalanceStateValueMerger(height, feeRcvrSt.Key(), fact.currency, st)
+			},
+		))
 
+		sts = append(sts, common.NewBaseStateMergeValue(
+			senderBalSt.Key(),
+			currency.NewDeductBalanceStateValue(v.Amount.WithBig(fee)),
+			func(height base.Height, st base.State) base.StateValueMerger {
+				return currency.NewBalanceStateValueMerger(height, senderBalSt.Key(), fact.currency, st)
+			},
+		))
+	}
+	
 	return sts, nil, nil
 }
 
