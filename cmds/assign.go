@@ -33,9 +33,6 @@ func (cmd *AssignCommand) Run(pctx context.Context) error {
 		return err
 	}
 
-	encs = cmd.Encoders
-	enc = cmd.Encoder
-
 	if err := cmd.parseFlags(); err != nil {
 		return err
 	}
@@ -55,19 +52,19 @@ func (cmd *AssignCommand) parseFlags() error {
 		return err
 	}
 
-	sender, err := cmd.Sender.Encode(enc)
+	sender, err := cmd.Sender.Encode(cmd.Encoders.JSON())
 	if err != nil {
 		return errors.Wrapf(err, "invalid sender format, %q", cmd.Sender.String())
 	}
 	cmd.sender = sender
 
-	contract, err := cmd.Contract.Encode(enc)
+	contract, err := cmd.Contract.Encode(cmd.Encoders.JSON())
 	if err != nil {
 		return errors.Wrapf(err, "invalid contract account format, %q", cmd.Contract.String())
 	}
 	cmd.contract = contract
 
-	holder, err := cmd.Holder.Encode(enc)
+	holder, err := cmd.Holder.Encode(cmd.Encoders.JSON())
 	if err != nil {
 		return errors.Wrapf(err, "invalid holder account format, %q", cmd.Holder.String())
 	}

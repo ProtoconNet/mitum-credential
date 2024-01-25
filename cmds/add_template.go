@@ -39,9 +39,6 @@ func (cmd *AddTemplateCommand) Run(pctx context.Context) error { // nolint:dupl
 		return err
 	}
 
-	encs = cmd.Encoders
-	enc = cmd.Encoder
-
 	if err := cmd.parseFlags(); err != nil {
 		return err
 	}
@@ -61,19 +58,19 @@ func (cmd *AddTemplateCommand) parseFlags() error {
 		return err
 	}
 
-	sender, err := cmd.Sender.Encode(enc)
+	sender, err := cmd.Sender.Encode(cmd.Encoders.JSON())
 	if err != nil {
 		return errors.Wrapf(err, "invalid sender format, %q", cmd.Sender.String())
 	}
 	cmd.sender = sender
 
-	contract, err := cmd.Contract.Encode(enc)
+	contract, err := cmd.Contract.Encode(cmd.Encoders.JSON())
 	if err != nil {
 		return errors.Wrapf(err, "invalid contract account format, %q", cmd.Contract.String())
 	}
 	cmd.contract = contract
 
-	creator, err := cmd.Creator.Encode(enc)
+	creator, err := cmd.Creator.Encode(cmd.Encoders.JSON())
 	if err != nil {
 		return errors.Wrapf(err, "invalid creator account format, %q", cmd.Creator.String())
 	}
