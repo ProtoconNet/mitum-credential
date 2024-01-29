@@ -7,7 +7,7 @@ import (
 
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
-	jsonenc "github.com/ProtoconNet/mitum2/util/encoder/json"
+	"github.com/ProtoconNet/mitum2/util/encoder"
 )
 
 type RevokeFactJSONMarshaler struct {
@@ -30,7 +30,7 @@ type RevokeFactJSONUnMarshaler struct {
 	Items  json.RawMessage `json:"items"`
 }
 
-func (fact *RevokeFact) DecodeJSON(b []byte, enc *jsonenc.Encoder) error {
+func (fact *RevokeFact) DecodeJSON(b []byte, enc encoder.Encoder) error {
 	e := util.StringError("failed to decode json of RevokeFact")
 
 	var uf RevokeFactJSONUnMarshaler
@@ -53,7 +53,7 @@ func (op Revoke) MarshalJSON() ([]byte, error) {
 	})
 }
 
-func (op *Revoke) DecodeJSON(b []byte, enc *jsonenc.Encoder) error {
+func (op *Revoke) DecodeJSON(b []byte, enc encoder.Encoder) error {
 	e := util.StringError("failed to decode json of Revoke")
 
 	var ubo common.BaseOperation

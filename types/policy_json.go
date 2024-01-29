@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
-	jsonenc "github.com/ProtoconNet/mitum2/util/encoder/json"
+	"github.com/ProtoconNet/mitum2/util/encoder"
 	"github.com/ProtoconNet/mitum2/util/hint"
 )
 
@@ -28,7 +28,7 @@ type HolderJSONUnmarshaler struct {
 	CredentialCount uint64    `json:"credential_count"`
 }
 
-func (h *Holder) DecodeJSON(b []byte, enc *jsonenc.Encoder) error {
+func (h *Holder) DecodeJSON(b []byte, enc encoder.Encoder) error {
 	e := util.StringError("failed to decode json of Holder")
 
 	var uho HolderJSONUnmarshaler
@@ -62,7 +62,7 @@ type PolicyJSONUnmarshaler struct {
 	CredentialCount uint64          `json:"credential_count"`
 }
 
-func (po *Policy) DecodeJSON(b []byte, enc *jsonenc.Encoder) error {
+func (po *Policy) DecodeJSON(b []byte, enc encoder.Encoder) error {
 	e := util.StringError("failed to decode json of Policy")
 
 	var upo PolicyJSONUnmarshaler

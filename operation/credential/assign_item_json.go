@@ -4,7 +4,7 @@ import (
 	currencytypes "github.com/ProtoconNet/mitum-currency/v3/types"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
-	jsonenc "github.com/ProtoconNet/mitum2/util/encoder/json"
+	"github.com/ProtoconNet/mitum2/util/encoder"
 	"github.com/ProtoconNet/mitum2/util/hint"
 )
 
@@ -49,7 +49,7 @@ type AssignItemJSONUnMarshaler struct {
 	Currency   string    `json:"currency"`
 }
 
-func (it *AssignItem) DecodeJSON(b []byte, enc *jsonenc.Encoder) error {
+func (it *AssignItem) DecodeJSON(b []byte, enc encoder.Encoder) error {
 	e := util.StringError("failed to decode json of AssignItem")
 
 	var uit AssignItemJSONUnMarshaler

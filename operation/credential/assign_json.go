@@ -7,7 +7,7 @@ import (
 
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
-	jsonenc "github.com/ProtoconNet/mitum2/util/encoder/json"
+	"github.com/ProtoconNet/mitum2/util/encoder"
 )
 
 type AssignFactJSONMarshaler struct {
@@ -30,7 +30,7 @@ type AssignFactJSONUnMarshaler struct {
 	Items  json.RawMessage `json:"items"`
 }
 
-func (fact *AssignFact) DecodeJSON(b []byte, enc *jsonenc.Encoder) error {
+func (fact *AssignFact) DecodeJSON(b []byte, enc encoder.Encoder) error {
 	e := util.StringError("failed to decode json of AssignFact")
 
 	var uf AssignFactJSONUnMarshaler
@@ -53,7 +53,7 @@ func (op Assign) MarshalJSON() ([]byte, error) {
 	})
 }
 
-func (op *Assign) DecodeJSON(b []byte, enc *jsonenc.Encoder) error {
+func (op *Assign) DecodeJSON(b []byte, enc encoder.Encoder) error {
 	e := util.StringError("failed to decode json of Assign")
 
 	var ubo common.BaseOperation

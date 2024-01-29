@@ -5,7 +5,7 @@ import (
 	"github.com/ProtoconNet/mitum-credential/types"
 
 	"github.com/ProtoconNet/mitum2/util"
-	jsonenc "github.com/ProtoconNet/mitum2/util/encoder/json"
+	"github.com/ProtoconNet/mitum2/util/encoder"
 	"github.com/ProtoconNet/mitum2/util/hint"
 )
 
@@ -26,7 +26,7 @@ type DesignStateValueJSONUnmarshaler struct {
 	CredentialService json.RawMessage `json:"credential_service"`
 }
 
-func (de *DesignStateValue) DecodeJSON(b []byte, enc *jsonenc.Encoder) error {
+func (de *DesignStateValue) DecodeJSON(b []byte, enc encoder.Encoder) error {
 	e := util.StringError("failed to decode json of DesignStateValue")
 
 	var u DesignStateValueJSONUnmarshaler
@@ -68,7 +68,7 @@ type TemplateStateValueJSONUnmarshaler struct {
 	Template json.RawMessage `json:"template"`
 }
 
-func (t *TemplateStateValue) DecodeJSON(b []byte, enc *jsonenc.Encoder) error {
+func (t *TemplateStateValue) DecodeJSON(b []byte, enc encoder.Encoder) error {
 	e := util.StringError("failed to decode json of TemplateStateValue")
 
 	var u TemplateStateValueJSONUnmarshaler
@@ -112,7 +112,7 @@ type CredentialStateValueJSONUnmarshaler struct {
 	IsActive   bool            `json:"is_active"`
 }
 
-func (cd *CredentialStateValue) DecodeJSON(b []byte, enc *jsonenc.Encoder) error {
+func (cd *CredentialStateValue) DecodeJSON(b []byte, enc encoder.Encoder) error {
 	e := util.StringError("failed to decode json of CredentialStateValue")
 
 	var u CredentialStateValueJSONUnmarshaler
@@ -154,7 +154,7 @@ type HolderDIDStateValueJSONUnmarshaler struct {
 	DID  string    `json:"did"`
 }
 
-func (hd *HolderDIDStateValue) DecodeJSON(b []byte, enc *jsonenc.Encoder) error {
+func (hd *HolderDIDStateValue) DecodeJSON(b []byte, enc encoder.Encoder) error {
 	e := util.StringError("failed to decode json of HolderDIDStateValue")
 
 	var u HolderDIDStateValueJSONUnmarshaler
