@@ -5,14 +5,27 @@ import (
 	"github.com/ProtoconNet/mitum-credential/digest"
 	currencycmds "github.com/ProtoconNet/mitum-currency/v3/cmds"
 	currencydigest "github.com/ProtoconNet/mitum-currency/v3/digest"
-	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/isaac"
-	isaacblock "github.com/ProtoconNet/mitum2/isaac/block"
-	isaacdatabase "github.com/ProtoconNet/mitum2/isaac/database"
 	"github.com/ProtoconNet/mitum2/launch"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/logging"
+	"sync"
 )
+
+var blockSessionPool = sync.Pool{
+	New: func() interface{} {
+
+		bs := currencydigest.NewBlockSession()
+		bs.SetPrepareFuncs(currencydigest.PrepareFuncs)
+		bs.SetPrepareFuncs(digest.PrepareFuncs)
+		bs.SetHandlerFuncs(currencydigest.HandlerFuncs)
+		bs.SetHandlerFuncs(digest.HandlerFuncs)
+		bs.SetCommitFuncs(currencydigest.CommitFuncs)
+		bs.SetCommitFuncs(digest.CommitFuncs)
+
+		return bs
+	},
+}
 
 func ProcessDigester(ctx context.Context) (context.Context, error) {
 	var log *logging.Logging
@@ -54,139 +67,10 @@ func ProcessDigester(ctx context.Context) (context.Context, error) {
 		sourceReaders = i
 	}
 
-	di := digest.NewDigester(st, root, sourceReaders, fromRemotes, design.NetworkID, nil)
+	di := currencydigest.NewDigester(st, root, sourceReaders, fromRemotes, design.NetworkID, nil, &blockSessionPool)
 	_ = di.SetLogging(log)
 
+	ctx = context.WithValue(ctx, currencycmds.ContextValueBlockSession, &blockSessionPool)
+
 	return context.WithValue(ctx, currencycmds.ContextValueDigester, di), nil
-}
-
-func ProcessStartDigester(ctx context.Context) (context.Context, error) {
-	var di *digest.Digester
-	if err := util.LoadFromContext(ctx, currencycmds.ContextValueDigester, &di); err != nil {
-		return ctx, err
-	}
-	if di == nil {
-		return ctx, nil
-	}
-
-	return ctx, di.Start(ctx)
-}
-
-func PDigesterFollowUp(ctx context.Context) (context.Context, error) {
-	var log *logging.Logging
-	if err := util.LoadFromContextOK(ctx, launch.LoggingContextKey, &log); err != nil {
-		return ctx, err
-	}
-
-	log.Log().Debug().Msg("digester trying to follow up")
-
-	var mst *isaacdatabase.Center
-	if err := util.LoadFromContextOK(ctx, launch.CenterDatabaseContextKey, &mst); err != nil {
-		return ctx, err
-	}
-
-	var st *currencydigest.Database
-	if err := util.LoadFromContext(ctx, currencycmds.ContextValueDigestDatabase, &st); err != nil {
-		return ctx, err
-	}
-	if st == nil {
-		return ctx, nil
-	}
-
-	switch m, found, err := mst.LastBlockMap(); {
-	case err != nil:
-		return ctx, err
-	case !found:
-		log.Log().Debug().Msg("last BlockMap not found")
-	case m.Manifest().Height() > st.LastBlock():
-		log.Log().Info().
-			Int64("last_manifest", m.Manifest().Height().Int64()).
-			Int64("last_block", st.LastBlock().Int64()).
-			Msg("new blocks found to digest")
-
-		if err := digestFollowup(ctx, m.Manifest().Height()); err != nil {
-			log.Log().Error().Err(err).Msg("failed to follow up")
-
-			return ctx, err
-		}
-		log.Log().Info().Msg("digested new blocks")
-	default:
-		log.Log().Info().Msg("digested blocks is up-to-dated")
-	}
-
-	return ctx, nil
-}
-
-func digestFollowup(ctx context.Context, height base.Height) error {
-	var st *currencydigest.Database
-	if err := util.LoadFromContextOK(ctx, currencycmds.ContextValueDigestDatabase, &st); err != nil {
-		return err
-	}
-
-	var design launch.NodeDesign
-	if err := util.LoadFromContext(ctx, launch.DesignContextKey, &design); err != nil {
-		return err
-	}
-	root := launch.LocalFSDataDirectory(design.Storage.Base)
-
-	var newReaders func(context.Context, string, *isaac.BlockItemReadersArgs) (*isaac.BlockItemReaders, error)
-	var fromRemotes isaac.RemotesBlockItemReadFunc
-
-	if err := util.LoadFromContextOK(ctx,
-		launch.NewBlockItemReadersFuncContextKey, &newReaders,
-		launch.RemotesBlockItemReaderFuncContextKey, &fromRemotes,
-	); err != nil {
-		return err
-	}
-
-	var sourceReaders *isaac.BlockItemReaders
-
-	switch i, err := newReaders(ctx, root, nil); {
-	case err != nil:
-		return err
-	default:
-		sourceReaders = i
-	}
-
-	if height <= st.LastBlock() {
-		return nil
-	}
-
-	lastBlock := st.LastBlock()
-	if lastBlock < base.GenesisHeight {
-		lastBlock = base.GenesisHeight
-	}
-
-	for h := lastBlock; h <= height; h++ {
-
-		var bm base.BlockMap
-
-		switch i, found, err := isaac.BlockItemReadersDecode[base.BlockMap](sourceReaders.Item, h, base.BlockItemMap, nil); {
-		case err != nil:
-			return err
-		case !found:
-			return util.ErrNotFound.Errorf("blockmap")
-		default:
-			if err := i.IsValid(design.NetworkID); err != nil {
-				return err
-			}
-
-			bm = i
-		}
-
-		pr, ops, sts, opsTree, _, _, err := isaacblock.LoadBlockItemsFromReader(bm, sourceReaders.Item, h)
-		if err != nil {
-			return err
-		}
-
-		if err := digest.DigestBlock(ctx, st, bm, ops, opsTree, sts, pr); err != nil {
-			return err
-		}
-
-		if err := st.SetLastBlock(h); err != nil {
-			return err
-		}
-
-	}
-	return nil
 }

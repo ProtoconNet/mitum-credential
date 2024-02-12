@@ -77,7 +77,7 @@ func (cmd *RunCommand) Run(pctx context.Context) error {
 	pps := currencycmds.DefaultRunPS()
 
 	_ = pps.AddOK(currencycmds.PNameDigester, ProcessDigester, nil, currencycmds.PNameMongoDBsDataBase).
-		AddOK(currencycmds.PNameStartDigester, ProcessStartDigester, nil, currencycmds.PNameDigestStart)
+		AddOK(currencycmds.PNameStartDigester, currencycmds.ProcessStartDigester, nil, currencycmds.PNameDigestStart)
 	_ = pps.POK(launch.PNameStorage).PostAddOK(ps.Name("check-hold"), cmd.pCheckHold)
 	_ = pps.POK(launch.PNameStates).
 		PreAddOK(PNameOperationProcessorsMap, POperationProcessorsMap).
@@ -89,7 +89,7 @@ func (cmd *RunCommand) Run(pctx context.Context) error {
 	_ = pps.POK(currencycmds.PNameDigest).
 		PostAddOK(currencycmds.PNameDigestAPIHandlers, cmd.pDigestAPIHandlers)
 	_ = pps.POK(currencycmds.PNameDigester).
-		PostAddOK(currencycmds.PNameDigesterFollowUp, PDigesterFollowUp)
+		PostAddOK(currencycmds.PNameDigesterFollowUp, currencycmds.PdigesterFollowUp)
 
 	_ = pps.SetLogging(log)
 
@@ -188,7 +188,7 @@ func (cmd *RunCommand) runStates(ctx, pctx context.Context) (func(), error) {
 func (cmd *RunCommand) pWhenNewBlockSavedInSyncingStateFunc(pctx context.Context) (context.Context, error) {
 	var log *logging.Logging
 	var db isaac.Database
-	var di *digest.Digester
+	var di *currencydigest.Digester
 
 	if err := util.LoadFromContextOK(pctx,
 		launch.LoggingContextKey, &log,
@@ -264,7 +264,7 @@ func (cmd *RunCommand) pWhenNewBlockSavedInConsensusStateFunc(pctx context.Conte
 func (cmd *RunCommand) pWhenNewBlockConfirmed(pctx context.Context) (context.Context, error) {
 	var log *logging.Logging
 	var db isaac.Database
-	var di *digest.Digester
+	var di *currencydigest.Digester
 
 	if err := util.LoadFromContextOK(pctx,
 		launch.LoggingContextKey, &log,
@@ -312,7 +312,7 @@ func (cmd *RunCommand) pWhenNewBlockConfirmed(pctx context.Context) (context.Con
 
 func (cmd *RunCommand) whenBlockSaved(
 	db isaac.Database,
-	di *digest.Digester,
+	di *currencydigest.Digester,
 ) ps.Func {
 	return func(ctx context.Context) (context.Context, error) {
 		switch m, found, err := db.LastBlockMap(); {

@@ -13,12 +13,6 @@ import (
 )
 
 var (
-	defaultColNameAccount              = "digest_ac"
-	defaultColNameContractAccount      = "digest_ca"
-	defaultColNameBalance              = "digest_bl"
-	defaultColNameCurrency             = "digest_cr"
-	defaultColNameOperation            = "digest_op"
-	defaultColNameBlock                = "digest_bm"
 	defaultColNameDIDCredentialService = "digest_did_issuer"
 	defaultColNameDIDCredential        = "digest_did_credential"
 	defaultColNameHolder               = "digest_did_holder_did"
@@ -33,11 +27,11 @@ func CredentialService(st *currencydigest.Database, contract string) (*types.Des
 	var design *types.Design
 	var sta mitumbase.State
 	var err error
-	if err := st.DatabaseClient().GetByFilter(
+	if err := st.Client().GetByFilter(
 		defaultColNameDIDCredentialService,
 		filter.D(),
 		func(res *mongo.SingleResult) error {
-			sta, err = currencydigest.LoadState(res.Decode, st.DatabaseEncoders())
+			sta, err = currencydigest.LoadState(res.Decode, st.Encoders())
 			if err != nil {
 				return err
 			}
@@ -67,11 +61,11 @@ func Credential(st *currencydigest.Database, contract, templateID, credentialID 
 	var isActive bool
 	var sta mitumbase.State
 	var err error
-	if err = st.DatabaseClient().GetByFilter(
+	if err = st.Client().GetByFilter(
 		defaultColNameDIDCredential,
 		filter.D(),
 		func(res *mongo.SingleResult) error {
-			sta, err = currencydigest.LoadState(res.Decode, st.DatabaseEncoders())
+			sta, err = currencydigest.LoadState(res.Decode, st.Encoders())
 			if err != nil {
 				return err
 			}
@@ -98,11 +92,11 @@ func Template(st *currencydigest.Database, contract, templateID string) (*types.
 	var template *types.Template
 	var sta mitumbase.State
 	var err error
-	if err = st.DatabaseClient().GetByFilter(
+	if err = st.Client().GetByFilter(
 		defaultColNameTemplate,
 		filter.D(),
 		func(res *mongo.SingleResult) error {
-			sta, err = currencydigest.LoadState(res.Decode, st.DatabaseEncoders())
+			sta, err = currencydigest.LoadState(res.Decode, st.Encoders())
 			if err != nil {
 				return err
 			}
@@ -128,11 +122,11 @@ func HolderDID(st *currencydigest.Database, contract, holder string) (string, er
 	var did string
 	var sta mitumbase.State
 	var err error
-	if err = st.DatabaseClient().GetByFilter(
+	if err = st.Client().GetByFilter(
 		defaultColNameHolder,
 		filter.D(),
 		func(res *mongo.SingleResult) error {
-			sta, err = currencydigest.LoadState(res.Decode, st.DatabaseEncoders())
+			sta, err = currencydigest.LoadState(res.Decode, st.Encoders())
 			if err != nil {
 				return err
 			}
@@ -182,12 +176,12 @@ func CredentialsByServiceTemplate(
 		opt = opt.SetLimit(limit)
 	}
 
-	return st.DatabaseClient().Find(
+	return st.Client().Find(
 		context.Background(),
 		defaultColNameDIDCredential,
 		filter,
 		func(cursor *mongo.Cursor) (bool, error) {
-			st, err := currencydigest.LoadState(cursor.Decode, st.DatabaseEncoders())
+			st, err := currencydigest.LoadState(cursor.Decode, st.Encoders())
 			if err != nil {
 				return false, err
 			}
@@ -251,12 +245,12 @@ func CredentialsByServiceHolder(
 
 	opt = opt.SetLimit(1000)
 
-	return st.DatabaseClient().Find(
+	return st.Client().Find(
 		context.Background(),
 		defaultColNameDIDCredential,
 		filter,
 		func(cursor *mongo.Cursor) (bool, error) {
-			st, err := currencydigest.LoadState(cursor.Decode, st.DatabaseEncoders())
+			st, err := currencydigest.LoadState(cursor.Decode, st.Encoders())
 			if err != nil {
 				return false, err
 			}
