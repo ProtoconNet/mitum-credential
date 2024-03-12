@@ -6,6 +6,7 @@ import (
 	"github.com/ProtoconNet/mitum-credential/state"
 	crcystate "github.com/ProtoconNet/mitum-currency/v3/state"
 	stateextension "github.com/ProtoconNet/mitum-currency/v3/state/extension"
+	"go.mongodb.org/mongo-driver/bson"
 	"sync"
 	"time"
 
@@ -108,83 +109,91 @@ func (bs *BlockSession) Commit(ctx context.Context) error {
 		_ = bs.close()
 	}()
 
-	if len(bs.didCredentialModels) > 0 {
-		for key := range bs.credentialMap {
-			parsedKey, err := crcystate.ParseStateKey(key, state.CredentialPrefix, 5)
-			if err != nil {
-				return err
+	_, err := bs.st.DatabaseClient().WithSession(func(txnCtx mongo.SessionContext, collection func(string) *mongo.Collection) (interface{}, error) {
+		if err := bs.writeModels(txnCtx, defaultColNameBlock, bs.blockModels); err != nil {
+			return nil, err
+		}
+
+		if len(bs.didCredentialModels) > 0 {
+			for key := range bs.credentialMap {
+				parsedKey, err := crcystate.ParseStateKey(key, state.CredentialPrefix, 5)
+				if err != nil {
+					return nil, err
+				}
+				err = bs.st.CleanByHeightColName(
+					txnCtx,
+					bs.block.Manifest().Height(),
+					defaultColNameDIDCredential,
+					bson.D{{"contract", parsedKey[1]}},
+					bson.D{{"template", parsedKey[2]}},
+					bson.D{{"credential_id", parsedKey[3]}},
+				)
+				if err != nil {
+					return nil, err
+				}
 			}
-			err = bs.st.CleanByHeightColName(
-				ctx,
-				bs.block.Manifest().Height(),
-				defaultColNameDIDCredential,
-				"contract", parsedKey[1],
-				"template", parsedKey[2],
-				"credential_id", parsedKey[3],
-			)
-			if err != nil {
-				return err
+
+			if err := bs.writeModels(txnCtx, defaultColNameDIDCredential, bs.didCredentialModels); err != nil {
+				return nil, err
 			}
 		}
 
-		if err := bs.writeModels(ctx, defaultColNameDIDCredential, bs.didCredentialModels); err != nil {
-			return err
+		if err := bs.writeModels(txnCtx, defaultColNameBlock, bs.blockModels); err != nil {
+			return nil, err
 		}
-	}
 
-	if err := bs.writeModels(ctx, defaultColNameBlock, bs.blockModels); err != nil {
-		return err
-	}
-
-	if len(bs.operationModels) > 0 {
-		if err := bs.writeModels(ctx, defaultColNameOperation, bs.operationModels); err != nil {
-			return err
+		if len(bs.operationModels) > 0 {
+			if err := bs.writeModels(txnCtx, defaultColNameOperation, bs.operationModels); err != nil {
+				return nil, err
+			}
 		}
-	}
 
-	if len(bs.currencyModels) > 0 {
-		if err := bs.writeModels(ctx, defaultColNameCurrency, bs.currencyModels); err != nil {
-			return err
+		if len(bs.currencyModels) > 0 {
+			if err := bs.writeModels(txnCtx, defaultColNameCurrency, bs.currencyModels); err != nil {
+				return nil, err
+			}
 		}
-	}
 
-	if len(bs.accountModels) > 0 {
-		if err := bs.writeModels(ctx, defaultColNameAccount, bs.accountModels); err != nil {
-			return err
+		if len(bs.accountModels) > 0 {
+			if err := bs.writeModels(txnCtx, defaultColNameAccount, bs.accountModels); err != nil {
+				return nil, err
+			}
 		}
-	}
 
-	if len(bs.contractAccountModels) > 0 {
-		if err := bs.writeModels(ctx, defaultColNameContractAccount, bs.contractAccountModels); err != nil {
-			return err
+		if len(bs.contractAccountModels) > 0 {
+			if err := bs.writeModels(txnCtx, defaultColNameContractAccount, bs.contractAccountModels); err != nil {
+				return nil, err
+			}
 		}
-	}
 
-	if len(bs.balanceModels) > 0 {
-		if err := bs.writeModels(ctx, defaultColNameBalance, bs.balanceModels); err != nil {
-			return err
+		if len(bs.balanceModels) > 0 {
+			if err := bs.writeModels(txnCtx, defaultColNameBalance, bs.balanceModels); err != nil {
+				return nil, err
+			}
 		}
-	}
 
-	if len(bs.didIssuerModels) > 0 {
-		if err := bs.writeModels(ctx, defaultColNameDIDCredentialService, bs.didIssuerModels); err != nil {
-			return err
+		if len(bs.didIssuerModels) > 0 {
+			if err := bs.writeModels(txnCtx, defaultColNameDIDCredentialService, bs.didIssuerModels); err != nil {
+				return nil, err
+			}
 		}
-	}
 
-	if len(bs.didHolderDIDModels) > 0 {
-		if err := bs.writeModels(ctx, defaultColNameHolder, bs.didHolderDIDModels); err != nil {
-			return err
+		if len(bs.didHolderDIDModels) > 0 {
+			if err := bs.writeModels(txnCtx, defaultColNameHolder, bs.didHolderDIDModels); err != nil {
+				return nil, err
+			}
 		}
-	}
 
-	if len(bs.didTemplateModels) > 0 {
-		if err := bs.writeModels(ctx, defaultColNameTemplate, bs.didTemplateModels); err != nil {
-			return err
+		if len(bs.didTemplateModels) > 0 {
+			if err := bs.writeModels(txnCtx, defaultColNameTemplate, bs.didTemplateModels); err != nil {
+				return nil, err
+			}
 		}
-	}
 
-	return nil
+		return nil, nil
+	})
+
+	return err
 }
 
 func (bs *BlockSession) Close() error {
