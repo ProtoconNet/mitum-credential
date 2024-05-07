@@ -1,6 +1,7 @@
 package types
 
 import (
+	"github.com/ProtoconNet/mitum-currency/v3/common"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
@@ -78,15 +79,13 @@ func (po Policy) Bytes() []byte {
 }
 
 func (po Policy) IsValid([]byte) error {
-	e := util.StringError("invalid policy")
-
 	if err := util.CheckIsValiders(nil, false, po.BaseHinter); err != nil {
-		return e.Wrap(err)
+		return common.ErrValueInvalid.Wrap(err)
 	}
 
 	for _, h := range po.holders {
 		if err := h.IsValid(nil); err != nil {
-			return e.Wrap(err)
+			return common.ErrValueInvalid.Wrap(err)
 		}
 	}
 

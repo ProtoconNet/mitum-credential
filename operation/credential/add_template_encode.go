@@ -4,7 +4,6 @@ import (
 	"github.com/ProtoconNet/mitum-credential/types"
 	currencytypes "github.com/ProtoconNet/mitum-currency/v3/types"
 	"github.com/ProtoconNet/mitum2/base"
-	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/encoder"
 )
 
@@ -14,8 +13,6 @@ func (fact *AddTemplateFact) unpack(enc encoder.Encoder,
 	tmplShr, ma bool,
 	dpName, subjKey, desc, crAdr, cid string,
 ) error {
-	e := util.StringError("failed to unmarshal AddTemplateFact")
-
 	fact.templateName = tmplName
 	fact.serviceDate = types.Date(svcDate)
 	fact.expirationDate = types.Date(expDate)
@@ -29,21 +26,21 @@ func (fact *AddTemplateFact) unpack(enc encoder.Encoder,
 
 	switch a, err := base.DecodeAddress(sAdr, enc); {
 	case err != nil:
-		return e.Wrap(err)
+		return err
 	default:
 		fact.sender = a
 	}
 
 	switch a, err := base.DecodeAddress(cAdr, enc); {
 	case err != nil:
-		return e.Wrap(err)
+		return err
 	default:
 		fact.contract = a
 	}
 
 	switch a, err := base.DecodeAddress(crAdr, enc); {
 	case err != nil:
-		return e.Wrap(err)
+		return err
 	default:
 		fact.creator = a
 	}

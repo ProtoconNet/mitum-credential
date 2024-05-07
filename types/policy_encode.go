@@ -1,6 +1,7 @@
 package types
 
 import (
+	"github.com/ProtoconNet/mitum-currency/v3/common"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/encoder"
@@ -9,7 +10,7 @@ import (
 )
 
 func (h *Holder) unpack(enc encoder.Encoder, ht hint.Hint, adr string, count uint64) error {
-	e := util.StringError("failed to unpack of Holder")
+	e := util.StringError("unpack Holder")
 
 	h.BaseHinter = hint.NewBaseHinter(ht)
 
@@ -33,7 +34,7 @@ func (h *Holder) unpack(enc encoder.Encoder, ht hint.Hint, adr string, count uin
 }
 
 func (po *Policy) unpack(enc encoder.Encoder, ht hint.Hint, tmplIDs []string, bHolders []byte, count uint64) error {
-	e := util.StringError("failed to unpack of Policy")
+	e := util.StringError("unpack Policy")
 
 	po.BaseHinter = hint.NewBaseHinter(ht)
 	po.templateIDs = tmplIDs
@@ -47,7 +48,7 @@ func (po *Policy) unpack(enc encoder.Encoder, ht hint.Hint, tmplIDs []string, bH
 	for i := range hds {
 		j, ok := hds[i].(Holder)
 		if !ok {
-			return e.Wrap(errors.Errorf("expected Holder, not %T", hds[i]))
+			return e.Wrap(common.ErrTypeMismatch.Wrap(errors.Errorf("expected Holder, not %T", hds[i])))
 		}
 
 		holders[i] = j

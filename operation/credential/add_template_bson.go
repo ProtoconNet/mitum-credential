@@ -51,12 +51,10 @@ type AddTemplateFactBSONUnmarshaler struct {
 }
 
 func (fact *AddTemplateFact) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
-	e := util.StringError("failed to decode bson of AddTemplateFact")
-
 	var ubf common.BaseFactBSONUnmarshaler
 
 	if err := enc.Unmarshal(b, &ubf); err != nil {
-		return e.Wrap(err)
+		return common.DecorateError(err, common.ErrDecodeBson, *fact)
 	}
 
 	fact.BaseFact.SetHash(valuehash.NewBytesFromString(ubf.Hash))
@@ -64,12 +62,12 @@ func (fact *AddTemplateFact) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
 
 	var uf AddTemplateFactBSONUnmarshaler
 	if err := bson.Unmarshal(b, &uf); err != nil {
-		return e.Wrap(err)
+		return common.DecorateError(err, common.ErrDecodeBson, *fact)
 	}
 
 	ht, err := hint.ParseHint(uf.Hint)
 	if err != nil {
-		return e.Wrap(err)
+		return common.DecorateError(err, common.ErrDecodeBson, *fact)
 	}
 	fact.BaseHinter = hint.NewBaseHinter(ht)
 

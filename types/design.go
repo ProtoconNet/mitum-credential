@@ -1,8 +1,10 @@
 package types
 
 import (
+	"github.com/ProtoconNet/mitum-currency/v3/common"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
+	"github.com/pkg/errors"
 )
 
 var DesignHint = hint.MustNewHint("mitum-credential-design-v0.0.1")
@@ -24,7 +26,7 @@ func (de Design) IsValid([]byte) error {
 		de.BaseHinter,
 		de.policy,
 	); err != nil {
-		return util.ErrInvalid.Errorf("invalid Design: %v", err)
+		return common.ErrValueInvalid.Wrap(errors.Errorf("design: %v", err))
 	}
 
 	return nil

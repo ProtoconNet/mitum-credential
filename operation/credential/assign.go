@@ -5,11 +5,11 @@ import (
 
 	"github.com/ProtoconNet/mitum-currency/v3/common"
 	currencytypes "github.com/ProtoconNet/mitum-currency/v3/types"
-
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
 	"github.com/ProtoconNet/mitum2/util/valuehash"
+	"github.com/pkg/errors"
 )
 
 type CredentialItem interface {
@@ -66,40 +66,40 @@ func (fact AssignFact) Bytes() []byte {
 
 func (fact AssignFact) IsValid(b []byte) error {
 	if err := fact.BaseHinter.IsValid(nil); err != nil {
-		return err
+		return common.ErrFactInvalid.Wrap(err)
 	}
 
 	if n := len(fact.items); n < 1 {
-		return util.ErrInvalid.Errorf("empty items")
+		return common.ErrFactInvalid.Wrap(common.ErrArrayLen.Wrap(errors.Errorf("empty items")))
 	} else if n > int(MaxAssignItems) {
-		return util.ErrInvalid.Errorf("items, %d over max, %d", n, MaxAssignItems)
+		return common.ErrFactInvalid.Wrap(common.ErrArrayLen.Wrap(errors.Errorf("items, %d over max, %d", n, MaxAssignItems)))
 	}
 
 	if err := fact.sender.IsValid(nil); err != nil {
-		return err
+		return common.ErrFactInvalid.Wrap(err)
 	}
 
 	founds := map[string]struct{}{}
 	for _, it := range fact.items {
 		if err := it.IsValid(nil); err != nil {
-			return err
+			return common.ErrFactInvalid.Wrap(err)
 		}
 
 		if it.contract.Equal(fact.sender) {
-			return util.ErrInvalid.Errorf("contract address is same with sender, %q", fact.sender)
+			return common.ErrFactInvalid.Wrap(common.ErrSelfTarget.Wrap(errors.Errorf("contract address is same with sender, %q", fact.sender)))
 		}
 
 		k := fmt.Sprintf("%s-%s", it.contract, it.id)
 
 		if _, found := founds[k]; found {
-			return util.ErrInvalid.Errorf("duplicate credential id found, %s", k)
+			return common.ErrFactInvalid.Wrap(common.ErrDupVal.Wrap(errors.Errorf("credential id, %s", k)))
 		}
 
 		founds[k] = struct{}{}
 	}
 
 	if err := common.IsValidOperationFact(fact, b); err != nil {
-		return err
+		return common.ErrFactInvalid.Wrap(err)
 	}
 
 	return nil

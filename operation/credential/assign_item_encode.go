@@ -3,7 +3,6 @@ package credential
 import (
 	currencytypes "github.com/ProtoconNet/mitum-currency/v3/types"
 	"github.com/ProtoconNet/mitum2/base"
-	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/encoder"
 	"github.com/ProtoconNet/mitum2/util/hint"
 )
@@ -15,8 +14,6 @@ func (it *AssignItem) unpack(enc encoder.Encoder, ht hint.Hint,
 	vFrom, vUntil uint64,
 	did, cid string,
 ) error {
-	e := util.StringError("failed to unmarshal AssignItem")
-
 	it.BaseHinter = hint.NewBaseHinter(ht)
 	it.id = id
 	it.value = val
@@ -25,14 +22,14 @@ func (it *AssignItem) unpack(enc encoder.Encoder, ht hint.Hint,
 
 	switch a, err := base.DecodeAddress(cAdr, enc); {
 	case err != nil:
-		return e.Wrap(err)
+		return err
 	default:
 		it.contract = a
 	}
 
 	switch a, err := base.DecodeAddress(hAdr, enc); {
 	case err != nil:
-		return e.Wrap(err)
+		return err
 	default:
 		it.holder = a
 	}

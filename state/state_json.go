@@ -27,7 +27,7 @@ type DesignStateValueJSONUnmarshaler struct {
 }
 
 func (de *DesignStateValue) DecodeJSON(b []byte, enc encoder.Encoder) error {
-	e := util.StringError("failed to decode json of DesignStateValue")
+	e := util.StringError("decode json of DesignStateValue")
 
 	var u DesignStateValueJSONUnmarshaler
 	if err := enc.Unmarshal(b, &u); err != nil {
@@ -69,7 +69,7 @@ type TemplateStateValueJSONUnmarshaler struct {
 }
 
 func (t *TemplateStateValue) DecodeJSON(b []byte, enc encoder.Encoder) error {
-	e := util.StringError("failed to decode json of TemplateStateValue")
+	e := util.StringError("decode json of TemplateStateValue")
 
 	var u TemplateStateValueJSONUnmarshaler
 	if err := enc.Unmarshal(b, &u); err != nil {
@@ -113,7 +113,7 @@ type CredentialStateValueJSONUnmarshaler struct {
 }
 
 func (cd *CredentialStateValue) DecodeJSON(b []byte, enc encoder.Encoder) error {
-	e := util.StringError("failed to decode json of CredentialStateValue")
+	e := util.StringError("decode json of CredentialStateValue")
 
 	var u CredentialStateValueJSONUnmarshaler
 	if err := enc.Unmarshal(b, &u); err != nil {
@@ -155,7 +155,7 @@ type HolderDIDStateValueJSONUnmarshaler struct {
 }
 
 func (hd *HolderDIDStateValue) DecodeJSON(b []byte, enc encoder.Encoder) error {
-	e := util.StringError("failed to decode json of HolderDIDStateValue")
+	e := util.StringError("decode json of HolderDIDStateValue")
 
 	var u HolderDIDStateValueJSONUnmarshaler
 	if err := enc.Unmarshal(b, &u); err != nil {

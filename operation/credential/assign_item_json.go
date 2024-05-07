@@ -1,6 +1,7 @@
 package credential
 
 import (
+	"github.com/ProtoconNet/mitum-currency/v3/common"
 	currencytypes "github.com/ProtoconNet/mitum-currency/v3/types"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
@@ -50,14 +51,12 @@ type AssignItemJSONUnMarshaler struct {
 }
 
 func (it *AssignItem) DecodeJSON(b []byte, enc encoder.Encoder) error {
-	e := util.StringError("failed to decode json of AssignItem")
-
 	var uit AssignItemJSONUnMarshaler
 	if err := enc.Unmarshal(b, &uit); err != nil {
-		return e.Wrap(err)
+		return common.DecorateError(err, common.ErrDecodeJson, *it)
 	}
 
-	return it.unpack(enc,
+	if err := it.unpack(enc,
 		uit.Hint,
 		uit.Contract,
 		uit.Holder,
@@ -68,5 +67,9 @@ func (it *AssignItem) DecodeJSON(b []byte, enc encoder.Encoder) error {
 		uit.ValidUntil,
 		uit.DID,
 		uit.Currency,
-	)
+	); err != nil {
+		return common.DecorateError(err, common.ErrDecodeJson, *it)
+	}
+
+	return nil
 }

@@ -31,16 +31,18 @@ type AssignFactJSONUnMarshaler struct {
 }
 
 func (fact *AssignFact) DecodeJSON(b []byte, enc encoder.Encoder) error {
-	e := util.StringError("failed to decode json of AssignFact")
-
 	var uf AssignFactJSONUnMarshaler
 	if err := enc.Unmarshal(b, &uf); err != nil {
-		return e.Wrap(err)
+		return common.DecorateError(err, common.ErrDecodeJson, *fact)
 	}
 
 	fact.BaseFact.SetJSONUnmarshaler(uf.BaseFactJSONUnmarshaler)
 
-	return fact.unpack(enc, uf.Sender, uf.Items)
+	if err := fact.unpack(enc, uf.Sender, uf.Items); err != nil {
+		return common.DecorateError(err, common.ErrDecodeJson, *fact)
+	}
+
+	return nil
 }
 
 type AssignMarshaler struct {
@@ -54,11 +56,9 @@ func (op Assign) MarshalJSON() ([]byte, error) {
 }
 
 func (op *Assign) DecodeJSON(b []byte, enc encoder.Encoder) error {
-	e := util.StringError("failed to decode json of Assign")
-
 	var ubo common.BaseOperation
 	if err := ubo.DecodeJSON(b, enc); err != nil {
-		return e.Wrap(err)
+		return common.DecorateError(err, common.ErrDecodeJson, *op)
 	}
 
 	op.BaseOperation = ubo

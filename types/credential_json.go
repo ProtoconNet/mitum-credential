@@ -43,7 +43,7 @@ type CredentialJSONUnmarshaler struct {
 }
 
 func (c *Credential) DecodeJSON(b []byte, enc encoder.Encoder) error {
-	e := util.StringError("failed to decode json of Credential")
+	e := util.StringError("decode json of Credential")
 
 	var u CredentialJSONUnmarshaler
 	if err := enc.Unmarshal(b, &u); err != nil {

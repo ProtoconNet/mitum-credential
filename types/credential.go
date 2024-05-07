@@ -1,10 +1,12 @@
 package types
 
 import (
+	"github.com/ProtoconNet/mitum-currency/v3/common"
 	crcytypes "github.com/ProtoconNet/mitum-currency/v3/types"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
+	"github.com/pkg/errors"
 	"unicode/utf8"
 )
 
@@ -78,23 +80,23 @@ func (c Credential) IsValid([]byte) error {
 	}
 
 	if c.validUntil <= c.validFrom {
-		return util.ErrInvalid.Errorf("valid until <= valid from, %q <= %q", c.validUntil, c.validFrom)
+		return common.ErrValOOR.Wrap(errors.Errorf("valid until <= valid from, but %q <= %q", c.validUntil, c.validFrom))
 	}
 
 	if l := utf8.RuneCountInString(c.templateID); l < 1 || l > MaxLengthTemplateID {
-		return util.ErrInvalid.Errorf("invalid length of credential ID, 0 <= length <= %d", MaxLengthTemplateID)
+		return common.ErrValOOR.Wrap(errors.Errorf("0 <= credential ID length <= %d", MaxLengthTemplateID))
 	}
 
 	if !crcytypes.ReSpcecialChar.Match([]byte(c.templateID)) {
-		return util.ErrInvalid.Errorf("invalid template ID due to the inclusion of special characters")
+		return common.ErrValueInvalid.Wrap(errors.Errorf("template ID %s, must match regex `^[^\\s:/?#\\[\\]@]*$`", c.templateID))
 	}
 
 	if l := utf8.RuneCountInString(c.id); l < 1 || l > MaxLengthCredentialID {
-		return util.ErrInvalid.Errorf("invalid length of credential ID, 0 <= length <= %d", MaxLengthCredentialID)
+		return common.ErrValOOR.Wrap(errors.Errorf("0 <= length of credential ID <= %d", MaxLengthCredentialID))
 	}
 
 	if !crcytypes.ReSpcecialChar.Match([]byte(c.id)) {
-		return util.ErrInvalid.Errorf("invalid credential ID due to the inclusion of special characters")
+		return common.ErrValueInvalid.Wrap(errors.Errorf("credential ID %s, must match regex `^[^\\s:/?#\\[\\]@]*$`", c.id))
 	}
 
 	if len(c.did) == 0 {

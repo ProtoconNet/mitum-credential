@@ -113,10 +113,6 @@ func (bs *BlockSession) Commit(ctx context.Context) error {
 	}()
 
 	_, err := bs.st.DatabaseClient().WithSession(func(txnCtx mongo.SessionContext, collection func(string) *mongo.Collection) (interface{}, error) {
-		if err := bs.writeModels(txnCtx, defaultColNameBlock, bs.blockModels); err != nil {
-			return nil, err
-		}
-
 		if len(bs.didCredentialModels) > 0 {
 			for key := range bs.credentialMap {
 				parsedKey, err := crcystate.ParseStateKey(key, state.CredentialPrefix, 5)

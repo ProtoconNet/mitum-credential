@@ -5,7 +5,7 @@ go 1.22
 toolchain go1.22.1
 
 require (
-	github.com/ProtoconNet/mitum-currency/v3 v3.0.0-alpha.0.20240530033931-8a5dcd41d504
+	github.com/ProtoconNet/mitum-currency/v3 v3.0.0-alpha.0.20240530054233-ce02158e57bd
 	github.com/ProtoconNet/mitum2 v0.0.0-20240516232940-9c065b66904b
 	github.com/alecthomas/kong v0.9.0
 	github.com/arl/statsviz v0.6.0
@@ -13,6 +13,8 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/rs/zerolog v1.32.0
 )
+
+require github.com/hashicorp/go-msgpack v0.5.5 // indirect
 
 require (
 	github.com/hashicorp/go-retryablehttp v0.7.5 // indirect
@@ -97,7 +99,6 @@ require (
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
 	github.com/hashicorp/go-hclog v1.6.3 // indirect
 	github.com/hashicorp/go-immutable-radix v1.3.1 // indirect
-	github.com/hashicorp/go-msgpack/v2 v2.1.1 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/nxadm/tail v1.4.8 // indirect
 	github.com/oklog/ulid/v2 v2.1.0 // indirect
@@ -107,3 +108,5 @@ require (
 	go.uber.org/mock v0.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
+
+replace github.com/hashicorp/memberlist => github.com/spikeekips/memberlist v0.0.0-20230626195851-39f17fa10d23 // latest fix-data-race branch

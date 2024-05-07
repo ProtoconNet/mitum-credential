@@ -1,10 +1,9 @@
 package types
 
 import (
+	"github.com/ProtoconNet/mitum-currency/v3/common"
 	"regexp"
 	"time"
-
-	"github.com/ProtoconNet/mitum2/util"
 )
 
 var (
@@ -24,7 +23,7 @@ func (s Date) String() string {
 
 func (s Date) IsValid([]byte) error {
 	if !ReValidDate.Match([]byte(s)) {
-		return util.ErrInvalid.Errorf("wrong date, %q", s)
+		return common.ErrValueInvalid.Errorf("wrong date, %v", s)
 	}
 
 	return nil

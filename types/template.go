@@ -1,10 +1,12 @@
 package types
 
 import (
+	"github.com/ProtoconNet/mitum-currency/v3/common"
 	crcytypes "github.com/ProtoconNet/mitum-currency/v3/types"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
+	"github.com/pkg/errors"
 	"unicode/utf8"
 )
 
@@ -72,37 +74,37 @@ func (t Template) IsValid([]byte) error {
 	}
 
 	if l := utf8.RuneCountInString(t.templateID); l < 1 || l > MaxLengthTemplateID {
-		return util.ErrInvalid.Errorf("invalid length of credential ID, 0 <= length <= %d", MaxLengthTemplateID)
+		return common.ErrValOOR.Errorf("0 <= length of credential ID <= %d", MaxLengthTemplateID)
 	}
 
 	if !crcytypes.ReSpcecialChar.Match([]byte(t.templateID)) {
-		return util.ErrInvalid.Errorf("invalid templateID due to the inclusion of special characters")
+		return common.ErrValueInvalid.Wrap(errors.Errorf("template ID %s, must match regex `^[^\\s:/?#\\[\\]@]*$`", t.templateID))
 	}
 
 	if len(t.templateName) == 0 {
-		return util.ErrInvalid.Errorf("empty template name")
+		return common.ErrValOOR.Errorf("empty template name")
 	}
 
 	if len(t.displayName) == 0 {
-		return util.ErrInvalid.Errorf("empty display name")
+		return common.ErrValOOR.Errorf("empty display name")
 	}
 
 	if len(t.subjectKey) == 0 {
-		return util.ErrInvalid.Errorf("empty subject key")
+		return common.ErrValOOR.Errorf("empty subject key")
 	}
 
 	serviceDate, err := t.serviceDate.Parse()
 	if err != nil {
-		return err
+		return common.ErrValueInvalid.Wrap(err)
 	}
 
 	expireDate, err := t.expirationDate.Parse()
 	if err != nil {
-		return err
+		return common.ErrValueInvalid.Wrap(err)
 	}
 
 	if expireDate.UnixNano() < serviceDate.UnixNano() {
-		return util.ErrInvalid.Errorf("expire date <= service date, %s <= %s", t.expirationDate, t.serviceDate)
+		return common.ErrValOOR.Errorf("expire date <= service date, but %s <= %s", t.expirationDate, t.serviceDate)
 	}
 
 	return nil

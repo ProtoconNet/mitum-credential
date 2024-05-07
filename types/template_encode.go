@@ -13,7 +13,7 @@ func (t *Template) unpack(enc encoder.Encoder, ht hint.Hint,
 	share, audit bool,
 	dpName, subjKey, desc, creator string,
 ) error {
-	e := util.StringError("failed to unpack of Template")
+	e := util.StringError("unpack Template")
 
 	t.BaseHinter = hint.NewBaseHinter(ht)
 	t.templateID = tmplID

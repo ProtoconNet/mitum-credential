@@ -4,10 +4,12 @@ import (
 	"unicode/utf8"
 
 	"github.com/ProtoconNet/mitum-credential/types"
+	"github.com/ProtoconNet/mitum-currency/v3/common"
 	crcytypes "github.com/ProtoconNet/mitum-currency/v3/types"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
+	"github.com/pkg/errors"
 )
 
 var RevokeItemHint = hint.MustNewHint("mitum-credential-revoke-item-v0.0.1")
@@ -58,23 +60,23 @@ func (it RevokeItem) IsValid([]byte) error {
 	}
 
 	if it.contract.Equal(it.holder) {
-		return util.ErrInvalid.Errorf("contract address is same with sender, %q", it.holder)
+		return common.ErrItemInvalid.Wrap(common.ErrSelfTarget.Wrap(errors.Errorf("contract address is same with holder, %q", it.holder)))
 	}
 
 	if l := utf8.RuneCountInString(it.templateID); l < 1 || l > types.MaxLengthTemplateID {
-		return util.ErrInvalid.Errorf("invalid length of template ID, 0 <= length <= %d", types.MaxLengthTemplateID)
+		return common.ErrItemInvalid.Wrap(common.ErrValOOR.Wrap(errors.Errorf("0 <= length of template ID <= %d", types.MaxLengthTemplateID)))
 	}
 
 	if !crcytypes.ReSpcecialChar.Match([]byte(it.templateID)) {
-		return util.ErrInvalid.Errorf("invalid template ID due to the inclusion of special characters")
+		return common.ErrItemInvalid.Wrap(common.ErrValueInvalid.Wrap(errors.Errorf("template ID %s, must match regex `^[^\\s:/?#\\[\\]@]*$`", it.templateID)))
 	}
 
 	if l := utf8.RuneCountInString(it.id); l < 1 || l > types.MaxLengthCredentialID {
-		return util.ErrInvalid.Errorf("invalid length of credential ID, 0 <= length <= %d", types.MaxLengthCredentialID)
+		return common.ErrItemInvalid.Wrap(common.ErrValOOR.Wrap(errors.Errorf("0 <= length of credential ID <= %d", types.MaxLengthCredentialID)))
 	}
 
 	if !crcytypes.ReSpcecialChar.Match([]byte(it.id)) {
-		return util.ErrInvalid.Errorf("invalid credential ID due to the inclusion of special characters")
+		return common.ErrItemInvalid.Wrap(common.ErrValueInvalid.Wrap(errors.Errorf("credential ID %s, must match regex `^[^\\s:/?#\\[\\]@]*$`", it.id)))
 	}
 
 	return nil

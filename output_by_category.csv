@@ -1,0 +1,110 @@
+파일명,줄번호,분류문구1,분류문구2,세부 내용
+/operation/credential/assign.go,73,Array length,,empty items
+/operation/credential/assign.go,75,Array length,,"items, %d over max, %d"
+/operation/credential/assign.go,95,Duplicated value,,"credential id, %s"
+/operation/credential/add_template_process.go,68,PreProcess,Type mismatch,"expected %T, not %T"
+/operation/credential/add_template_process.go,72,PreProcess,,%w
+/operation/credential/add_template_process.go,76,PreProcess,Account not found,"sender account, %q; %w"
+/operation/credential/add_template_process.go,80,PreProcess,Currency not found,"currency id, %v: %w"
+/operation/credential/add_template_process.go,84,PreProcess,,"sender account is contract account, %q; %w"
+/operation/credential/add_template_process.go,88,PreProcess,Account not found,"creator account state not found, %q; %w"
+/operation/credential/add_template_process.go,92,PreProcess,,"creator account is contract account, %q; %w"
+/operation/credential/add_template_process.go,97,PreProcess,Account not found,"target contract account state not found, %q; %w"
+/operation/credential/add_template_process.go,102,PreProcess,Account not found,"contract account value not found from state, %q; %w"
+/operation/credential/add_template_process.go,106,PreProcess,Account not authorized,"sender account is neither the owner nor the operator of the target contract account, %q"
+/operation/credential/add_template_process.go,111,PreProcess,Service not found,"credential service state not found, %s; %w"
+/operation/credential/add_template_process.go,116,PreProcess,Service not found,"credential service value not found from state, %s; %w"
+/operation/credential/add_template_process.go,121,PreProcess,Template exists,"already registered template, %q, %s"
+/operation/credential/add_template_process.go,126,PreProcess,,Invalid signing; %w
+/operation/credential/revoke_item.go,67,Value out of range,,"invalid length of template ID, 0 <= length <= %d"
+/operation/credential/revoke_item.go,71,Value out of range,,invalid template ID due to the inclusion of special characters
+/operation/credential/revoke_item.go,75,Value out of range,,"invalid length of credential ID, 0 <= length <= %d"
+/operation/credential/revoke_item.go,79,Value out of range,,invalid credential ID due to the inclusion of special characters
+/types/design.go,27,invalid Design,,%v
+/operation/credential/revoke_item.go,63,,,"contract address is same with sender, %q"
+/operation/credential/assign_process.go,52,,,invalid AssignItem
+/operation/credential/assign_process.go,56,,,failed to get fee Currency %s state
+/operation/credential/assign_process.go,60,,,failed to get Holder %s state
+/operation/credential/assign_process.go,64,,,"Holder %s is contract account, contract account cannot be holder"
+/operation/credential/assign_process.go,69,,,failed to get target contract account %s state
+/operation/credential/assign_process.go,74,,,failed to get contract account value from state
+/operation/credential/assign_process.go,85,,,failed to get design state of credential service
+/operation/credential/assign_process.go,87,,,failed to get design value of credential service from state
+/operation/credential/assign_process.go,97,,,templateID not found
+/operation/credential/assign_process.go,106,,,failed to get credential state
+/operation/credential/assign_process.go,110,,,failed to get credential state
+/operation/credential/assign_process.go,212,,,"expected %T, not %T"
+/operation/credential/assign_process.go,220,,,"sender not found, %q; %w"
+/operation/credential/assign_process.go,235,,,invalid signing; %w
+/operation/credential/assign_process.go,242,,,"expected AssignItemProcessor, not %T"
+/operation/credential/assign_process.go,426,,,"feeer receiver account not found, %s"
+/operation/credential/create_service.go,76,,,"contract address is same with sender, %q"
+/operation/credential/assign_encode.go,29,,,"expected AssignItem, not %T"
+/operation/credential/create_service_process.go,70,,,"not CreateServiceFact, %T"
+/operation/credential/create_service_process.go,77,,,"sender not found, %q; %w"
+/operation/credential/create_service_process.go,81,,,"contract account cannot create service, %q; %w"
+/operation/credential/create_service_process.go,86,,,"contract account not found, %q; %w"
+/operation/credential/create_service_process.go,119,,,invalid signing; %w
+/operation/credential/assign_item.go,78,,,"contract address is same with sender, %q"
+/operation/credential/assign_item.go,82,,,"valid until <= valid from, %q <= %q"
+/operation/credential/assign_item.go,86,,,"invalid length of template ID, 0 <= length <= %d"
+/operation/credential/assign_item.go,90,,,invalid templateID due to the inclusion of special characters
+/operation/credential/assign_item.go,94,,,"invalid length of credential ID, 0 <= length <= %d"
+/operation/credential/assign_item.go,98,,,invalid credential ID due to the inclusion of special characters
+/operation/credential/assign_item.go,102,,,empty did
+/operation/credential/assign_item.go,106,,,"invalid length of value, 0 <= length <= %d"
+/operation/credential/revoke_encode.go,29,,,"expected RevokeItem, not %T"
+/operation/credential/assign.go,89,,,"contract address is same with sender, %q"
+/operation/credential/revoke.go,66,,,empty items
+/operation/credential/revoke.go,68,,,"items, %d over max, %d"
+/operation/credential/revoke.go,82,,,"contract address is same with sender, %q"
+/operation/credential/revoke.go,88,,,"duplicate credential id found, %s"
+/operation/credential/add_template.go,116,,,"invalid length of template ID, 0 <= length <= %d"
+/operation/credential/add_template.go,120,,,invalid templateID due to the inclusion of special characters
+/operation/credential/add_template.go,124,,,"invalid length of template name, 0 <= length <= %d"
+/operation/credential/add_template.go,128,,,"invalid length of display name, 0 <= length <= %d"
+/operation/credential/add_template.go,132,,,"invalid length of subjectKey, 0 <= length <= %d"
+/operation/credential/add_template.go,136,,,"invalid length of description, 0 <= length <= %d"
+/operation/credential/add_template.go,140,,,"contract address is same with sender, %q"
+/operation/credential/add_template.go,144,,,"contract address is same with creator, %q"
+/operation/credential/add_template.go,158,,,"expire date <= service date, %s <= %s"
+/operation/credential/revoke_process.go,81,,,failed to get design state of credential service
+/operation/credential/revoke_process.go,83,,,failed to get design value of credential service from state
+/operation/credential/revoke_process.go,93,,,templateID not found
+/operation/credential/revoke_process.go,109,,,"already revoked credential, %s-%s, %s"
+/operation/credential/revoke_process.go,215,,,"expected RevokeFact, not %T"
+/operation/credential/revoke_process.go,223,,,"sender not found, %q; %w"
+/operation/credential/revoke_process.go,227,,,"contract account cannot revoke credential status, %q; %w"
+/operation/credential/revoke_process.go,231,,,invalid signing; %w
+/operation/credential/revoke_process.go,238,,,"expected RevokeItemProcessor, not %T"
+/operation/credential/revoke_process.go,248,,,failed to preprocess RevokeItem; %w
+/types/service_id.go,35,,,"wrong service id, %v"
+/types/design_encode.go,18,,,"expected Policy, not %T"
+/types/types.go,27,,,"wrong date, %q"
+/types/template.go,75,,,"invalid length of credential ID, 0 <= length <= %d"
+/types/template.go,79,,,invalid templateID due to the inclusion of special characters
+/types/template.go,83,,,empty template name
+/types/template.go,87,,,empty display name
+/types/template.go,91,,,empty subject key
+/types/template.go,105,,,"expire date <= service date, %s <= %s"
+/types/policy_encode.go,50,,,"expected Holder, not %T"
+/types/credential.go,81,,,"valid until <= valid from, %q <= %q"
+/types/credential.go,85,,,"invalid length of credential ID, 0 <= length <= %d"
+/types/credential.go,89,,,invalid template ID due to the inclusion of special characters
+/types/credential.go,93,,,"invalid length of credential ID, 0 <= length <= %d"
+/types/credential.go,97,,,invalid credential ID due to the inclusion of special characters
+/types/credential.go,101,,,empty did
+/types/credential.go,105,,,empty value
+/state/state.go,41,,,invalid credential DesignStateValue
+/state/state.go,61,,,credential design not found in State
+/state/state.go,66,,,"invalid credential design value found, %T"
+/state/state.go,102,,,invalid credential TemplateStateValue
+/state/state.go,134,,,template not found in State
+/state/state.go,139,,,"invalid template value found, %T"
+/state/state.go,169,,,invalid CredentialStateValue
+/state/state.go,206,,,credential not found in State
+/state/state.go,211,,,"invalid credential value found, %T"
+/state/state.go,239,,,invalid credential HolderDIDStateValue
+/state/state.go,246,,,empty did
+/state/state.go,259,,,holder did not found in State
+/state/state.go,264,,,"invalid holder did value found, %T"

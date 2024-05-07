@@ -2,15 +2,15 @@ package credential
 
 import (
 	"context"
-	"github.com/ProtoconNet/mitum-currency/v3/common"
 	"sync"
 
 	"github.com/ProtoconNet/mitum-credential/state"
 	"github.com/ProtoconNet/mitum-credential/types"
+	"github.com/ProtoconNet/mitum-currency/v3/common"
 	"github.com/ProtoconNet/mitum-currency/v3/operation/currency"
 	currencystate "github.com/ProtoconNet/mitum-currency/v3/state"
 	statecurrency "github.com/ProtoconNet/mitum-currency/v3/state/currency"
-	"github.com/ProtoconNet/mitum-currency/v3/state/extension"
+	extensioncurrency "github.com/ProtoconNet/mitum-currency/v3/state/extension"
 	currencytypes "github.com/ProtoconNet/mitum-currency/v3/types"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
@@ -46,71 +46,70 @@ type RevokeItemProcessor struct {
 func (ipp *RevokeItemProcessor) PreProcess(
 	_ context.Context, _ base.Operation, getStateFunc base.GetStateFunc,
 ) error {
+	e := util.StringError("process RevokeItemProcessor")
 	it := ipp.item
 
 	if err := it.IsValid(nil); err != nil {
-		return err
+		return e.Wrap(err)
 	}
 
-	if err := currencystate.CheckExistsState(statecurrency.StateKeyAccount(it.Holder()), getStateFunc); err != nil {
-		return err
+	if err := currencystate.CheckExistsState(statecurrency.StateKeyCurrencyDesign(it.Currency()), getStateFunc); err != nil {
+		return e.Wrap(common.ErrCurrencyNF.Wrap(errors.Errorf("currency id, %v", it.Currency())))
 	}
 
-	if err := currencystate.CheckNotExistsState(extension.StateKeyContractAccount(it.Holder()), getStateFunc); err != nil {
-		return err
+	if _, _, aErr, cErr := currencystate.ExistsCAccount(it.Holder(), "holder", true, false, getStateFunc); aErr != nil {
+		return e.Wrap(aErr)
+	} else if cErr != nil {
+		return e.Wrap(common.ErrCAccountNA.Wrap(cErr))
 	}
 
-	st, err := currencystate.ExistsState(extension.StateKeyContractAccount(it.Contract()), "key of contract account", getStateFunc)
+	_, cSt, aErr, cErr := currencystate.ExistsCAccount(it.Contract(), "contract", true, true, getStateFunc)
+	if aErr != nil {
+		return e.Wrap(aErr)
+	} else if cErr != nil {
+		return e.Wrap(cErr)
+	}
+
+	_, err := extensioncurrency.CheckCAAuthFromState(cSt, ipp.sender)
 	if err != nil {
-		return err
+		return e.Wrap(err)
 	}
 
-	ca, err := extension.StateContractAccountValue(st)
-	if err != nil {
-		return err
-	}
-
-	if !(ca.Owner().Equal(ipp.sender) || ca.IsOperator(ipp.sender)) {
-		return errors.Errorf(
-			"sender is neither the owner nor the operator of the target contract account, %q",
-			ipp.sender,
-		)
-	}
-
-	if st, err := currencystate.ExistsState(state.StateKeyDesign(it.Contract()), "key of design", getStateFunc); err != nil {
-		return errors.Wrapf(err, "failed to get design state of credential service")
+	if st, err := currencystate.ExistsState(state.StateKeyDesign(it.Contract()), "design", getStateFunc); err != nil {
+		return e.Wrap(common.ErrServiceNF.Errorf("credential service state, %s; %v", it.Contract(), err))
 	} else if de, err := state.StateDesignValue(st); err != nil {
-		return errors.Wrapf(err, "failed to get design value of credential service from state")
+		return e.Wrap(common.ErrServiceNF.Errorf("credential service state value, %s; %v", it.Contract(), err))
 	} else {
 		if err := de.IsValid(nil); err != nil {
-			return err
+			return e.Wrap(err)
 		}
 		for i, v := range de.Policy().TemplateIDs() {
 			if it.templateID == v {
 				break
 			}
 			if i == len(de.Policy().TemplateIDs())-1 {
-				return errors.Errorf("templateID not found")
+				return e.Wrap(common.ErrValueInvalid.Errorf("templateID not found"))
 			}
 		}
 	}
 
-	st, err = currencystate.ExistsState(state.StateKeyCredential(it.Contract(), it.TemplateID(), it.ID()), "key of credential", getStateFunc)
+	st, err := currencystate.ExistsState(state.StateKeyCredential(it.Contract(), it.TemplateID(), it.ID()), "credential", getStateFunc)
 	if err != nil {
-		return err
+		return e.Wrap(common.ErrStateNF.Errorf("credential for template id %v, id %v, %v", it.TemplateID(), it.ID(), err))
 	}
 
-	credential, isActive, err := state.StateCredentialValue(st)
+	crd, isActive, err := state.StateCredentialValue(st)
 	if err != nil {
-		return err
+		return e.Wrap(common.ErrStateValInvalid.Errorf("credential for template id %v, id %v, %v", it.TemplateID(), it.ID(), err))
+	}
+
+	if !crd.Holder().Equal(it.Holder()) {
+		return e.Wrap(common.ErrValueInvalid.Errorf("holder, %v have not owned id, %v", it.Holder(), it.ID()))
 	}
 
 	if !isActive {
-		return errors.Errorf("already revoked credential, %s-%s, %s", it.Contract(), it.ID(), credential.Holder())
-	}
-
-	if err := currencystate.CheckExistsState(statecurrency.StateKeyCurrencyDesign(it.Currency()), getStateFunc); err != nil {
-		return err
+		return e.Wrap(common.ErrValueInvalid.Errorf(
+			"already revoked credential, template id %v, id %v", it.TemplateID(), it.ID()))
 	}
 
 	return nil
@@ -130,7 +129,7 @@ func (ipp *RevokeItemProcessor) Process(
 		return nil, errors.Errorf("empty holders, %s", it.Contract())
 	}
 
-	st, _ := currencystate.ExistsState(state.StateKeyCredential(it.Contract(), it.TemplateID(), it.ID()), "key of credential", getStateFunc)
+	st, _ := currencystate.ExistsState(state.StateKeyCredential(it.Contract(), it.TemplateID(), it.ID()), "credential", getStateFunc)
 	credential, _, _ := state.StateCredentialValue(st)
 
 	if err := credential.IsValid(nil); err != nil {
@@ -219,23 +218,29 @@ func (opp *RevokeProcessor) PreProcess(
 		return ctx, nil, e.Wrap(err)
 	}
 
-	if err := currencystate.CheckExistsState(statecurrency.StateKeyAccount(fact.Sender()), getStateFunc); err != nil {
-		return ctx, base.NewBaseOperationProcessReasonError("sender not found, %q; %w", fact.Sender(), err), nil
-	}
-
-	if err := currencystate.CheckNotExistsState(extension.StateKeyContractAccount(fact.Sender()), getStateFunc); err != nil {
-		return ctx, base.NewBaseOperationProcessReasonError("contract account cannot revoke credential status, %q; %w", fact.Sender(), err), nil
+	if _, _, aErr, cErr := currencystate.ExistsCAccount(fact.Sender(), "sender", true, false, getStateFunc); aErr != nil {
+		return ctx, base.NewBaseOperationProcessReasonError(
+			common.ErrMPreProcess.
+				Errorf("%v", aErr)), nil
+	} else if cErr != nil {
+		return ctx, base.NewBaseOperationProcessReasonError(
+			common.ErrMPreProcess.Wrap(common.ErrMCAccountNA).
+				Errorf("%v: sender account is contract account, %q", fact.Sender(), cErr)), nil
 	}
 
 	if err := currencystate.CheckFactSignsByState(fact.sender, op.Signs(), getStateFunc); err != nil {
-		return ctx, base.NewBaseOperationProcessReasonError("invalid signing; %w", err), nil
+		return ctx, base.NewBaseOperationProcessReasonError(
+			common.ErrMPreProcess.
+				Wrap(common.ErrMSignInvalid).
+				Errorf("%v", err)), nil
 	}
 
 	for _, it := range fact.Items() {
 		ip := revokeItemProcessorPool.Get()
 		ipc, ok := ip.(*RevokeItemProcessor)
 		if !ok {
-			return nil, nil, e.Errorf("expected RevokeItemProcessor, not %T", ip)
+			return nil, base.NewBaseOperationProcessReasonError(
+				common.ErrMTypeMismatch.Errorf("expected RevokeItemProcessor, not %T", ip)), nil
 		}
 
 		ipc.h = op.Hash()
@@ -245,7 +250,9 @@ func (opp *RevokeProcessor) PreProcess(
 		ipc.holders = nil
 
 		if err := ipc.PreProcess(ctx, op, getStateFunc); err != nil {
-			return nil, base.NewBaseOperationProcessReasonError("failed to preprocess RevokeItem; %w", err), nil
+			return nil, base.NewBaseOperationProcessReasonError(
+				common.ErrMPreProcess.Errorf("%v", err),
+			), nil
 		}
 
 		ipc.Close()
@@ -276,7 +283,7 @@ func (opp *RevokeProcessor) Process( // nolint:dupl
 			continue
 		}
 
-		st, _ := currencystate.ExistsState(k, "key of design", getStateFunc)
+		st, _ := currencystate.ExistsState(k, "design", getStateFunc)
 
 		design, err := state.StateDesignValue(st)
 		if err != nil {

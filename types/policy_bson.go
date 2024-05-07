@@ -25,7 +25,7 @@ type HolderBSONUnmarshaler struct {
 }
 
 func (h *Holder) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
-	e := util.StringError("failed to decode bson of Holder")
+	e := util.StringError("decode bson of Holder")
 
 	var upo HolderBSONUnmarshaler
 	if err := enc.Unmarshal(b, &upo); err != nil {
@@ -59,7 +59,7 @@ type PolicyBSONUnmarshaler struct {
 }
 
 func (po *Policy) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
-	e := util.StringError("failed to decode bson of Policy")
+	e := util.StringError("decode bson of Policy")
 
 	var upo PolicyBSONUnmarshaler
 	if err := enc.Unmarshal(b, &upo); err != nil {

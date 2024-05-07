@@ -1,6 +1,7 @@
 package credential
 
 import (
+	"github.com/ProtoconNet/mitum-currency/v3/common"
 	currencytypes "github.com/ProtoconNet/mitum-currency/v3/types"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
@@ -38,19 +39,21 @@ type RevokeItemJSONUnmarshaler struct {
 }
 
 func (it *RevokeItem) DecodeJSON(b []byte, enc encoder.Encoder) error {
-	e := util.StringError("failed to decode json of RevokeItem")
-
 	var uit RevokeItemJSONUnmarshaler
 	if err := enc.Unmarshal(b, &uit); err != nil {
-		return e.Wrap(err)
+		return common.DecorateError(err, common.ErrDecodeJson, *it)
 	}
 
-	return it.unpack(enc,
+	if err := it.unpack(enc,
 		uit.Hint,
 		uit.Contract,
 		uit.Holder,
 		uit.TemplateID,
 		uit.ID,
 		uit.Currency,
-	)
+	); err != nil {
+		return common.DecorateError(err, common.ErrDecodeJson, *it)
+	}
+
+	return nil
 }

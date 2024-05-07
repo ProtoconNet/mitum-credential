@@ -13,7 +13,7 @@ func (c *Credential) unpack(enc encoder.Encoder, ht hint.Hint,
 	vFrom, vUntil uint64,
 	did string,
 ) error {
-	e := util.StringError("failed to unpack of Credential")
+	e := util.StringError("unpack Credential")
 
 	c.BaseHinter = hint.NewBaseHinter(ht)
 	c.id = id

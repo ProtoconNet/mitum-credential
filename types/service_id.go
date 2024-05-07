@@ -1,7 +1,8 @@
 package types
 
 import (
-	"github.com/ProtoconNet/mitum2/util"
+	"github.com/ProtoconNet/mitum-currency/v3/common"
+	"github.com/pkg/errors"
 	"regexp"
 	"unicode/utf8"
 )
@@ -25,14 +26,14 @@ func (sid ServiceID) String() string {
 
 func (sid ServiceID) IsValid([]byte) error {
 	if l := utf8.RuneCountInString(sid.String()); l < MinLengthContractID || l > MaxLengthContractID {
-		return util.ErrInvalid.Errorf(
-			"invalid length of service id, %d <= length <= %d",
+		return common.ErrValOOR.Wrap(errors.Errorf(
+			"%d <= length of service id <= %d",
 			MinLengthContractID,
 			MaxLengthContractID,
-		)
+		))
 	}
 	if !REServiceIDExp.Match([]byte(sid)) {
-		return util.ErrInvalid.Errorf("wrong service id, %v", sid)
+		return common.ErrValueInvalid.Wrap(errors.Errorf("service ID %s, must match regex `^[A-Za-z0-9가-힣][A-Za-z0-9가-힣-_]*$`", sid))
 	}
 
 	return nil

@@ -52,7 +52,7 @@ type TemplateJSONUnmarshaler struct {
 }
 
 func (t *Template) DecodeJSON(b []byte, enc encoder.Encoder) error {
-	e := util.StringError("failed to decode json of Template")
+	e := util.StringError("decode json of Template")
 
 	var u TemplateJSONUnmarshaler
 	if err := enc.Unmarshal(b, &u); err != nil {

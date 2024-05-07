@@ -4,13 +4,14 @@ import (
 	"context"
 	"sync"
 
+	extensioncurrency "github.com/ProtoconNet/mitum-currency/v3/state/extension"
+
 	"github.com/ProtoconNet/mitum-credential/state"
 	"github.com/ProtoconNet/mitum-credential/types"
 	"github.com/ProtoconNet/mitum-currency/v3/common"
 	"github.com/ProtoconNet/mitum-currency/v3/operation/currency"
 	currencystate "github.com/ProtoconNet/mitum-currency/v3/state"
 	statecurrency "github.com/ProtoconNet/mitum-currency/v3/state/currency"
-	stateextension "github.com/ProtoconNet/mitum-currency/v3/state/extension"
 	currencytypes "github.com/ProtoconNet/mitum-currency/v3/types"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
@@ -46,55 +47,49 @@ type AssignItemProcessor struct {
 func (ipp *AssignItemProcessor) PreProcess(
 	_ context.Context, _ base.Operation, getStateFunc base.GetStateFunc,
 ) error {
+	e := util.StringError("preprocess AssignItemProcessor")
 	it := ipp.item
 
 	if err := it.IsValid(nil); err != nil {
-		return errors.Wrap(err, " invalid AssignItem")
+		return e.Wrap(err)
 	}
 
 	if err := currencystate.CheckExistsState(statecurrency.StateKeyCurrencyDesign(it.Currency()), getStateFunc); err != nil {
-		return errors.Errorf("failed to get fee Currency %s state", it.Currency())
+		return e.Wrap(common.ErrCurrencyNF.Wrap(errors.Errorf("currency id, %v", it.Currency())))
 	}
 
-	if err := currencystate.CheckExistsState(statecurrency.StateKeyAccount(it.Holder()), getStateFunc); err != nil {
-		return errors.Wrapf(err, "failed to get Holder %s state", it.Holder())
+	if _, _, aErr, cErr := currencystate.ExistsCAccount(it.Holder(), "holder", true, false, getStateFunc); aErr != nil {
+		return e.Wrap(aErr)
+	} else if cErr != nil {
+		return e.Wrap(common.ErrCAccountNA.Wrap(cErr))
 	}
 
-	if err := currencystate.CheckNotExistsState(stateextension.StateKeyContractAccount(it.Holder()), getStateFunc); err != nil {
-		return errors.Wrapf(err, "Holder %s is contract account, contract account cannot be holder", it.Holder())
+	_, cSt, aErr, cErr := currencystate.ExistsCAccount(it.Contract(), "contract", true, true, getStateFunc)
+	if aErr != nil {
+		return e.Wrap(aErr)
+	} else if cErr != nil {
+		return e.Wrap(cErr)
 	}
 
-	st, err := currencystate.ExistsState(stateextension.StateKeyContractAccount(it.Contract()), "key of contract account", getStateFunc)
+	_, err := extensioncurrency.CheckCAAuthFromState(cSt, ipp.sender)
 	if err != nil {
-		return errors.Wrapf(err, "failed to get target contract account %s state", it.Contract())
+		return e.Wrap(err)
 	}
 
-	ca, err := stateextension.StateContractAccountValue(st)
-	if err != nil {
-		return errors.Wrap(err, "failed to get contract account value from state")
-	}
-
-	if !(ca.Owner().Equal(ipp.sender) || ca.IsOperator(ipp.sender)) {
-		return errors.Errorf(
-			"sender is neither the owner nor the operator of the target contract account, %q",
-			ipp.sender,
-		)
-	}
-
-	if st, err := currencystate.ExistsState(state.StateKeyDesign(it.Contract()), "key of design", getStateFunc); err != nil {
-		return errors.Wrapf(err, "failed to get design state of credential service")
+	if st, err := currencystate.ExistsState(state.StateKeyDesign(it.Contract()), "design", getStateFunc); err != nil {
+		return e.Wrap(common.ErrServiceNF.Errorf("credential service, %s: %v", it.Contract(), err))
 	} else if de, err := state.StateDesignValue(st); err != nil {
-		return errors.Wrapf(err, "failed to get design value of credential service from state")
+		return e.Wrap(common.ErrServiceNF.Errorf("credential service, %s: %v", it.Contract(), err))
 	} else {
 		if err := de.IsValid(nil); err != nil {
-			return err
+			return e.Wrap(err)
 		}
 		for i, v := range de.Policy().TemplateIDs() {
 			if it.templateID == v {
 				break
 			}
 			if i == len(de.Policy().TemplateIDs())-1 {
-				return errors.Errorf("templateID not found")
+				return e.Wrap(common.ErrValueInvalid.Errorf("templateID not found"))
 			}
 		}
 	}
@@ -103,16 +98,14 @@ func (ipp *AssignItemProcessor) PreProcess(
 		it.TemplateID(),
 		it.ID())); {
 	case err != nil:
-		return errors.Wrapf(err, "failed to get credential state")
+		return e.Wrap(common.ErrStateNF.Errorf("credential for template id %v, id %v, %v", it.TemplateID(), it.ID(), err))
 	case !found:
 	default:
 		if credential, isActive, err := state.StateCredentialValue(st); err != nil {
-			return errors.Wrapf(err, "failed to get credential state")
+			return e.Wrap(common.ErrStateValInvalid.Errorf("credential for template id %v, id %v, %v", it.TemplateID(), it.ID(), err))
 		} else if isActive {
-			return errors.Errorf(
-				"credential already assigned to holder account, %q",
-				credential.Holder(),
-			)
+			return e.Wrap(common.ErrValueInvalid.Errorf(
+				"already assigned credential to holder %v, template id %v, id %v", credential.Holder(), it.TemplateID(), it.ID()))
 		}
 	}
 
@@ -120,7 +113,7 @@ func (ipp *AssignItemProcessor) PreProcess(
 }
 
 func (ipp *AssignItemProcessor) Process(
-	_ context.Context, _ base.Operation, getStateFunc base.GetStateFunc,
+	_ context.Context, _ base.Operation, _ base.GetStateFunc,
 ) ([]base.StateMergeValue, error) {
 	it := ipp.item
 
@@ -205,41 +198,43 @@ func NewAssignProcessor() currencytypes.GetNewProcessor {
 func (opp *AssignProcessor) PreProcess(
 	ctx context.Context, op base.Operation, getStateFunc base.GetStateFunc,
 ) (context.Context, base.OperationProcessReasonError, error) {
-	e := util.StringError("failed to preprocess Assign")
-
 	fact, ok := op.Fact().(AssignFact)
 	if !ok {
-		return ctx, nil, e.Errorf("expected %T, not %T", AssignFact{}, op.Fact())
+		return ctx, base.NewBaseOperationProcessReasonError(
+			common.ErrMPreProcess.
+				Wrap(common.ErrMTypeMismatch).
+				Errorf("expected %T, not %T", AssignFact{}, op.Fact())), nil
 	}
 
 	if err := fact.IsValid(nil); err != nil {
-		return ctx, nil, e.Wrap(err)
-	}
-
-	if err := currencystate.CheckExistsState(statecurrency.StateKeyAccount(fact.Sender()), getStateFunc); err != nil {
-		return ctx, base.NewBaseOperationProcessReasonError("sender not found, %q; %w", fact.Sender(), err), nil
-	}
-
-	if err := currencystate.CheckNotExistsState(
-		stateextension.StateKeyContractAccount(fact.Sender()),
-		getStateFunc,
-	); err != nil {
 		return ctx, base.NewBaseOperationProcessReasonError(
-			"sender is contract account and contract account cannot assign credential status, %q; %w",
-			fact.Sender(),
-			err,
-		), nil
+			common.ErrMPreProcess.
+				Errorf("%v", err)), nil
+	}
+
+	if _, _, aErr, cErr := currencystate.ExistsCAccount(fact.Sender(), "sender", true, false, getStateFunc); aErr != nil {
+		return ctx, base.NewBaseOperationProcessReasonError(
+			common.ErrMPreProcess.
+				Errorf("%v", aErr)), nil
+	} else if cErr != nil {
+		return ctx, base.NewBaseOperationProcessReasonError(
+			common.ErrMPreProcess.Wrap(common.ErrMCAccountNA).
+				Errorf("%v: sender account is contract account, %q", fact.Sender(), cErr)), nil
 	}
 
 	if err := currencystate.CheckFactSignsByState(fact.sender, op.Signs(), getStateFunc); err != nil {
-		return ctx, base.NewBaseOperationProcessReasonError("invalid signing; %w", err), nil
+		return ctx, base.NewBaseOperationProcessReasonError(
+			common.ErrMPreProcess.
+				Wrap(common.ErrMSignInvalid).
+				Errorf("%v", err)), nil
 	}
 
 	for _, it := range fact.Items() {
 		ip := assignItemProcessorPool.Get()
 		ipc, ok := ip.(*AssignItemProcessor)
 		if !ok {
-			return nil, nil, e.Errorf("expected AssignItemProcessor, not %T", ip)
+			return nil, base.NewBaseOperationProcessReasonError(
+				common.ErrMTypeMismatch.Errorf("expected AssignItemProcessor, not %T", ip)), nil
 		}
 
 		ipc.h = op.Hash()
@@ -250,8 +245,7 @@ func (opp *AssignProcessor) PreProcess(
 
 		if err := ipc.PreProcess(ctx, op, getStateFunc); err != nil {
 			return nil, base.NewBaseOperationProcessReasonError(
-				"failed to preprocess AssignItem; %w",
-				err,
+				common.ErrMPreProcess.Errorf("%v", err),
 			), nil
 		}
 
@@ -279,7 +273,7 @@ func (opp *AssignProcessor) Process( // nolint:dupl
 			continue
 		}
 
-		st, _ := currencystate.ExistsState(k, "key of design", getStateFunc)
+		st, _ := currencystate.ExistsState(k, "design", getStateFunc)
 
 		design, _ := state.StateDesignValue(st)
 		count := design.Policy().CredentialCount()

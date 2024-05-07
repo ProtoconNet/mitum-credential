@@ -10,6 +10,7 @@ import (
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
 	"github.com/ProtoconNet/mitum2/util/valuehash"
+	"github.com/pkg/errors"
 )
 
 var (
@@ -108,57 +109,57 @@ func (fact AddTemplateFact) IsValid(b []byte) error {
 		fact.expirationDate,
 		fact.currency,
 	); err != nil {
-		return err
+		return common.ErrFactInvalid.Wrap(err)
 	}
 
 	if l := utf8.RuneCountInString(fact.templateID); l < 1 || l > types.MaxLengthTemplateID {
-		return util.ErrInvalid.Errorf("invalid length of template ID, 0 <= length <= %d", types.MaxLengthTemplateID)
+		return common.ErrFactInvalid.Wrap(common.ErrValOOR.Wrap(errors.Errorf("0 <= length of template ID <= %d, but %d", types.MaxLengthTemplateID, l)))
 	}
 
 	if !crcytypes.ReSpcecialChar.Match([]byte(fact.templateID)) {
-		return util.ErrInvalid.Errorf("invalid templateID due to the inclusion of special characters")
+		return common.ErrFactInvalid.Wrap(common.ErrValueInvalid.Wrap(errors.Errorf("template ID %s, must match regex `^[^\\s:/?#\\[\\]@]*$`", fact.TemplateID())))
 	}
 
 	if l := utf8.RuneCountInString(fact.templateName); l < 1 || l > types.MaxLengthTemplateName {
-		return util.ErrInvalid.Errorf("invalid length of template name, 0 <= length <= %d", types.MaxLengthTemplateName)
+		return common.ErrFactInvalid.Wrap(common.ErrValOOR.Wrap(errors.Errorf("0 <= length of template name <= %d, but %d", types.MaxLengthTemplateName, l)))
 	}
 
 	if l := utf8.RuneCountInString(fact.displayName); l < 1 || l > types.MaxLengthDisplayName {
-		return util.ErrInvalid.Errorf("invalid length of display name, 0 <= length <= %d", types.MaxLengthDisplayName)
+		return common.ErrFactInvalid.Wrap(common.ErrValOOR.Wrap(errors.Errorf("0 <= length of display name <= %d, but %d", types.MaxLengthDisplayName, l)))
 	}
 
 	if l := utf8.RuneCountInString(fact.subjectKey); l < 1 || l > types.MaxLengthSubjectKey {
-		return util.ErrInvalid.Errorf("invalid length of subjectKey, 0 <= length <= %d", types.MaxLengthSubjectKey)
+		return common.ErrFactInvalid.Wrap(common.ErrValOOR.Wrap(errors.Errorf("0 <= length of subjectKey <= %d, but %d", types.MaxLengthSubjectKey, l)))
 	}
 
 	if l := utf8.RuneCountInString(fact.description); l < 1 || l > types.MaxLengthDescription {
-		return util.ErrInvalid.Errorf("invalid length of description, 0 <= length <= %d", types.MaxLengthDescription)
+		return common.ErrFactInvalid.Wrap(common.ErrValOOR.Wrap(errors.Errorf("0 <= length of description <= %d, but %d", types.MaxLengthDescription, l)))
 	}
 
 	if fact.sender.Equal(fact.contract) {
-		return util.ErrInvalid.Errorf("contract address is same with sender, %q", fact.sender)
+		return common.ErrFactInvalid.Wrap(common.ErrSelfTarget.Wrap(errors.Errorf("contract address is same with sender, %q", fact.sender)))
 	}
 
 	if fact.creator.Equal(fact.contract) {
-		return util.ErrInvalid.Errorf("contract address is same with creator, %q", fact.creator)
+		return common.ErrFactInvalid.Wrap(common.ErrSelfTarget.Wrap(errors.Errorf("contract address is same with creator, %q", fact.creator)))
 	}
 
 	serviceDate, err := fact.serviceDate.Parse()
 	if err != nil {
-		return err
+		return common.ErrFactInvalid.Wrap(common.ErrValueInvalid.Wrap(err))
 	}
 
 	expire, err := fact.serviceDate.Parse()
 	if err != nil {
-		return err
+		return common.ErrFactInvalid.Wrap(common.ErrValueInvalid.Wrap(err))
 	}
 
 	if expire.UnixNano() < serviceDate.UnixNano() {
-		return util.ErrInvalid.Errorf("expire date <= service date, %s <= %s", fact.expirationDate, fact.serviceDate)
+		return common.ErrFactInvalid.Wrap(common.ErrValOOR.Wrap(errors.Errorf("expire date <= service date, %s <= %s", fact.expirationDate, fact.serviceDate)))
 	}
 
 	if err := common.IsValidOperationFact(fact, b); err != nil {
-		return err
+		return common.ErrFactInvalid.Wrap(err)
 	}
 
 	return nil

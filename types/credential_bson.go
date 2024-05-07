@@ -35,7 +35,7 @@ type CredentialBSONUnmarshaler struct {
 }
 
 func (c *Credential) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
-	e := util.StringError("failed to decode bson of Credential")
+	e := util.StringError("decode bson of Credential")
 
 	var u CredentialBSONUnmarshaler
 	if err := enc.Unmarshal(b, &u); err != nil {

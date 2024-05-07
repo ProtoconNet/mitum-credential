@@ -23,7 +23,7 @@ type DesignStateValueBSONUnmarshaler struct {
 }
 
 func (de *DesignStateValue) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
-	e := util.StringError("failed to decode bson of DesignStateValue")
+	e := util.StringError("decode bson of DesignStateValue")
 
 	var u DesignStateValueBSONUnmarshaler
 	if err := enc.Unmarshal(b, &u); err != nil {
@@ -66,7 +66,7 @@ type TemplateStateValueBSONUnmarshaler struct {
 }
 
 func (t *TemplateStateValue) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
-	e := util.StringError("failed to decode bson of TemplateStateValue")
+	e := util.StringError("decode bson of TemplateStateValue")
 
 	var u TemplateStateValueBSONUnmarshaler
 	if err := enc.Unmarshal(b, &u); err != nil {
@@ -111,7 +111,7 @@ type CredentialStateValueBSONUnmarshaler struct {
 }
 
 func (cd *CredentialStateValue) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
-	e := util.StringError("failed to decode bson of CredentialStateValue")
+	e := util.StringError("decode bson of CredentialStateValue")
 
 	var u CredentialStateValueBSONUnmarshaler
 	if err := enc.Unmarshal(b, &u); err != nil {
@@ -154,7 +154,7 @@ type HolderDIDStateValueBSONUnmarshaler struct {
 }
 
 func (hd *HolderDIDStateValue) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
-	e := util.StringError("failed to decode bson of HolderDIDStateValue")
+	e := util.StringError("decode bson of HolderDIDStateValue")
 
 	var u HolderDIDStateValueBSONUnmarshaler
 	if err := enc.Unmarshal(b, &u); err != nil {

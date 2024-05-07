@@ -3,12 +3,11 @@ package state
 import (
 	"fmt"
 	"github.com/ProtoconNet/mitum-credential/types"
-	"strings"
-
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
 	"github.com/pkg/errors"
+	"strings"
 )
 
 var (
@@ -33,26 +32,26 @@ func NewDesignStateValue(design types.Design) DesignStateValue {
 	}
 }
 
-func (hd DesignStateValue) Hint() hint.Hint {
-	return hd.BaseHinter.Hint()
+func (de DesignStateValue) Hint() hint.Hint {
+	return de.BaseHinter.Hint()
 }
 
-func (hd DesignStateValue) IsValid([]byte) error {
+func (de DesignStateValue) IsValid([]byte) error {
 	e := util.ErrInvalid.Errorf("invalid credential DesignStateValue")
 
-	if err := hd.BaseHinter.IsValid(DesignStateValueHint.Type().Bytes()); err != nil {
+	if err := de.BaseHinter.IsValid(DesignStateValueHint.Type().Bytes()); err != nil {
 		return e.Wrap(err)
 	}
 
-	if err := hd.Design.IsValid(nil); err != nil {
+	if err := de.Design.IsValid(nil); err != nil {
 		return e.Wrap(err)
 	}
 
 	return nil
 }
 
-func (hd DesignStateValue) HashBytes() []byte {
-	return hd.Design.Bytes()
+func (de DesignStateValue) HashBytes() []byte {
+	return de.Design.Bytes()
 }
 
 func StateDesignValue(st base.State) (types.Design, error) {
@@ -94,26 +93,26 @@ func NewTemplateStateValue(template types.Template) TemplateStateValue {
 	}
 }
 
-func (sv TemplateStateValue) Hint() hint.Hint {
-	return sv.BaseHinter.Hint()
+func (t TemplateStateValue) Hint() hint.Hint {
+	return t.BaseHinter.Hint()
 }
 
-func (sv TemplateStateValue) IsValid([]byte) error {
+func (t TemplateStateValue) IsValid([]byte) error {
 	e := util.ErrInvalid.Errorf("invalid credential TemplateStateValue")
 
-	if err := sv.BaseHinter.IsValid(TemplateStateValueHint.Type().Bytes()); err != nil {
+	if err := t.BaseHinter.IsValid(TemplateStateValueHint.Type().Bytes()); err != nil {
 		return e.Wrap(err)
 	}
 
-	if err := sv.Template.IsValid(nil); err != nil {
+	if err := t.Template.IsValid(nil); err != nil {
 		return e.Wrap(err)
 	}
 
 	return nil
 }
 
-func (sv TemplateStateValue) HashBytes() []byte {
-	return sv.Template.Bytes()
+func (t TemplateStateValue) HashBytes() []byte {
+	return t.Template.Bytes()
 }
 
 func StateKeyTemplate(contract base.Address, templateID string) string {
@@ -161,30 +160,30 @@ func NewCredentialStateValue(credential types.Credential, isActive bool) Credent
 	}
 }
 
-func (sv CredentialStateValue) Hint() hint.Hint {
-	return sv.BaseHinter.Hint()
+func (cd CredentialStateValue) Hint() hint.Hint {
+	return cd.BaseHinter.Hint()
 }
 
-func (sv CredentialStateValue) IsValid([]byte) error {
+func (cd CredentialStateValue) IsValid([]byte) error {
 	e := util.ErrInvalid.Errorf("invalid CredentialStateValue")
 
-	if err := sv.BaseHinter.IsValid(CredentialStateValueHint.Type().Bytes()); err != nil {
+	if err := cd.BaseHinter.IsValid(CredentialStateValueHint.Type().Bytes()); err != nil {
 		return e.Wrap(err)
 	}
 
-	if err := sv.Credential.IsValid(nil); err != nil {
+	if err := cd.Credential.IsValid(nil); err != nil {
 		return e.Wrap(err)
 	}
 
 	return nil
 }
 
-func (sv CredentialStateValue) HashBytes() []byte {
+func (cd CredentialStateValue) HashBytes() []byte {
 	var v int8
-	if sv.IsActive {
+	if cd.IsActive {
 		v = 1
 	}
-	return util.ConcatBytesSlice([]byte{byte(v)}, sv.Credential.Bytes())
+	return util.ConcatBytesSlice([]byte{byte(v)}, cd.Credential.Bytes())
 }
 
 func StateKeyCredential(contract base.Address, templateID string, id string) string {

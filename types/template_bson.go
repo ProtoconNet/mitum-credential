@@ -41,7 +41,7 @@ type TemplateBSONUnmarshaler struct {
 }
 
 func (t *Template) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
-	e := util.StringError("failed to decode bson of Template")
+	e := util.StringError("decode bson of Template")
 
 	var u TemplateBSONUnmarshaler
 	if err := enc.Unmarshal(b, &u); err != nil {

@@ -32,16 +32,18 @@ type CreateServiceFactJSONUnMarshaler struct {
 }
 
 func (fact *CreateServiceFact) DecodeJSON(b []byte, enc encoder.Encoder) error {
-	e := util.StringError("failed to decode json of CreateServiceFact")
-
 	var uf CreateServiceFactJSONUnMarshaler
 	if err := enc.Unmarshal(b, &uf); err != nil {
-		return e.Wrap(err)
+		return common.DecorateError(err, common.ErrDecodeJson, *fact)
 	}
 
 	fact.BaseFact.SetJSONUnmarshaler(uf.BaseFactJSONUnmarshaler)
 
-	return fact.unpack(enc, uf.Owner, uf.Contract, uf.Currency)
+	if err := fact.unpack(enc, uf.Owner, uf.Contract, uf.Currency); err != nil {
+		return common.DecorateError(err, common.ErrDecodeJson, *fact)
+	}
+
+	return nil
 }
 
 type CreateServiceMarshaler struct {
@@ -55,11 +57,9 @@ func (op CreateService) MarshalJSON() ([]byte, error) {
 }
 
 func (op *CreateService) DecodeJSON(b []byte, enc encoder.Encoder) error {
-	e := util.StringError("failed to decode json of CreateService")
-
 	var ubo common.BaseOperation
 	if err := ubo.DecodeJSON(b, enc); err != nil {
-		return e.Wrap(err)
+		return common.DecorateError(err, common.ErrDecodeJson, *op)
 	}
 
 	op.BaseOperation = ubo

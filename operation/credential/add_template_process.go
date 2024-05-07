@@ -63,69 +63,93 @@ func NewAddTemplateProcessor() currencytypes.GetNewProcessor {
 func (opp *AddTemplateProcessor) PreProcess(
 	ctx context.Context, op base.Operation, getStateFunc base.GetStateFunc,
 ) (context.Context, base.OperationProcessReasonError, error) {
-	e := util.StringError("failed to preprocess AddTemplate")
-
 	fact, ok := op.Fact().(AddTemplateFact)
 	if !ok {
-		return ctx, nil, e.Errorf("not %T, %T", AddTemplateFact{}, op.Fact())
+		return ctx, base.NewBaseOperationProcessReasonError(
+			common.ErrMPreProcess.
+				Wrap(common.ErrMTypeMismatch).
+				Errorf("expected %T, not %T", AddTemplateFact{}, op.Fact())), nil
 	}
 
 	if err := fact.IsValid(nil); err != nil {
-		return ctx, nil, e.Wrap(err)
-	}
-
-	if err := currencystate.CheckExistsState(currency.StateKeyAccount(fact.Sender()), getStateFunc); err != nil {
-		return nil, base.NewBaseOperationProcessReasonError("sender account state not found, %q; %w", fact.Sender(), err), nil
+		return ctx, base.NewBaseOperationProcessReasonError(
+			common.ErrMPreProcess.
+				Errorf("%v", err)), nil
 	}
 
 	if err := currencystate.CheckExistsState(currency.StateKeyCurrencyDesign(fact.Currency()), getStateFunc); err != nil {
-		return ctx, nil, e.WithMessage(err, "fee Currency state not found")
+		return ctx, base.NewBaseOperationProcessReasonError(
+			common.ErrMPreProcess.Wrap(common.ErrMCurrencyNF).Errorf("currency id, %v", fact.Currency())), nil
 	}
 
-	if err := currencystate.CheckNotExistsState(extensioncurrency.StateKeyContractAccount(fact.Sender()), getStateFunc); err != nil {
-		return nil, base.NewBaseOperationProcessReasonError("sender account is contract account, %q; %w", fact.Sender(), err), nil
+	if _, _, aErr, cErr := currencystate.ExistsCAccount(fact.Sender(), "sender", true, false, getStateFunc); aErr != nil {
+		return ctx, base.NewBaseOperationProcessReasonError(
+			common.ErrMPreProcess.
+				Errorf("%v", aErr)), nil
+	} else if cErr != nil {
+		return ctx, base.NewBaseOperationProcessReasonError(
+			common.ErrMPreProcess.Wrap(common.ErrMCAccountNA).
+				Errorf("%v", cErr)), nil
 	}
 
-	if err := currencystate.CheckExistsState(currency.StateKeyAccount(fact.Creator()), getStateFunc); err != nil {
-		return nil, base.NewBaseOperationProcessReasonError("creator account state not found, %q; %w", fact.Creator(), err), nil
+	if _, _, aErr, cErr := currencystate.ExistsCAccount(fact.Creator(), "creator", true, false, getStateFunc); aErr != nil {
+		return ctx, base.NewBaseOperationProcessReasonError(
+			common.ErrMPreProcess.
+				Errorf("%v", aErr)), nil
+	} else if cErr != nil {
+		return ctx, base.NewBaseOperationProcessReasonError(
+			common.ErrMPreProcess.Wrap(common.ErrMCAccountNA).
+				Errorf("%v", cErr)), nil
 	}
 
-	if err := currencystate.CheckNotExistsState(extensioncurrency.StateKeyContractAccount(fact.Creator()), getStateFunc); err != nil {
-		return nil, base.NewBaseOperationProcessReasonError("creator account is contract account, %q; %w", fact.Creator(), err), nil
+	_, cSt, aErr, cErr := currencystate.ExistsCAccount(fact.Contract(), "contract", true, true, getStateFunc)
+	if aErr != nil {
+		return ctx, base.NewBaseOperationProcessReasonError(
+			common.ErrMPreProcess.
+				Errorf("%v", aErr)), nil
+	} else if cErr != nil {
+		return ctx, base.NewBaseOperationProcessReasonError(
+			common.ErrMPreProcess.
+				Errorf("%v", cErr)), nil
 	}
 
-	st, err := currencystate.ExistsState(extensioncurrency.StateKeyContractAccount(fact.Contract()), "key of contract account", getStateFunc)
+	_, err := extensioncurrency.CheckCAAuthFromState(cSt, fact.Sender())
 	if err != nil {
-		return nil, base.NewBaseOperationProcessReasonError("target contract account state not found, %q; %w", fact.Contract(), err), nil
+		return ctx, base.NewBaseOperationProcessReasonError(
+			common.ErrMPreProcess.
+				Errorf("%v", err)), nil
 	}
 
-	ca, err := extensioncurrency.StateContractAccountValue(st)
+	st, err := currencystate.ExistsState(state.StateKeyDesign(fact.Contract()), "design", getStateFunc)
 	if err != nil {
-		return nil, base.NewBaseOperationProcessReasonError("contract account value not found from state, %q; %w", fact.Contract(), err), nil
-	}
-
-	if !(ca.Owner().Equal(fact.sender) || ca.IsOperator(fact.Sender())) {
-		return nil, base.NewBaseOperationProcessReasonError("sender account is neither the owner nor the operator of the target contract account, %q", fact.sender), nil
-	}
-
-	st, err = currencystate.ExistsState(state.StateKeyDesign(fact.Contract()), "key of design", getStateFunc)
-	if err != nil {
-		return nil, base.NewBaseOperationProcessReasonError("credential service state not found, %s; %w", fact.Contract(), err), nil
+		return ctx, base.NewBaseOperationProcessReasonError(
+			common.ErrMPreProcess.
+				Wrap(common.ErrMServiceNF).
+				Errorf("credential service state, %s; %v", fact.Contract(), err)), nil
 	}
 
 	design, err := state.StateDesignValue(st)
 	if err != nil {
-		return nil, base.NewBaseOperationProcessReasonError("credential service value not found from state, %s; %w", fact.Contract(), err), nil
+		return ctx, base.NewBaseOperationProcessReasonError(
+			common.ErrMPreProcess.
+				Wrap(common.ErrMServiceNF).
+				Errorf("credential service state value, %s; %v", fact.Contract(), err)), nil
 	}
 
 	for _, templateID := range design.Policy().TemplateIDs() {
 		if templateID == fact.TemplateID() {
-			return nil, base.NewBaseOperationProcessReasonError("already registered template, %q, %s", fact.TemplateID(), fact.Contract()), nil
+			return ctx, base.NewBaseOperationProcessReasonError(
+				common.ErrMPreProcess.
+					Wrap(common.ErrMStateE).
+					Errorf("already registered template, %q, %s", fact.TemplateID(), fact.Contract())), nil
 		}
 	}
 
 	if err := currencystate.CheckFactSignsByState(fact.Sender(), op.Signs(), getStateFunc); err != nil {
-		return ctx, base.NewBaseOperationProcessReasonError("invalid signing; %w", err), nil
+		return ctx, base.NewBaseOperationProcessReasonError(
+			common.ErrMPreProcess.
+				Wrap(common.ErrMSignInvalid).
+				Errorf("%v", err)), nil
 	}
 
 	return ctx, nil, nil
@@ -136,7 +160,7 @@ func (opp *AddTemplateProcessor) Process(
 	[]base.StateMergeValue, base.OperationProcessReasonError, error,
 ) {
 	fact, _ := op.Fact().(AddTemplateFact)
-	st, _ := currencystate.ExistsState(state.StateKeyDesign(fact.Contract()), "key of design", getStateFunc)
+	st, _ := currencystate.ExistsState(state.StateKeyDesign(fact.Contract()), "design", getStateFunc)
 	design, _ := state.StateDesignValue(st)
 	templateIDs := design.Policy().TemplateIDs()
 	templateIDs = append(templateIDs, fact.templateID)
@@ -194,7 +218,7 @@ func (opp *AddTemplateProcessor) Process(
 
 	senderBalSt, err := currencystate.ExistsState(
 		currency.StateKeyBalance(fact.Sender(), fact.Currency()),
-		"key of sender balance",
+		"sender balance",
 		getStateFunc,
 	)
 	if err != nil {
@@ -251,7 +275,7 @@ func (opp *AddTemplateProcessor) Process(
 			},
 		))
 	}
-	
+
 	return sts, nil, nil
 }
 

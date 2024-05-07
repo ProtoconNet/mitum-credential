@@ -26,7 +26,7 @@ type DesignJSONUnmarshaler struct {
 }
 
 func (de *Design) DecodeJSON(b []byte, enc encoder.Encoder) error {
-	e := util.StringError("failed to decode json of Design")
+	e := util.StringError("decode json of Design")
 
 	var ud DesignJSONUnmarshaler
 	if err := enc.Unmarshal(b, &ud); err != nil {

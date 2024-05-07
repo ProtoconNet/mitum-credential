@@ -5,7 +5,7 @@ import (
 	"sync"
 
 	"github.com/ProtoconNet/mitum-credential/state"
-	crendentialtypes "github.com/ProtoconNet/mitum-credential/types"
+	credentialtypes "github.com/ProtoconNet/mitum-credential/types"
 	"github.com/ProtoconNet/mitum-currency/v3/common"
 
 	currencystate "github.com/ProtoconNet/mitum-currency/v3/state"
@@ -63,60 +63,73 @@ func NewCreateServiceProcessor() types.GetNewProcessor {
 func (opp *CreateServiceProcessor) PreProcess(
 	ctx context.Context, op base.Operation, getStateFunc base.GetStateFunc,
 ) (context.Context, base.OperationProcessReasonError, error) {
-	e := util.StringError("failed to preprocess CreateService")
-
 	fact, ok := op.Fact().(CreateServiceFact)
 	if !ok {
-		return ctx, nil, e.Errorf("not CreateServiceFact, %T", op.Fact())
+		return ctx, base.NewBaseOperationProcessReasonError(
+			common.ErrMPreProcess.
+				Wrap(common.ErrMTypeMismatch).
+				Errorf("expected %T, not %T", CreateServiceFact{}, op.Fact())), nil
 	}
 
 	if err := fact.IsValid(nil); err != nil {
-		return ctx, nil, e.Wrap(err)
-	}
-	if err := currencystate.CheckExistsState(currency.StateKeyAccount(fact.Sender()), getStateFunc); err != nil {
-		return nil, base.NewBaseOperationProcessReasonError("sender not found, %q; %w", fact.Sender(), err), nil
-	}
-
-	if err := currencystate.CheckNotExistsState(extensioncurrency.StateKeyContractAccount(fact.Sender()), getStateFunc); err != nil {
-		return nil, base.NewBaseOperationProcessReasonError("contract account cannot create service, %q; %w", fact.Sender(), err), nil
+		return ctx, base.NewBaseOperationProcessReasonError(
+			common.ErrMPreProcess.
+				Errorf("%v", err)), nil
 	}
 
-	st, err := currencystate.ExistsState(extensioncurrency.StateKeyContractAccount(fact.Contract()), "key of contract account", getStateFunc)
+	if err := currencystate.CheckExistsState(currency.StateKeyCurrencyDesign(fact.Currency()), getStateFunc); err != nil {
+		return ctx, base.NewBaseOperationProcessReasonError(
+			common.ErrMPreProcess.Wrap(common.ErrMCurrencyNF).Errorf("currency id, %v", fact.Currency())), nil
+	}
+
+	if _, _, aErr, cErr := currencystate.ExistsCAccount(fact.Sender(), "sender", true, false, getStateFunc); aErr != nil {
+		return ctx, base.NewBaseOperationProcessReasonError(
+			common.ErrMPreProcess.
+				Errorf("%v", aErr)), nil
+	} else if cErr != nil {
+		return ctx, base.NewBaseOperationProcessReasonError(
+			common.ErrMPreProcess.Wrap(common.ErrMCAccountNA).
+				Errorf("%v", cErr)), nil
+	}
+
+	_, cSt, aErr, cErr := currencystate.ExistsCAccount(fact.Contract(), "contract", true, true, getStateFunc)
+	if aErr != nil {
+		return ctx, base.NewBaseOperationProcessReasonError(
+			common.ErrMPreProcess.
+				Errorf("%v", aErr)), nil
+	} else if cErr != nil {
+		return ctx, base.NewBaseOperationProcessReasonError(
+			common.ErrMPreProcess.
+				Errorf("%v", cErr)), nil
+	}
+
+	ca, err := extensioncurrency.CheckCAAuthFromState(cSt, fact.Sender())
 	if err != nil {
-		return nil, base.NewBaseOperationProcessReasonError("contract account not found, %q; %w", fact.Contract(), err), nil
-	}
-
-	ca, err := extensioncurrency.StateContractAccountValue(st)
-	if err != nil {
-		return nil, base.NewBaseOperationProcessReasonError(
-			"contract account value not found, %q; %w",
-			fact.Contract(),
-			err,
-		), nil
-	}
-
-	if !(ca.Owner().Equal(fact.sender) || ca.IsOperator(fact.Sender())) {
-		return nil, base.NewBaseOperationProcessReasonError(
-			"sender is neither the owner nor the operator of the target contract account, %q", fact.sender), nil
+		return ctx, base.NewBaseOperationProcessReasonError(
+			common.ErrMPreProcess.
+				Errorf("%v", err)), nil
 	}
 
 	if ca.IsActive() {
 		return nil, base.NewBaseOperationProcessReasonError(
-			"a design is already registered, %q",
-			fact.Contract().String(),
-		), nil
+			common.ErrMPreProcess.
+				Wrap(common.ErrMServiceE).Errorf("credential service, %v", fact.Contract())), nil
 	}
 
-	if err := currencystate.CheckNotExistsState(state.StateKeyDesign(fact.Contract()), getStateFunc); err != nil {
+	if found, _ := currencystate.CheckNotExistsState(state.StateKeyDesign(fact.Contract()), getStateFunc); found {
 		return nil, base.NewBaseOperationProcessReasonError(
-			"credential service already exists, %s; %w",
-			fact.Contract(),
-			err,
-		), nil
+			common.ErrMPreProcess.
+				Wrap(common.ErrMServiceE).Errorf("credential service, %v; %v",
+				fact.Contract(),
+				err,
+			)), nil
 	}
 
 	if err := currencystate.CheckFactSignsByState(fact.Sender(), op.Signs(), getStateFunc); err != nil {
-		return ctx, base.NewBaseOperationProcessReasonError("invalid signing; %w", err), nil
+		return ctx, base.NewBaseOperationProcessReasonError(
+			common.ErrMPreProcess.
+				Wrap(common.ErrMSignInvalid).
+				Errorf("%v", err)), nil
 	}
 
 	return ctx, nil, nil
@@ -134,17 +147,10 @@ func (opp *CreateServiceProcessor) Process(
 	}
 
 	var templates []string
-	var holders []crendentialtypes.Holder
+	var holders []credentialtypes.Holder
 
-	policy := crendentialtypes.NewPolicy(templates, holders, 0)
-	if err := policy.IsValid(nil); err != nil {
-		return nil, base.NewBaseOperationProcessReasonError("invalid credential policy, %s; %w", fact.Contract(), err), nil
-	}
-
-	design := crendentialtypes.NewDesign(policy)
-	if err := design.IsValid(nil); err != nil {
-		return nil, base.NewBaseOperationProcessReasonError("invalid credential design, %s; %w", fact.Contract(), err), nil
-	}
+	policy := credentialtypes.NewPolicy(templates, holders, 0)
+	design := credentialtypes.NewDesign(policy)
 
 	var sts []base.StateMergeValue
 
@@ -153,7 +159,7 @@ func (opp *CreateServiceProcessor) Process(
 		state.NewDesignStateValue(design),
 	))
 
-	st, err := currencystate.ExistsState(extensioncurrency.StateKeyContractAccount(fact.Contract()), "key of contract account", getStateFunc)
+	st, err := currencystate.ExistsState(extensioncurrency.StateKeyContractAccount(fact.Contract()), "contract account", getStateFunc)
 	if err != nil {
 		return nil, base.NewBaseOperationProcessReasonError("target contract account not found, %q; %w", fact.Contract(), err), nil
 	}
@@ -189,7 +195,7 @@ func (opp *CreateServiceProcessor) Process(
 
 	senderBalSt, err := currencystate.ExistsState(
 		currency.StateKeyBalance(fact.Sender(), fact.Currency()),
-		"key of sender balance",
+		"sender balance",
 		getStateFunc,
 	)
 	if err != nil {

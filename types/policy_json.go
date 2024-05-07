@@ -29,7 +29,7 @@ type HolderJSONUnmarshaler struct {
 }
 
 func (h *Holder) DecodeJSON(b []byte, enc encoder.Encoder) error {
-	e := util.StringError("failed to decode json of Holder")
+	e := util.StringError("decode json of Holder")
 
 	var uho HolderJSONUnmarshaler
 	if err := enc.Unmarshal(b, &uho); err != nil {
@@ -63,7 +63,7 @@ type PolicyJSONUnmarshaler struct {
 }
 
 func (po *Policy) DecodeJSON(b []byte, enc encoder.Encoder) error {
-	e := util.StringError("failed to decode json of Policy")
+	e := util.StringError("decode json of Policy")
 
 	var upo PolicyJSONUnmarshaler
 	if err := enc.Unmarshal(b, &upo); err != nil {
