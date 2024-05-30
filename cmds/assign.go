@@ -95,12 +95,9 @@ func (cmd *AssignCommand) createOperation() (base.Operation, error) { // nolint:
 
 	fact := credential.NewAssignFact([]byte(cmd.Token), cmd.sender, items)
 
-	op, err := credential.NewAssign(fact)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to assign operation")
-	}
+	op := credential.NewAssign(fact)
 
-	err = op.Sign(cmd.Privatekey, cmd.NetworkID.NetworkID())
+	err := op.Sign(cmd.Privatekey, cmd.NetworkID.NetworkID())
 	if err != nil {
 		return nil, e.Wrap(err)
 	}

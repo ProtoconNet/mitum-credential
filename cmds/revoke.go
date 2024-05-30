@@ -88,11 +88,8 @@ func (cmd *RevokeCredentialsCommand) createOperation() (base.Operation, error) {
 
 	fact := credential.NewRevokeFact([]byte(cmd.Token), cmd.sender, items)
 
-	op, err := credential.NewRevoke(fact)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to revoke operation")
-	}
-	err = op.Sign(cmd.Privatekey, cmd.NetworkID.NetworkID())
+	op := credential.NewRevoke(fact)
+	err := op.Sign(cmd.Privatekey, cmd.NetworkID.NetworkID())
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to revoke operation")
 	}

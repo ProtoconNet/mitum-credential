@@ -69,11 +69,8 @@ func (cmd *CreateServiceCommand) createOperation() (base.Operation, error) { // 
 		cmd.Currency.CID,
 	)
 
-	op, err := credential.NewCreateService(fact)
-	if err != nil {
-		return nil, e.Wrap(err)
-	}
-	err = op.Sign(cmd.Privatekey, cmd.NetworkID.NetworkID())
+	op := credential.NewCreateService(fact)
+	err := op.Sign(cmd.Privatekey, cmd.NetworkID.NetworkID())
 	if err != nil {
 		return nil, e.Wrap(err)
 	}

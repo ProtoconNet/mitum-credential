@@ -109,12 +109,9 @@ func (cmd *AddTemplateCommand) createOperation() (base.Operation, error) { // no
 		cmd.Currency.CID,
 	)
 
-	op, err := credential.NewAddTemplate(fact)
-	if err != nil {
-		return nil, e.Wrap(err)
-	}
+	op := credential.NewAddTemplate(fact)
 
-	err = op.Sign(cmd.Privatekey, cmd.NetworkID.NetworkID())
+	err := op.Sign(cmd.Privatekey, cmd.NetworkID.NetworkID())
 	if err != nil {
 		return nil, e.Wrap(err)
 	}

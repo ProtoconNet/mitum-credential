@@ -138,6 +138,6 @@ type Assign struct {
 	common.BaseOperation
 }
 
-func NewAssign(fact AssignFact) (Assign, error) {
-	return Assign{BaseOperation: common.NewBaseOperation(AssignHint, fact)}, nil
+func NewAssign(fact AssignFact) Assign {
+	return Assign{BaseOperation: common.NewBaseOperation(AssignHint, fact)}
 }

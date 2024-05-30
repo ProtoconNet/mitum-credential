@@ -232,6 +232,6 @@ type AddTemplate struct {
 	common.BaseOperation
 }
 
-func NewAddTemplate(fact AddTemplateFact) (AddTemplate, error) {
-	return AddTemplate{BaseOperation: common.NewBaseOperation(AddTemplateHint, fact)}, nil
+func NewAddTemplate(fact AddTemplateFact) AddTemplate {
+	return AddTemplate{BaseOperation: common.NewBaseOperation(AddTemplateHint, fact)}
 }

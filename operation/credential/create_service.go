@@ -111,6 +111,6 @@ type CreateService struct {
 	common.BaseOperation
 }
 
-func NewCreateService(fact CreateServiceFact) (CreateService, error) {
-	return CreateService{BaseOperation: common.NewBaseOperation(CreateServiceHint, fact)}, nil
+func NewCreateService(fact CreateServiceFact) CreateService {
+	return CreateService{BaseOperation: common.NewBaseOperation(CreateServiceHint, fact)}
 }

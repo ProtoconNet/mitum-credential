@@ -131,6 +131,6 @@ type Revoke struct {
 	common.BaseOperation
 }
 
-func NewRevoke(fact RevokeFact) (Revoke, error) {
-	return Revoke{BaseOperation: common.NewBaseOperation(RevokeHint, fact)}, nil
+func NewRevoke(fact RevokeFact) Revoke {
+	return Revoke{BaseOperation: common.NewBaseOperation(RevokeHint, fact)}
 }
