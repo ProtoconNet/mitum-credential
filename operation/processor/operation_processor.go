@@ -25,7 +25,7 @@ func CheckDuplication(opr *currencyprocessor.OperationProcessor, op base.Operati
 	var duplicationTypeSenderID string
 	var duplicationTypeCurrencyID string
 	var duplicationTypeCredentialID []string
-	var duplicationTypeContract string
+	var duplicationTypeContractID string
 	var newAddresses []base.Address
 
 	switch t := op.(type) {
@@ -39,31 +39,31 @@ func CheckDuplication(opr *currencyprocessor.OperationProcessor, op base.Operati
 			return errors.Errorf("failed to get Addresses")
 		}
 		newAddresses = as
-		duplicationTypeSenderID = fact.Sender().String()
+		duplicationTypeSenderID = currencyprocessor.DuplicationKey(fact.Sender().String(), DuplicationTypeSender)
 	case currency.UpdateKey:
 		fact, ok := t.Fact().(currency.UpdateKeyFact)
 		if !ok {
 			return errors.Errorf("expected UpdateKeyFact, not %T", t.Fact())
 		}
-		duplicationTypeSenderID = fact.Target().String()
+		duplicationTypeSenderID = currencyprocessor.DuplicationKey(fact.Target().String(), DuplicationTypeSender)
 	case currency.Transfer:
 		fact, ok := t.Fact().(currency.TransferFact)
 		if !ok {
 			return errors.Errorf("expected TransferFact, not %T", t.Fact())
 		}
-		duplicationTypeSenderID = fact.Sender().String()
+		duplicationTypeSenderID = currencyprocessor.DuplicationKey(fact.Sender().String(), DuplicationTypeSender)
 	case currency.RegisterCurrency:
 		fact, ok := t.Fact().(currency.RegisterCurrencyFact)
 		if !ok {
 			return errors.Errorf("expected RegisterCurrencyFact, not %T", t.Fact())
 		}
-		duplicationTypeCurrencyID = fact.Currency().Currency().String()
+		duplicationTypeCurrencyID = currencyprocessor.DuplicationKey(fact.Currency().Currency().String(), DuplicationTypeCurrency)
 	case currency.UpdateCurrency:
 		fact, ok := t.Fact().(currency.UpdateCurrencyFact)
 		if !ok {
 			return errors.Errorf("expected UpdateCurrencyFact, not %T", t.Fact())
 		}
-		duplicationTypeSenderID = fact.Currency().String()
+		duplicationTypeCurrencyID = currencyprocessor.DuplicationKey(fact.Currency().String(), DuplicationTypeCurrency)
 	case currency.Mint:
 	case extensioncurrency.CreateContractAccount:
 		fact, ok := t.Fact().(extensioncurrency.CreateContractAccountFact)
@@ -75,46 +75,37 @@ func CheckDuplication(opr *currencyprocessor.OperationProcessor, op base.Operati
 			return errors.Errorf("failed to get Addresses")
 		}
 		newAddresses = as
-		duplicationTypeSenderID = fact.Sender().String()
+		duplicationTypeSenderID = currencyprocessor.DuplicationKey(fact.Sender().String(), DuplicationTypeSender)
+		duplicationTypeContractID = currencyprocessor.DuplicationKey(fact.Sender().String(), DuplicationTypeContract)
 	case extensioncurrency.Withdraw:
 		fact, ok := t.Fact().(extensioncurrency.WithdrawFact)
 		if !ok {
 			return errors.Errorf("expected WithdrawFact, not %T", t.Fact())
 		}
-		duplicationTypeSenderID = fact.Sender().String()
+		duplicationTypeSenderID = currencyprocessor.DuplicationKey(fact.Sender().String(), DuplicationTypeSender)
 	case credential.CreateService:
 		fact, ok := t.Fact().(credential.CreateServiceFact)
 		if !ok {
 			return errors.Errorf("expected CreateServiceFact, not %T", t.Fact())
 		}
-		duplicationTypeSenderID = fact.Sender().String()
-		duplicationTypeContract = fact.Contract().String()
+		duplicationTypeSenderID = currencyprocessor.DuplicationKey(fact.Sender().String(), DuplicationTypeSender)
+		duplicationTypeContractID = currencyprocessor.DuplicationKey(fact.Contract().String(), DuplicationTypeContract)
 	case credential.AddTemplate:
 		fact, ok := t.Fact().(credential.AddTemplateFact)
 		if !ok {
 			return errors.Errorf("expected AddTemplateFact, not %T", t.Fact())
 		}
-		duplicationTypeSenderID = fact.Sender().String()
+		duplicationTypeSenderID = currencyprocessor.DuplicationKey(fact.Sender().String(), DuplicationTypeSender)
 	case credential.Assign:
 		fact, ok := t.Fact().(credential.AssignFact)
 		if !ok {
 			return errors.Errorf("expected AssignFact, not %T", t.Fact())
 		}
-		duplicationTypeSenderID = fact.Sender().String()
+		duplicationTypeSenderID = currencyprocessor.DuplicationKey(fact.Sender().String(), DuplicationTypeSender)
 		var credentials []string
 		for _, v := range fact.Items() {
-			credentials = append(credentials, fmt.Sprintf("%s-%s-%s", v.Contract().String(), v.TemplateID(), v.ID()))
-		}
-		duplicationTypeCredentialID = credentials
-	case credential.Revoke:
-		fact, ok := t.Fact().(credential.RevokeFact)
-		if !ok {
-			return errors.Errorf("expected RevokeFact, not %T", t.Fact())
-		}
-		duplicationTypeSenderID = fact.Sender().String()
-		var credentials []string
-		for _, v := range fact.Items() {
-			credentials = append(credentials, fmt.Sprintf("%s-%s-%s", v.Contract().String(), v.TemplateID(), v.ID()))
+			key := currencyprocessor.DuplicationKey(fmt.Sprintf("%s-%s-%s", v.Contract().String(), v.TemplateID(), v.ID()), DuplicationTypeCredential)
+			credentials = append(credentials, key)
 		}
 		duplicationTypeCredentialID = credentials
 	default:
@@ -123,30 +114,31 @@ func CheckDuplication(opr *currencyprocessor.OperationProcessor, op base.Operati
 
 	if len(duplicationTypeSenderID) > 0 {
 		if _, found := opr.Duplicated[duplicationTypeSenderID]; found {
-			return errors.Errorf("proposal cannot have duplicate sender, %v", duplicationTypeSenderID)
+			return errors.Errorf("proposal cannot have duplicated sender, %v", duplicationTypeSenderID)
 		}
 
-		opr.Duplicated[duplicationTypeSenderID] = DuplicationTypeSender
+		opr.Duplicated[duplicationTypeSenderID] = struct{}{}
 	}
+
 	if len(duplicationTypeCurrencyID) > 0 {
 		if _, found := opr.Duplicated[duplicationTypeCurrencyID]; found {
 			return errors.Errorf(
-				"cannot register duplicate currency id, %v within a proposal",
+				"cannot register duplicated currency id, %v within a proposal",
 				duplicationTypeCurrencyID,
 			)
 		}
 
-		opr.Duplicated[duplicationTypeCurrencyID] = DuplicationTypeCurrency
+		opr.Duplicated[duplicationTypeCurrencyID] = struct{}{}
 	}
-	if len(duplicationTypeContract) > 0 {
-		if _, found := opr.Duplicated[duplicationTypeContract]; found {
+	if len(duplicationTypeContractID) > 0 {
+		if _, found := opr.Duplicated[duplicationTypeContractID]; found {
 			return errors.Errorf(
 				"cannot use a duplicated contract for registering in contract model , %v within a proposal",
 				duplicationTypeSenderID,
 			)
 		}
 
-		opr.Duplicated[duplicationTypeContract] = DuplicationTypeContract
+		opr.Duplicated[duplicationTypeContractID] = struct{}{}
 	}
 	if len(duplicationTypeCredentialID) > 0 {
 		for _, v := range duplicationTypeCredentialID {
@@ -156,7 +148,7 @@ func CheckDuplication(opr *currencyprocessor.OperationProcessor, op base.Operati
 					v,
 				)
 			}
-			opr.Duplicated[v] = DuplicationTypeCredential
+			opr.Duplicated[v] = struct{}{}
 		}
 	}
 
