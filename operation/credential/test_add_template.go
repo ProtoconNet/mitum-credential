@@ -9,7 +9,6 @@ import (
 	"github.com/ProtoconNet/mitum-currency/v3/types"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
-	"github.com/ProtoconNet/mitum2/util/encoder"
 )
 
 type TestAddTemplateProcessor struct {
@@ -25,8 +24,8 @@ type TestAddTemplateProcessor struct {
 	description    string
 }
 
-func NewTestAddTemplateProcessor(encs *encoder.Encoders) TestAddTemplateProcessor {
-	t := test.NewBaseTestOperationProcessorNoItem[AddTemplate](encs)
+func NewTestAddTemplateProcessor(tp *test.TestProcessor) TestAddTemplateProcessor {
+	t := test.NewBaseTestOperationProcessorNoItem[AddTemplate](tp)
 	return TestAddTemplateProcessor{BaseTestOperationProcessorNoItem: &t}
 }
 

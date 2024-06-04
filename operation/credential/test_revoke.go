@@ -9,7 +9,6 @@ import (
 	"github.com/ProtoconNet/mitum-currency/v3/types"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
-	"github.com/ProtoconNet/mitum2/util/encoder"
 )
 
 type TestRevokeProcessor struct {
@@ -18,8 +17,8 @@ type TestRevokeProcessor struct {
 	id         string
 }
 
-func NewTestRevokeProcessor(encs *encoder.Encoders) TestRevokeProcessor {
-	t := test.NewBaseTestOperationProcessorWithItem[Revoke, RevokeItem](encs)
+func NewTestRevokeProcessor(tp *test.TestProcessor) TestRevokeProcessor {
+	t := test.NewBaseTestOperationProcessorWithItem[Revoke, RevokeItem](tp)
 	return TestRevokeProcessor{BaseTestOperationProcessorWithItem: &t}
 }
 

@@ -9,7 +9,6 @@ import (
 	"github.com/ProtoconNet/mitum-currency/v3/types"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
-	"github.com/ProtoconNet/mitum2/util/encoder"
 )
 
 type TestAssignProcessor struct {
@@ -22,8 +21,8 @@ type TestAssignProcessor struct {
 	did        string
 }
 
-func NewTestAssignProcessor(encs *encoder.Encoders) TestAssignProcessor {
-	t := test.NewBaseTestOperationProcessorWithItem[Assign, AssignItem](encs)
+func NewTestAssignProcessor(tp *test.TestProcessor) TestAssignProcessor {
+	t := test.NewBaseTestOperationProcessorWithItem[Assign, AssignItem](tp)
 	return TestAssignProcessor{BaseTestOperationProcessorWithItem: &t}
 }
 
