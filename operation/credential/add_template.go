@@ -137,11 +137,11 @@ func (fact AddTemplateFact) IsValid(b []byte) error {
 	}
 
 	if fact.sender.Equal(fact.contract) {
-		return common.ErrFactInvalid.Wrap(common.ErrSelfTarget.Wrap(errors.Errorf("contract address is same with sender, %q", fact.sender)))
+		return common.ErrFactInvalid.Wrap(common.ErrSelfTarget.Wrap(errors.Errorf("sender %v is same with contract account", fact.sender)))
 	}
 
 	if fact.creator.Equal(fact.contract) {
-		return common.ErrFactInvalid.Wrap(common.ErrSelfTarget.Wrap(errors.Errorf("contract address is same with creator, %q", fact.creator)))
+		return common.ErrFactInvalid.Wrap(common.ErrSelfTarget.Wrap(errors.Errorf("creator %v is same with contract account", fact.creator)))
 	}
 
 	serviceDate, err := fact.serviceDate.Parse()

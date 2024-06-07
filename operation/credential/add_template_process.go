@@ -125,15 +125,15 @@ func (opp *AddTemplateProcessor) PreProcess(
 		return ctx, base.NewBaseOperationProcessReasonError(
 			common.ErrMPreProcess.
 				Wrap(common.ErrMServiceNF).
-				Errorf("credential service state, %s; %v", fact.Contract(), err)), nil
+				Errorf("credential service state for contract account %v", fact.Contract())), nil
 	}
 
 	design, err := state.StateDesignValue(st)
 	if err != nil {
 		return ctx, base.NewBaseOperationProcessReasonError(
-			common.ErrMPreProcess.
+			common.ErrMPreProcess.Wrap(common.ErrMStateValInvalid).
 				Wrap(common.ErrMServiceNF).
-				Errorf("credential service state value, %s; %v", fact.Contract(), err)), nil
+				Errorf("credential service state value for contract account %v", fact.Contract())), nil
 	}
 
 	for _, templateID := range design.Policy().TemplateIDs() {
@@ -141,7 +141,7 @@ func (opp *AddTemplateProcessor) PreProcess(
 			return ctx, base.NewBaseOperationProcessReasonError(
 				common.ErrMPreProcess.
 					Wrap(common.ErrMStateE).
-					Errorf("already registered template, %q, %s", fact.TemplateID(), fact.Contract())), nil
+					Errorf("already registered template %v in contract account %v", fact.TemplateID(), fact.Contract())), nil
 		}
 	}
 

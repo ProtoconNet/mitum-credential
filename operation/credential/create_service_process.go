@@ -79,7 +79,7 @@ func (opp *CreateServiceProcessor) PreProcess(
 
 	if err := currencystate.CheckExistsState(currency.StateKeyCurrencyDesign(fact.Currency()), getStateFunc); err != nil {
 		return ctx, base.NewBaseOperationProcessReasonError(
-			common.ErrMPreProcess.Wrap(common.ErrMCurrencyNF).Errorf("currency id, %v", fact.Currency())), nil
+			common.ErrMPreProcess.Wrap(common.ErrMCurrencyNF).Errorf("currency id %v", fact.Currency())), nil
 	}
 
 	if _, _, aErr, cErr := currencystate.ExistsCAccount(fact.Sender(), "sender", true, false, getStateFunc); aErr != nil {
@@ -113,15 +113,15 @@ func (opp *CreateServiceProcessor) PreProcess(
 	if ca.IsActive() {
 		return nil, base.NewBaseOperationProcessReasonError(
 			common.ErrMPreProcess.
-				Wrap(common.ErrMServiceE).Errorf("credential service, %v", fact.Contract())), nil
+				Wrap(common.ErrMValueInvalid).Errorf(
+				"contract account %v has already been activated", fact.Contract())), nil
 	}
 
 	if found, _ := currencystate.CheckNotExistsState(state.StateKeyDesign(fact.Contract()), getStateFunc); found {
 		return nil, base.NewBaseOperationProcessReasonError(
-			common.ErrMPreProcess.
-				Wrap(common.ErrMServiceE).Errorf("credential service, %v; %v",
+			common.ErrMPreProcess.Wrap(common.ErrMStateNF).
+				Wrap(common.ErrMServiceE).Errorf("credential service for contract account %v",
 				fact.Contract(),
-				err,
 			)), nil
 	}
 

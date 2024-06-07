@@ -54,7 +54,7 @@ func (ipp *RevokeItemProcessor) PreProcess(
 	}
 
 	if err := currencystate.CheckExistsState(statecurrency.StateKeyCurrencyDesign(it.Currency()), getStateFunc); err != nil {
-		return e.Wrap(common.ErrCurrencyNF.Wrap(errors.Errorf("currency id, %v", it.Currency())))
+		return e.Wrap(common.ErrCurrencyNF.Wrap(errors.Errorf("currency id %v", it.Currency())))
 	}
 
 	if _, _, aErr, cErr := currencystate.ExistsCAccount(it.Holder(), "holder", true, false, getStateFunc); aErr != nil {
@@ -76,9 +76,11 @@ func (ipp *RevokeItemProcessor) PreProcess(
 	}
 
 	if st, err := currencystate.ExistsState(state.StateKeyDesign(it.Contract()), "design", getStateFunc); err != nil {
-		return e.Wrap(common.ErrServiceNF.Errorf("credential service state, %s; %v", it.Contract(), err))
+		return e.Wrap(
+			common.ErrServiceNF.Errorf("credential service state for contract account %v", it.Contract()))
 	} else if de, err := state.StateDesignValue(st); err != nil {
-		return e.Wrap(common.ErrServiceNF.Errorf("credential service state value, %s; %v", it.Contract(), err))
+		return e.Wrap(
+			common.ErrServiceNF.Errorf("credential service state value for contract account %v", it.Contract()))
 	} else {
 		if err := de.IsValid(nil); err != nil {
 			return e.Wrap(err)
@@ -88,28 +90,37 @@ func (ipp *RevokeItemProcessor) PreProcess(
 				break
 			}
 			if i == len(de.Policy().TemplateIDs())-1 {
-				return e.Wrap(common.ErrValueInvalid.Errorf("templateID not found"))
+				return e.Wrap(common.ErrValueInvalid.Errorf("not registered template %v", it.TemplateID()))
 			}
 		}
 	}
 
-	st, err := currencystate.ExistsState(state.StateKeyCredential(it.Contract(), it.TemplateID(), it.ID()), "credential", getStateFunc)
+	st, err := currencystate.ExistsState(
+		state.StateKeyCredential(it.Contract(), it.TemplateID(), it.ID()), "credential", getStateFunc)
 	if err != nil {
-		return e.Wrap(common.ErrStateNF.Errorf("credential for template id %v, id %v, %v", it.TemplateID(), it.ID(), err))
+		return e.Wrap(
+			common.ErrStateNF.Errorf(
+				"credential %v for template %v in contract account %v", it.ID(), it.TemplateID(), it.Contract()))
 	}
 
 	crd, isActive, err := state.StateCredentialValue(st)
 	if err != nil {
-		return e.Wrap(common.ErrStateValInvalid.Errorf("credential for template id %v, id %v, %v", it.TemplateID(), it.ID(), err))
+		return e.Wrap(
+			common.ErrStateValInvalid.Errorf(
+				"credential %v for template %v in contract account %v", it.ID(), it.TemplateID(), it.Contract()))
 	}
 
 	if !crd.Holder().Equal(it.Holder()) {
-		return e.Wrap(common.ErrValueInvalid.Errorf("holder, %v have not owned id, %v", it.Holder(), it.ID()))
+		return e.Wrap(
+			common.ErrValueInvalid.Errorf(
+				"holder %v has not owned credential %v for template %v in contract account %v",
+				it.Holder(), it.ID(), it.TemplateID(), it.Contract()))
 	}
 
 	if !isActive {
 		return e.Wrap(common.ErrValueInvalid.Errorf(
-			"already revoked credential, template id %v, id %v", it.TemplateID(), it.ID()))
+			"already revoked credential %v for template %v in contract account %v",
+			it.ID(), it.TemplateID(), it.Contract()))
 	}
 
 	return nil
@@ -225,7 +236,7 @@ func (opp *RevokeProcessor) PreProcess(
 	} else if cErr != nil {
 		return ctx, base.NewBaseOperationProcessReasonError(
 			common.ErrMPreProcess.Wrap(common.ErrMCAccountNA).
-				Errorf("%v: sender account is contract account, %q", fact.Sender(), cErr)), nil
+				Errorf("%v: sender is contract account, %q", fact.Sender(), cErr)), nil
 	}
 
 	if err := currencystate.CheckFactSignsByState(fact.sender, op.Signs(), getStateFunc); err != nil {

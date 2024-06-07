@@ -86,13 +86,13 @@ func (fact AssignFact) IsValid(b []byte) error {
 		}
 
 		if it.contract.Equal(fact.sender) {
-			return common.ErrFactInvalid.Wrap(common.ErrSelfTarget.Wrap(errors.Errorf("contract address is same with sender, %q", fact.sender)))
+			return common.ErrFactInvalid.Wrap(common.ErrSelfTarget.Wrap(errors.Errorf("sender %v is same with contract account", fact.sender)))
 		}
 
 		k := fmt.Sprintf("%s-%s", it.contract, it.id)
 
 		if _, found := founds[k]; found {
-			return common.ErrFactInvalid.Wrap(common.ErrDupVal.Wrap(errors.Errorf("credential id, %s", k)))
+			return common.ErrFactInvalid.Wrap(common.ErrDupVal.Wrap(errors.Errorf("credential id %v for template %v in contract account %v", it.ID(), it.TemplateID(), it.Contract())))
 		}
 
 		founds[k] = struct{}{}
