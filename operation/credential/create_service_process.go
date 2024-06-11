@@ -113,7 +113,7 @@ func (opp *CreateServiceProcessor) PreProcess(
 	if ca.IsActive() {
 		return nil, base.NewBaseOperationProcessReasonError(
 			common.ErrMPreProcess.
-				Wrap(common.ErrMValueInvalid).Errorf(
+				Wrap(common.ErrMServiceE).Errorf(
 				"contract account %v has already been activated", fact.Contract())), nil
 	}
 
