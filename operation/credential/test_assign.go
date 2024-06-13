@@ -12,7 +12,7 @@ import (
 )
 
 type TestAssignProcessor struct {
-	*test.BaseTestOperationProcessorWithItem[Assign, AssignItem]
+	*test.BaseTestOperationProcessorWithItem[Issue, IssueItem]
 	templateID string
 	id         string
 	value      string
@@ -22,12 +22,12 @@ type TestAssignProcessor struct {
 }
 
 func NewTestAssignProcessor(tp *test.TestProcessor) TestAssignProcessor {
-	t := test.NewBaseTestOperationProcessorWithItem[Assign, AssignItem](tp)
+	t := test.NewBaseTestOperationProcessorWithItem[Issue, IssueItem](tp)
 	return TestAssignProcessor{BaseTestOperationProcessorWithItem: &t}
 }
 
 func (t *TestAssignProcessor) Create() *TestAssignProcessor {
-	t.Opr, _ = NewAssignProcessor()(
+	t.Opr, _ = NewIssueProcessor()(
 		base.GenesisHeight,
 		t.GetStateFunc,
 		nil, nil,
@@ -128,9 +128,9 @@ func (t *TestAssignProcessor) SetTemplate(
 }
 
 func (t *TestAssignProcessor) MakeItem(
-	contract, holder test.Account, currency types.CurrencyID, targetItems []AssignItem,
+	contract, holder test.Account, currency types.CurrencyID, targetItems []IssueItem,
 ) *TestAssignProcessor {
-	item := NewAssignItem(
+	item := NewIssueItem(
 		contract.Address(),
 		holder.Address(),
 		t.templateID,
@@ -141,16 +141,16 @@ func (t *TestAssignProcessor) MakeItem(
 		t.did,
 		currency,
 	)
-	test.UpdateSlice[AssignItem](item, targetItems)
+	test.UpdateSlice[IssueItem](item, targetItems)
 
 	return t
 }
 
 func (t *TestAssignProcessor) MakeOperation(
-	sender base.Address, privatekey base.Privatekey, items []AssignItem,
+	sender base.Address, privatekey base.Privatekey, items []IssueItem,
 ) *TestAssignProcessor {
 	op := NewAssign(
-		NewAssignFact(
+		NewIssueFact(
 			[]byte("token"),
 			sender,
 			items,

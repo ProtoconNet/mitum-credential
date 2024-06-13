@@ -8,10 +8,10 @@ import (
 	"github.com/ProtoconNet/mitum-credential/types"
 	"github.com/ProtoconNet/mitum-currency/v3/common"
 	"github.com/ProtoconNet/mitum-currency/v3/operation/currency"
-	currencystate "github.com/ProtoconNet/mitum-currency/v3/state"
-	statecurrency "github.com/ProtoconNet/mitum-currency/v3/state/currency"
-	extensioncurrency "github.com/ProtoconNet/mitum-currency/v3/state/extension"
-	currencytypes "github.com/ProtoconNet/mitum-currency/v3/types"
+	cstate "github.com/ProtoconNet/mitum-currency/v3/state"
+	statec "github.com/ProtoconNet/mitum-currency/v3/state/currency"
+	stetee "github.com/ProtoconNet/mitum-currency/v3/state/extension"
+	ctypes "github.com/ProtoconNet/mitum-currency/v3/types"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/pkg/errors"
@@ -53,34 +53,34 @@ func (ipp *RevokeItemProcessor) PreProcess(
 		return e.Wrap(err)
 	}
 
-	if err := currencystate.CheckExistsState(statecurrency.StateKeyCurrencyDesign(it.Currency()), getStateFunc); err != nil {
+	if err := cstate.CheckExistsState(statec.DesignStateKey(it.Currency()), getStateFunc); err != nil {
 		return e.Wrap(common.ErrCurrencyNF.Wrap(errors.Errorf("currency id %v", it.Currency())))
 	}
 
-	if _, _, aErr, cErr := currencystate.ExistsCAccount(it.Holder(), "holder", true, false, getStateFunc); aErr != nil {
+	if _, _, aErr, cErr := cstate.ExistsCAccount(it.Holder(), "holder", true, false, getStateFunc); aErr != nil {
 		return e.Wrap(aErr)
 	} else if cErr != nil {
 		return e.Wrap(common.ErrCAccountNA.Wrap(cErr))
 	}
 
-	_, cSt, aErr, cErr := currencystate.ExistsCAccount(it.Contract(), "contract", true, true, getStateFunc)
+	_, cSt, aErr, cErr := cstate.ExistsCAccount(it.Contract(), "contract", true, true, getStateFunc)
 	if aErr != nil {
 		return e.Wrap(aErr)
 	} else if cErr != nil {
 		return e.Wrap(cErr)
 	}
 
-	_, err := extensioncurrency.CheckCAAuthFromState(cSt, ipp.sender)
+	_, err := stetee.CheckCAAuthFromState(cSt, ipp.sender)
 	if err != nil {
 		return e.Wrap(err)
 	}
 
-	if st, err := currencystate.ExistsState(state.StateKeyDesign(it.Contract()), "design", getStateFunc); err != nil {
+	if st, err := cstate.ExistsState(state.StateKeyDesign(it.Contract()), "design", getStateFunc); err != nil {
 		return e.Wrap(
-			common.ErrServiceNF.Errorf("credential service state for contract account %v", it.Contract()))
+			common.ErrServiceNF.Errorf("credential design state for contract account %v", it.Contract()))
 	} else if de, err := state.StateDesignValue(st); err != nil {
 		return e.Wrap(
-			common.ErrServiceNF.Errorf("credential service state value for contract account %v", it.Contract()))
+			common.ErrServiceNF.Errorf("credential design state value for contract account %v", it.Contract()))
 	} else {
 		if err := de.IsValid(nil); err != nil {
 			return e.Wrap(err)
@@ -95,32 +95,32 @@ func (ipp *RevokeItemProcessor) PreProcess(
 		}
 	}
 
-	st, err := currencystate.ExistsState(
-		state.StateKeyCredential(it.Contract(), it.TemplateID(), it.ID()), "credential", getStateFunc)
+	st, err := cstate.ExistsState(
+		state.StateKeyCredential(it.Contract(), it.TemplateID(), it.CredentialID()), "credential", getStateFunc)
 	if err != nil {
 		return e.Wrap(
 			common.ErrStateNF.Errorf(
-				"credential %v for template %v in contract account %v", it.ID(), it.TemplateID(), it.Contract()))
+				"credential %v for template %v in contract account %v", it.CredentialID(), it.TemplateID(), it.Contract()))
 	}
 
 	crd, isActive, err := state.StateCredentialValue(st)
 	if err != nil {
 		return e.Wrap(
 			common.ErrStateValInvalid.Errorf(
-				"credential %v for template %v in contract account %v", it.ID(), it.TemplateID(), it.Contract()))
+				"credential %v for template %v in contract account %v", it.CredentialID(), it.TemplateID(), it.Contract()))
 	}
 
 	if !crd.Holder().Equal(it.Holder()) {
 		return e.Wrap(
 			common.ErrValueInvalid.Errorf(
 				"holder %v has not owned credential %v for template %v in contract account %v",
-				it.Holder(), it.ID(), it.TemplateID(), it.Contract()))
+				it.Holder(), it.CredentialID(), it.TemplateID(), it.Contract()))
 	}
 
 	if !isActive {
 		return e.Wrap(common.ErrValueInvalid.Errorf(
 			"already revoked credential %v for template %v in contract account %v",
-			it.ID(), it.TemplateID(), it.Contract()))
+			it.CredentialID(), it.TemplateID(), it.Contract()))
 	}
 
 	return nil
@@ -140,7 +140,7 @@ func (ipp *RevokeItemProcessor) Process(
 		return nil, errors.Errorf("empty holders, %s", it.Contract())
 	}
 
-	st, _ := currencystate.ExistsState(state.StateKeyCredential(it.Contract(), it.TemplateID(), it.ID()), "credential", getStateFunc)
+	st, _ := cstate.ExistsState(state.StateKeyCredential(it.Contract(), it.TemplateID(), it.CredentialID()), "credential", getStateFunc)
 	credential, _, _ := state.StateCredentialValue(st)
 
 	if err := credential.IsValid(nil); err != nil {
@@ -148,8 +148,8 @@ func (ipp *RevokeItemProcessor) Process(
 	}
 
 	sts := []base.StateMergeValue{
-		currencystate.NewStateMergeValue(
-			state.StateKeyCredential(it.Contract(), it.TemplateID(), it.ID()),
+		cstate.NewStateMergeValue(
+			state.StateKeyCredential(it.Contract(), it.TemplateID(), it.CredentialID()),
 			state.NewCredentialStateValue(credential, false),
 		),
 	}
@@ -188,7 +188,7 @@ type RevokeProcessor struct {
 	*base.BaseOperationProcessor
 }
 
-func NewRevokeProcessor() currencytypes.GetNewProcessor {
+func NewRevokeProcessor() ctypes.GetNewProcessor {
 	return func(
 		height base.Height,
 		getStateFunc base.GetStateFunc,
@@ -229,7 +229,7 @@ func (opp *RevokeProcessor) PreProcess(
 		return ctx, nil, e.Wrap(err)
 	}
 
-	if _, _, aErr, cErr := currencystate.ExistsCAccount(fact.Sender(), "sender", true, false, getStateFunc); aErr != nil {
+	if _, _, aErr, cErr := cstate.ExistsCAccount(fact.Sender(), "sender", true, false, getStateFunc); aErr != nil {
 		return ctx, base.NewBaseOperationProcessReasonError(
 			common.ErrMPreProcess.
 				Errorf("%v", aErr)), nil
@@ -239,7 +239,7 @@ func (opp *RevokeProcessor) PreProcess(
 				Errorf("%v: sender is contract account, %q", fact.Sender(), cErr)), nil
 	}
 
-	if err := currencystate.CheckFactSignsByState(fact.sender, op.Signs(), getStateFunc); err != nil {
+	if err := cstate.CheckFactSignsByState(fact.sender, op.Signs(), getStateFunc); err != nil {
 		return ctx, base.NewBaseOperationProcessReasonError(
 			common.ErrMPreProcess.
 				Wrap(common.ErrMSignInvalid).
@@ -294,11 +294,11 @@ func (opp *RevokeProcessor) Process( // nolint:dupl
 			continue
 		}
 
-		st, _ := currencystate.ExistsState(k, "design", getStateFunc)
+		st, _ := cstate.ExistsState(k, "design", getStateFunc)
 
 		design, err := state.StateDesignValue(st)
 		if err != nil {
-			return nil, base.NewBaseOperationProcessReasonError("credential service value not found, %s; %w", it.Contract(), err), nil
+			return nil, base.NewBaseOperationProcessReasonError("credential design value not found, %s; %w", it.Contract(), err), nil
 		}
 
 		designs[k] = design
@@ -345,7 +345,7 @@ func (opp *RevokeProcessor) Process( // nolint:dupl
 		}
 
 		sts = append(sts,
-			currencystate.NewStateMergeValue(
+			cstate.NewStateMergeValue(
 				k,
 				state.NewDesignStateValue(design),
 			),
@@ -367,7 +367,7 @@ func (opp *RevokeProcessor) Process( // nolint:dupl
 	}
 
 	for cid := range sb {
-		v, ok := sb[cid].Value().(statecurrency.BalanceStateValue)
+		v, ok := sb[cid].Value().(statec.BalanceStateValue)
 		if !ok {
 			return nil, nil, e.Errorf("expected BalanceStateValue, not %T", sb[cid].Value())
 		}
@@ -377,23 +377,23 @@ func (opp *RevokeProcessor) Process( // nolint:dupl
 		if feeReceiverFound && (sb[cid].Key() != feeReceiverBalSts[cid].Key()) {
 			stmv := common.NewBaseStateMergeValue(
 				sb[cid].Key(),
-				statecurrency.NewDeductBalanceStateValue(v.Amount.WithBig(required[cid][1])),
+				statec.NewDeductBalanceStateValue(v.Amount.WithBig(required[cid][1])),
 				func(height base.Height, st base.State) base.StateValueMerger {
-					return statecurrency.NewBalanceStateValueMerger(height, sb[cid].Key(), cid, st)
+					return statec.NewBalanceStateValueMerger(height, sb[cid].Key(), cid, st)
 				},
 			)
 
-			r, ok := feeReceiverBalSts[cid].Value().(statecurrency.BalanceStateValue)
+			r, ok := feeReceiverBalSts[cid].Value().(statec.BalanceStateValue)
 			if !ok {
-				return nil, base.NewBaseOperationProcessReasonError("expected %T, not %T", statecurrency.BalanceStateValue{}, feeReceiverBalSts[cid].Value()), nil
+				return nil, base.NewBaseOperationProcessReasonError("expected %T, not %T", statec.BalanceStateValue{}, feeReceiverBalSts[cid].Value()), nil
 			}
 			sts = append(
 				sts,
 				common.NewBaseStateMergeValue(
 					feeReceiverBalSts[cid].Key(),
-					statecurrency.NewAddBalanceStateValue(r.Amount.WithBig(required[cid][1])),
+					statec.NewAddBalanceStateValue(r.Amount.WithBig(required[cid][1])),
 					func(height base.Height, st base.State) base.StateValueMerger {
-						return statecurrency.NewBalanceStateValueMerger(height, feeReceiverBalSts[cid].Key(), cid, st)
+						return statec.NewBalanceStateValueMerger(height, feeReceiverBalSts[cid].Key(), cid, st)
 					},
 				),
 			)

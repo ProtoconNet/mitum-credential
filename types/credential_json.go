@@ -9,37 +9,37 @@ import (
 
 type CredentialJSONMarshaler struct {
 	hint.BaseHinter
-	Holder     base.Address `json:"holder"`
-	TemplateID string       `json:"template_id"`
-	ID         string       `json:"id"`
-	Value      string       `json:"value"`
-	ValidFrom  uint64       `json:"valid_from"`
-	ValidUntil uint64       `json:"valid_until"`
-	DID        string       `json:"did"`
+	Holder       base.Address `json:"holder"`
+	TemplateID   string       `json:"template_id"`
+	CredentialID string       `json:"credential_id"`
+	Value        string       `json:"value"`
+	ValidFrom    uint64       `json:"valid_from"`
+	ValidUntil   uint64       `json:"valid_until"`
+	DID          string       `json:"did"`
 }
 
 func (c Credential) MarshalJSON() ([]byte, error) {
 	return util.MarshalJSON(CredentialJSONMarshaler{
-		BaseHinter: c.BaseHinter,
-		Holder:     c.holder,
-		TemplateID: c.templateID,
-		ID:         c.id,
-		Value:      c.value,
-		ValidFrom:  c.validFrom,
-		ValidUntil: c.validUntil,
-		DID:        c.did,
+		BaseHinter:   c.BaseHinter,
+		Holder:       c.holder,
+		TemplateID:   c.templateID,
+		CredentialID: c.credentialID,
+		Value:        c.value,
+		ValidFrom:    c.validFrom,
+		ValidUntil:   c.validUntil,
+		DID:          c.did,
 	})
 }
 
 type CredentialJSONUnmarshaler struct {
-	Hint       hint.Hint `json:"_hint"`
-	Holder     string    `json:"holder"`
-	TemplateID string    `json:"template_id"`
-	ID         string    `json:"id"`
-	Value      string    `json:"value"`
-	ValidFrom  uint64    `json:"valid_from"`
-	ValidUntil uint64    `json:"valid_until"`
-	DID        string    `json:"did"`
+	Hint         hint.Hint `json:"_hint"`
+	Holder       string    `json:"holder"`
+	TemplateID   string    `json:"template_id"`
+	CredentialID string    `json:"credential_id"`
+	Value        string    `json:"value"`
+	ValidFrom    uint64    `json:"valid_from"`
+	ValidUntil   uint64    `json:"valid_until"`
+	DID          string    `json:"did"`
 }
 
 func (c *Credential) DecodeJSON(b []byte, enc encoder.Encoder) error {
@@ -53,7 +53,7 @@ func (c *Credential) DecodeJSON(b []byte, enc encoder.Encoder) error {
 	return c.unpack(enc, u.Hint,
 		u.Holder,
 		u.TemplateID,
-		u.ID,
+		u.CredentialID,
 		u.Value,
 		u.ValidFrom,
 		u.ValidUntil,

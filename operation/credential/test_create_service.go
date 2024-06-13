@@ -12,16 +12,16 @@ import (
 )
 
 type TestCreateServiceProcessor struct {
-	*test.BaseTestOperationProcessorNoItem[CreateService]
+	*test.BaseTestOperationProcessorNoItem[RegisterModel]
 }
 
 func NewTestCreateServiceProcessor(tp *test.TestProcessor) TestCreateServiceProcessor {
-	t := test.NewBaseTestOperationProcessorNoItem[CreateService](tp)
+	t := test.NewBaseTestOperationProcessorNoItem[RegisterModel](tp)
 	return TestCreateServiceProcessor{&t}
 }
 
 func (t *TestCreateServiceProcessor) Create() *TestCreateServiceProcessor {
-	t.Opr, _ = NewCreateServiceProcessor()(
+	t.Opr, _ = NewRegisterModelProcessor()(
 		base.GenesisHeight,
 		t.GetStateFunc,
 		nil, nil,
@@ -107,7 +107,7 @@ func (t *TestCreateServiceProcessor) MakeOperation(
 	sender base.Address, privatekey base.Privatekey, contract base.Address, currency types.CurrencyID,
 ) *TestCreateServiceProcessor {
 	op := NewCreateService(
-		NewCreateServiceFact(
+		NewRegisterModelFact(
 			[]byte("token"),
 			sender,
 			contract,

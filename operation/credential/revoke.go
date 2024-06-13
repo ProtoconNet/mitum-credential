@@ -82,13 +82,13 @@ func (fact RevokeFact) IsValid(b []byte) error {
 			return common.ErrFactInvalid.Wrap(common.ErrSelfTarget.Wrap(errors.Errorf("sender %v is same with contract account", fact.sender)))
 		}
 
-		k := fmt.Sprintf("%s-%s", it.contract, it.id)
+		k := fmt.Sprintf("%s-%s", it.contract, it.credentialID)
 
 		if _, found := founds[k]; found {
-			return common.ErrFactInvalid.Wrap(common.ErrDupVal.Wrap(errors.Errorf("credential id %v for template %v in contract account %v", it.ID(), it.TemplateID(), it.Contract())))
+			return common.ErrFactInvalid.Wrap(common.ErrDupVal.Wrap(errors.Errorf("credential id %v for template %v in contract account %v", it.CredentialID(), it.TemplateID(), it.Contract())))
 		}
 
-		founds[it.ID()] = struct{}{}
+		founds[it.CredentialID()] = struct{}{}
 	}
 
 	if err := common.IsValidOperationFact(fact, b); err != nil {

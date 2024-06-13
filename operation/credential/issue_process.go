@@ -18,43 +18,43 @@ import (
 	"github.com/pkg/errors"
 )
 
-var assignItemProcessorPool = sync.Pool{
+var issueItemProcessorPool = sync.Pool{
 	New: func() interface{} {
-		return new(AssignItemProcessor)
+		return new(IssueItemProcessor)
 	},
 }
 
-var assignProcessorPool = sync.Pool{
+var issueProcessorPool = sync.Pool{
 	New: func() interface{} {
-		return new(AssignProcessor)
+		return new(IssueProcessor)
 	},
 }
 
-func (Assign) Process(
+func (Issue) Process(
 	_ context.Context, _ base.GetStateFunc,
 ) ([]base.StateMergeValue, base.OperationProcessReasonError, error) {
 	return nil, nil, nil
 }
 
-type AssignItemProcessor struct {
+type IssueItemProcessor struct {
 	h               util.Hash
 	sender          base.Address
-	item            AssignItem
+	item            IssueItem
 	credentialCount *uint64
 	holders         *[]types.Holder
 }
 
-func (ipp *AssignItemProcessor) PreProcess(
+func (ipp *IssueItemProcessor) PreProcess(
 	_ context.Context, _ base.Operation, getStateFunc base.GetStateFunc,
 ) error {
-	e := util.StringError("preprocess AssignItemProcessor")
+	e := util.StringError("preprocess IssueItemProcessor")
 	it := ipp.item
 
 	if err := it.IsValid(nil); err != nil {
 		return e.Wrap(err)
 	}
 
-	if err := currencystate.CheckExistsState(statecurrency.StateKeyCurrencyDesign(it.Currency()), getStateFunc); err != nil {
+	if err := currencystate.CheckExistsState(statecurrency.DesignStateKey(it.Currency()), getStateFunc); err != nil {
 		return e.Wrap(common.ErrCurrencyNF.Wrap(errors.Errorf("currency id %v", it.Currency())))
 	}
 
@@ -78,10 +78,10 @@ func (ipp *AssignItemProcessor) PreProcess(
 
 	if st, err := currencystate.ExistsState(state.StateKeyDesign(it.Contract()), "design", getStateFunc); err != nil {
 		return e.Wrap(
-			common.ErrServiceNF.Errorf("credential service state for contract account %v", it.Contract()))
+			common.ErrServiceNF.Errorf("credential design state for contract account %v", it.Contract()))
 	} else if de, err := state.StateDesignValue(st); err != nil {
 		return e.Wrap(
-			common.ErrServiceNF.Errorf("credential service state value for contract account %v", it.Contract()))
+			common.ErrServiceNF.Errorf("credential design state value for contract account %v", it.Contract()))
 	} else {
 		if err := de.IsValid(nil); err != nil {
 			return e.Wrap(err)
@@ -100,29 +100,29 @@ func (ipp *AssignItemProcessor) PreProcess(
 
 	switch st, found, err := getStateFunc(state.StateKeyCredential(it.Contract(),
 		it.TemplateID(),
-		it.ID())); {
+		it.CredentialID())); {
 	case err != nil:
 		return e.Wrap(common.ErrStateNF.Errorf(
-			"credential %v for template id %v in contract account %v", it.ID(), it.TemplateID(), it.Contract()))
+			"credential %v for template id %v in contract account %v", it.CredentialID(), it.TemplateID(), it.Contract()))
 	case !found:
 	default:
 		if credential, isActive, err := state.StateCredentialValue(st); err != nil {
 			return e.Wrap(
 				common.ErrStateValInvalid.Errorf(
 					"credential %v for template id %v in contract account %v",
-					it.ID(), it.TemplateID(), it.Contract()))
+					it.CredentialID(), it.TemplateID(), it.Contract()))
 		} else if isActive {
 			return e.Wrap(
 				common.ErrValueInvalid.Errorf(
 					"credential %v for template %v is already assigned to holder %v in contract account %v",
-					it.ID(), it.TemplateID(), credential.Holder(), it.Contract()))
+					it.CredentialID(), it.TemplateID(), credential.Holder(), it.Contract()))
 		}
 	}
 
 	return nil
 }
 
-func (ipp *AssignItemProcessor) Process(
+func (ipp *IssueItemProcessor) Process(
 	_ context.Context, _ base.Operation, _ base.GetStateFunc,
 ) ([]base.StateMergeValue, error) {
 	it := ipp.item
@@ -131,13 +131,13 @@ func (ipp *AssignItemProcessor) Process(
 
 	sts := make([]base.StateMergeValue, 2)
 
-	credential := types.NewCredential(it.Holder(), it.TemplateID(), it.ID(), it.Value(), it.ValidFrom(), it.ValidUntil(), it.DID())
+	credential := types.NewCredential(it.Holder(), it.TemplateID(), it.CredentialID(), it.Value(), it.ValidFrom(), it.ValidUntil(), it.DID())
 	if err := credential.IsValid(nil); err != nil {
 		return nil, err
 	}
 
 	sts[0] = currencystate.NewStateMergeValue(
-		state.StateKeyCredential(it.Contract(), it.TemplateID(), it.ID()),
+		state.StateKeyCredential(it.Contract(), it.TemplateID(), it.CredentialID()),
 		state.NewCredentialStateValue(credential, true),
 	)
 
@@ -164,21 +164,21 @@ func (ipp *AssignItemProcessor) Process(
 	return sts, nil
 }
 
-func (ipp *AssignItemProcessor) Close() {
+func (ipp *IssueItemProcessor) Close() {
 	ipp.h = nil
 	ipp.sender = nil
-	ipp.item = AssignItem{}
+	ipp.item = IssueItem{}
 	ipp.credentialCount = nil
 	ipp.holders = nil
 
-	assignItemProcessorPool.Put(ipp)
+	issueItemProcessorPool.Put(ipp)
 }
 
-type AssignProcessor struct {
+type IssueProcessor struct {
 	*base.BaseOperationProcessor
 }
 
-func NewAssignProcessor() currencytypes.GetNewProcessor {
+func NewIssueProcessor() currencytypes.GetNewProcessor {
 	return func(
 		height base.Height,
 		getStateFunc base.GetStateFunc,
@@ -187,8 +187,8 @@ func NewAssignProcessor() currencytypes.GetNewProcessor {
 	) (base.OperationProcessor, error) {
 		e := util.StringError("failed to create new AssignProcessor")
 
-		nopp := assignProcessorPool.Get()
-		opp, ok := nopp.(*AssignProcessor)
+		nopp := issueProcessorPool.Get()
+		opp, ok := nopp.(*IssueProcessor)
 		if !ok {
 			return nil, e.Errorf("expected AssignProcessor, not %T", nopp)
 		}
@@ -205,15 +205,15 @@ func NewAssignProcessor() currencytypes.GetNewProcessor {
 	}
 }
 
-func (opp *AssignProcessor) PreProcess(
+func (opp *IssueProcessor) PreProcess(
 	ctx context.Context, op base.Operation, getStateFunc base.GetStateFunc,
 ) (context.Context, base.OperationProcessReasonError, error) {
-	fact, ok := op.Fact().(AssignFact)
+	fact, ok := op.Fact().(IssueFact)
 	if !ok {
 		return ctx, base.NewBaseOperationProcessReasonError(
 			common.ErrMPreProcess.
 				Wrap(common.ErrMTypeMismatch).
-				Errorf("expected %T, not %T", AssignFact{}, op.Fact())), nil
+				Errorf("expected %T, not %T", IssueFact{}, op.Fact())), nil
 	}
 
 	if err := fact.IsValid(nil); err != nil {
@@ -241,8 +241,8 @@ func (opp *AssignProcessor) PreProcess(
 	}
 
 	for _, it := range fact.Items() {
-		ip := assignItemProcessorPool.Get()
-		ipc, ok := ip.(*AssignItemProcessor)
+		ip := issueItemProcessorPool.Get()
+		ipc, ok := ip.(*IssueItemProcessor)
 		if !ok {
 			return nil, base.NewBaseOperationProcessReasonError(
 				common.ErrMTypeMismatch.Errorf("expected AssignItemProcessor, not %T", ip)), nil
@@ -266,13 +266,13 @@ func (opp *AssignProcessor) PreProcess(
 	return ctx, nil, nil
 }
 
-func (opp *AssignProcessor) Process( // nolint:dupl
+func (opp *IssueProcessor) Process( // nolint:dupl
 	ctx context.Context, op base.Operation, getStateFunc base.GetStateFunc) (
 	[]base.StateMergeValue, base.OperationProcessReasonError, error,
 ) {
 	e := util.StringError("failed to process Assign")
 
-	fact, _ := op.Fact().(AssignFact)
+	fact, _ := op.Fact().(IssueFact)
 	designs := map[string]types.Design{}
 	counters := map[string]*uint64{}
 	holders := map[string]*[]types.Holder{}
@@ -298,8 +298,8 @@ func (opp *AssignProcessor) Process( // nolint:dupl
 	var sts []base.StateMergeValue // nolint:prealloc
 
 	for _, it := range fact.Items() {
-		ip := assignItemProcessorPool.Get()
-		ipc, _ := ip.(*AssignItemProcessor)
+		ip := issueItemProcessorPool.Get()
+		ipc, _ := ip.(*IssueItemProcessor)
 
 		k := state.StateKeyDesign(it.Contract())
 
@@ -387,8 +387,8 @@ func (opp *AssignProcessor) Process( // nolint:dupl
 	return sts, nil, nil
 }
 
-func (opp *AssignProcessor) Close() error {
-	assignProcessorPool.Put(opp)
+func (opp *IssueProcessor) Close() error {
+	issueProcessorPool.Put(opp)
 
 	return nil
 }
@@ -423,9 +423,9 @@ func calculateCredentialItemsFee(getStateFunc base.GetStateFunc, items []Credent
 			continue
 		}
 
-		if err := currencystate.CheckExistsState(statecurrency.StateKeyAccount(policy.Feeer().Receiver()), getStateFunc); err != nil {
+		if err := currencystate.CheckExistsState(statecurrency.AccountStateKey(policy.Feeer().Receiver()), getStateFunc); err != nil {
 			return nil, nil, err
-		} else if st, found, err := getStateFunc(statecurrency.StateKeyBalance(policy.Feeer().Receiver(), item.Currency())); err != nil {
+		} else if st, found, err := getStateFunc(statecurrency.BalanceStateKey(policy.Feeer().Receiver(), item.Currency())); err != nil {
 			return nil, nil, err
 		} else if !found {
 			return nil, nil, errors.Errorf("feeer receiver account not found, %s", policy.Feeer().Receiver())

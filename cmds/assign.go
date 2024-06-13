@@ -10,7 +10,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-type AssignCommand struct {
+type IssueCommand struct {
 	BaseCommand
 	currencycmds.OperationFlags
 	Sender     currencycmds.AddressFlag    `arg:"" name:"sender" help:"sender address" required:"true"`
@@ -28,7 +28,7 @@ type AssignCommand struct {
 	holder     base.Address
 }
 
-func (cmd *AssignCommand) Run(pctx context.Context) error {
+func (cmd *IssueCommand) Run(pctx context.Context) error {
 	if _, err := cmd.prepare(pctx); err != nil {
 		return err
 	}
@@ -47,7 +47,7 @@ func (cmd *AssignCommand) Run(pctx context.Context) error {
 	return nil
 }
 
-func (cmd *AssignCommand) parseFlags() error {
+func (cmd *IssueCommand) parseFlags() error {
 	if err := cmd.OperationFlags.IsValid(nil); err != nil {
 		return err
 	}
@@ -73,11 +73,11 @@ func (cmd *AssignCommand) parseFlags() error {
 	return nil
 }
 
-func (cmd *AssignCommand) createOperation() (base.Operation, error) { // nolint:dupl
+func (cmd *IssueCommand) createOperation() (base.Operation, error) { // nolint:dupl
 	e := util.StringError("failed to create assign operation")
 
-	var items []credential.AssignItem
-	item := credential.NewAssignItem(
+	var items []credential.IssueItem
+	item := credential.NewIssueItem(
 		cmd.contract,
 		cmd.holder,
 		cmd.TemplateID,
@@ -93,7 +93,7 @@ func (cmd *AssignCommand) createOperation() (base.Operation, error) { // nolint:
 	}
 	items = append(items, item)
 
-	fact := credential.NewAssignFact([]byte(cmd.Token), cmd.sender, items)
+	fact := credential.NewIssueFact([]byte(cmd.Token), cmd.sender, items)
 
 	op := credential.NewAssign(fact)
 

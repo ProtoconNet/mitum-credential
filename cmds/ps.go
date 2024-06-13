@@ -41,8 +41,8 @@ func POperationProcessorsMap(pctx context.Context) (context.Context, error) {
 		return pctx, err
 	}
 	if err := opr.SetProcessor(
-		credential.CreateServiceHint,
-		credential.NewCreateServiceProcessor(),
+		credential.RegisterModelHint,
+		credential.NewRegisterModelProcessor(),
 	); err != nil {
 		return pctx, err
 	} else if err := opr.SetProcessor(
@@ -51,8 +51,8 @@ func POperationProcessorsMap(pctx context.Context) (context.Context, error) {
 	); err != nil {
 		return pctx, err
 	} else if err := opr.SetProcessor(
-		credential.AssignHint,
-		credential.NewAssignProcessor(),
+		credential.IssueHint,
+		credential.NewIssueProcessor(),
 	); err != nil {
 		return pctx, err
 	} else if err := opr.SetProcessor(
@@ -62,7 +62,7 @@ func POperationProcessorsMap(pctx context.Context) (context.Context, error) {
 		return pctx, err
 	}
 
-	_ = set.Add(credential.CreateServiceHint,
+	_ = set.Add(credential.RegisterModelHint,
 		func(height base.Height, getStatef base.GetStateFunc) (base.OperationProcessor, error) {
 			return opr.New(
 				height,
@@ -82,7 +82,7 @@ func POperationProcessorsMap(pctx context.Context) (context.Context, error) {
 			)
 		})
 
-	_ = set.Add(credential.AssignHint,
+	_ = set.Add(credential.IssueHint,
 		func(height base.Height, getStatef base.GetStateFunc) (base.OperationProcessor, error) {
 			return opr.New(
 				height,

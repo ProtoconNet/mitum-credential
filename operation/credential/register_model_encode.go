@@ -6,7 +6,7 @@ import (
 	"github.com/ProtoconNet/mitum2/util/encoder"
 )
 
-func (fact *CreateServiceFact) unpack(enc encoder.Encoder, sAdr, cAdr, cid string) error {
+func (fact *RegisterModelFact) unpack(enc encoder.Encoder, sAdr, cAdr, cid string) error {
 	switch a, err := base.DecodeAddress(sAdr, enc); {
 	case err != nil:
 		return err

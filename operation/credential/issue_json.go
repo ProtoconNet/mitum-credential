@@ -10,28 +10,28 @@ import (
 	"github.com/ProtoconNet/mitum2/util/encoder"
 )
 
-type AssignFactJSONMarshaler struct {
+type IssueFactJSONMarshaler struct {
 	base.BaseFactJSONMarshaler
 	Sender base.Address `json:"sender"`
-	Items  []AssignItem `json:"items"`
+	Items  []IssueItem  `json:"items"`
 }
 
-func (fact AssignFact) MarshalJSON() ([]byte, error) {
-	return util.MarshalJSON(AssignFactJSONMarshaler{
+func (fact IssueFact) MarshalJSON() ([]byte, error) {
+	return util.MarshalJSON(IssueFactJSONMarshaler{
 		BaseFactJSONMarshaler: fact.BaseFact.JSONMarshaler(),
 		Sender:                fact.sender,
 		Items:                 fact.items,
 	})
 }
 
-type AssignFactJSONUnMarshaler struct {
+type IssueFactJSONUnMarshaler struct {
 	base.BaseFactJSONUnmarshaler
 	Sender string          `json:"sender"`
 	Items  json.RawMessage `json:"items"`
 }
 
-func (fact *AssignFact) DecodeJSON(b []byte, enc encoder.Encoder) error {
-	var uf AssignFactJSONUnMarshaler
+func (fact *IssueFact) DecodeJSON(b []byte, enc encoder.Encoder) error {
+	var uf IssueFactJSONUnMarshaler
 	if err := enc.Unmarshal(b, &uf); err != nil {
 		return common.DecorateError(err, common.ErrDecodeJson, *fact)
 	}
@@ -45,17 +45,17 @@ func (fact *AssignFact) DecodeJSON(b []byte, enc encoder.Encoder) error {
 	return nil
 }
 
-type AssignMarshaler struct {
+type IssueMarshaler struct {
 	common.BaseOperationJSONMarshaler
 }
 
-func (op Assign) MarshalJSON() ([]byte, error) {
-	return util.MarshalJSON(AssignMarshaler{
+func (op Issue) MarshalJSON() ([]byte, error) {
+	return util.MarshalJSON(IssueMarshaler{
 		BaseOperationJSONMarshaler: op.BaseOperation.JSONMarshaler(),
 	})
 }
 
-func (op *Assign) DecodeJSON(b []byte, enc encoder.Encoder) error {
+func (op *Issue) DecodeJSON(b []byte, enc encoder.Encoder) error {
 	var ubo common.BaseOperation
 	if err := ubo.DecodeJSON(b, enc); err != nil {
 		return common.DecorateError(err, common.ErrDecodeJson, *op)

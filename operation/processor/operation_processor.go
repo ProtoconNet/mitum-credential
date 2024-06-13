@@ -45,7 +45,7 @@ func CheckDuplication(opr *currencyprocessor.OperationProcessor, op base.Operati
 		if !ok {
 			return errors.Errorf("expected UpdateKeyFact, not %T", t.Fact())
 		}
-		duplicationTypeSenderID = currencyprocessor.DuplicationKey(fact.Target().String(), DuplicationTypeSender)
+		duplicationTypeSenderID = currencyprocessor.DuplicationKey(fact.Sender().String(), DuplicationTypeSender)
 	case currency.Transfer:
 		fact, ok := t.Fact().(currency.TransferFact)
 		if !ok {
@@ -83,8 +83,8 @@ func CheckDuplication(opr *currencyprocessor.OperationProcessor, op base.Operati
 			return errors.Errorf("expected WithdrawFact, not %T", t.Fact())
 		}
 		duplicationTypeSenderID = currencyprocessor.DuplicationKey(fact.Sender().String(), DuplicationTypeSender)
-	case credential.CreateService:
-		fact, ok := t.Fact().(credential.CreateServiceFact)
+	case credential.RegisterModel:
+		fact, ok := t.Fact().(credential.RegisterModelFact)
 		if !ok {
 			return errors.Errorf("expected CreateServiceFact, not %T", t.Fact())
 		}
@@ -96,15 +96,15 @@ func CheckDuplication(opr *currencyprocessor.OperationProcessor, op base.Operati
 			return errors.Errorf("expected AddTemplateFact, not %T", t.Fact())
 		}
 		duplicationTypeSenderID = currencyprocessor.DuplicationKey(fact.Sender().String(), DuplicationTypeSender)
-	case credential.Assign:
-		fact, ok := t.Fact().(credential.AssignFact)
+	case credential.Issue:
+		fact, ok := t.Fact().(credential.IssueFact)
 		if !ok {
 			return errors.Errorf("expected AssignFact, not %T", t.Fact())
 		}
 		duplicationTypeSenderID = currencyprocessor.DuplicationKey(fact.Sender().String(), DuplicationTypeSender)
 		var credentials []string
 		for _, v := range fact.Items() {
-			key := currencyprocessor.DuplicationKey(fmt.Sprintf("%s-%s-%s", v.Contract().String(), v.TemplateID(), v.ID()), DuplicationTypeCredential)
+			key := currencyprocessor.DuplicationKey(fmt.Sprintf("%s-%s-%s", v.Contract().String(), v.TemplateID(), v.CredentialID()), DuplicationTypeCredential)
 			credentials = append(credentials, key)
 		}
 		duplicationTypeCredentialID = credentials
@@ -178,9 +178,9 @@ func GetNewProcessor(opr *currencyprocessor.OperationProcessor, op base.Operatio
 		currency.RegisterCurrency,
 		currency.UpdateCurrency,
 		currency.Mint,
-		credential.CreateService,
+		credential.RegisterModel,
 		credential.AddTemplate,
-		credential.Assign,
+		credential.Issue,
 		credential.Revoke:
 		return nil, false, errors.Errorf("%T needs SetProcessor", t)
 	default:

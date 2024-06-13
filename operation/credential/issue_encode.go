@@ -7,7 +7,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-func (fact *AssignFact) unpack(enc encoder.Encoder, sa string, bit []byte) error {
+func (fact *IssueFact) unpack(enc encoder.Encoder, sa string, bit []byte) error {
 	switch a, err := base.DecodeAddress(sa, enc); {
 	case err != nil:
 		return err
@@ -20,9 +20,9 @@ func (fact *AssignFact) unpack(enc encoder.Encoder, sa string, bit []byte) error
 		return err
 	}
 
-	items := make([]AssignItem, len(hit))
+	items := make([]IssueItem, len(hit))
 	for i := range hit {
-		j, ok := hit[i].(AssignItem)
+		j, ok := hit[i].(IssueItem)
 		if !ok {
 			return common.ErrTypeMismatch.Wrap(errors.Errorf("expected AssignItem, not %T", hit[i]))
 		}

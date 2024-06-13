@@ -3,6 +3,7 @@ package digest
 import (
 	"context"
 	currencydigest "github.com/ProtoconNet/mitum-currency/v3/digest"
+	"github.com/ProtoconNet/mitum-currency/v3/types"
 	isaacnetwork "github.com/ProtoconNet/mitum2/isaac/network"
 	"github.com/ProtoconNet/mitum2/network/quicmemberlist"
 	"github.com/ProtoconNet/mitum2/network/quicstream"
@@ -22,11 +23,11 @@ import (
 )
 
 var (
-	HandlerPathDIDService     = `/did/{contract:.+}/service`
-	HandlerPathDIDCredential  = `/did/{contract:.+}/template/{templateid:.+}/credential/{credentialid:.+}`
-	HandlerPathDIDTemplate    = `/did/{contract:.+}/template/{templateid:.+}`
-	HandlerPathDIDCredentials = `/did/{contract:.+}/template/{templateid:.+}/credentials`
-	HandlerPathDIDHolder      = `/did/{contract:.+}/holder/{holder:(?i)` + base.REStringAddressString + `}` // revive:disable-line:line-length-limit
+	HandlerPathDIDService     = `/did/{contract:(?i)` + types.REStringAddressString + `}`
+	HandlerPathDIDCredential  = `/did/{contract:(?i)` + types.REStringAddressString + `}/template/{template_id:.+}/credential/{credential_id:.+}`
+	HandlerPathDIDTemplate    = `/did/{contract:(?i)` + types.REStringAddressString + `}/template/{template_id:.+}`
+	HandlerPathDIDCredentials = `/did/{contract:(?i)` + types.REStringAddressString + `}/template/{template_id:.+}/credentials`
+	HandlerPathDIDHolder      = `/did/{contract:(?i)` + types.REStringAddressString + `}/holder/{holder:(?i)` + types.REStringAddressString + `}` // revive:disable-line:line-length-limit
 )
 
 func init() {

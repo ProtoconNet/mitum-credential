@@ -10,7 +10,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-type CreateServiceCommand struct {
+type RegisterModelCommand struct {
 	BaseCommand
 	currencycmds.OperationFlags
 	Sender   currencycmds.AddressFlag    `arg:"" name:"sender" help:"sender address" required:"true"`
@@ -20,7 +20,7 @@ type CreateServiceCommand struct {
 	contract base.Address
 }
 
-func (cmd *CreateServiceCommand) Run(pctx context.Context) error { // nolint:dupl
+func (cmd *RegisterModelCommand) Run(pctx context.Context) error { // nolint:dupl
 	if _, err := cmd.prepare(pctx); err != nil {
 		return err
 	}
@@ -39,7 +39,7 @@ func (cmd *CreateServiceCommand) Run(pctx context.Context) error { // nolint:dup
 	return nil
 }
 
-func (cmd *CreateServiceCommand) parseFlags() error {
+func (cmd *RegisterModelCommand) parseFlags() error {
 	if err := cmd.OperationFlags.IsValid(nil); err != nil {
 		return err
 	}
@@ -59,10 +59,10 @@ func (cmd *CreateServiceCommand) parseFlags() error {
 	return nil
 }
 
-func (cmd *CreateServiceCommand) createOperation() (base.Operation, error) { // nolint:dupl}
-	e := util.StringError("failed to create create-service operation")
+func (cmd *RegisterModelCommand) createOperation() (base.Operation, error) { // nolint:dupl}
+	e := util.StringError("failed to create register-model operation")
 
-	fact := credential.NewCreateServiceFact(
+	fact := credential.NewRegisterModelFact(
 		[]byte(cmd.Token),
 		cmd.sender,
 		cmd.contract,

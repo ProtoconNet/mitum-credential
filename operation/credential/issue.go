@@ -19,21 +19,21 @@ type CredentialItem interface {
 }
 
 var (
-	AssignFactHint = hint.MustNewHint("mitum-credential-assign-operation-fact-v0.0.1")
-	AssignHint     = hint.MustNewHint("mitum-credential-assign-operation-v0.0.1")
+	IssueFactHint = hint.MustNewHint("mitum-credential-issue-operation-fact-v0.0.1")
+	IssueHint     = hint.MustNewHint("mitum-credential-issue-operation-v0.0.1")
 )
 
-var MaxAssignItems uint = 5000
+var MaxIssueItems uint = 5000
 
-type AssignFact struct {
+type IssueFact struct {
 	base.BaseFact
 	sender base.Address
-	items  []AssignItem
+	items  []IssueItem
 }
 
-func NewAssignFact(token []byte, sender base.Address, items []AssignItem) AssignFact {
-	bf := base.NewBaseFact(AssignFactHint, token)
-	fact := AssignFact{
+func NewIssueFact(token []byte, sender base.Address, items []IssueItem) IssueFact {
+	bf := base.NewBaseFact(IssueFactHint, token)
+	fact := IssueFact{
 		BaseFact: bf,
 		sender:   sender,
 		items:    items,
@@ -43,15 +43,15 @@ func NewAssignFact(token []byte, sender base.Address, items []AssignItem) Assign
 	return fact
 }
 
-func (fact AssignFact) Hash() util.Hash {
+func (fact IssueFact) Hash() util.Hash {
 	return fact.BaseFact.Hash()
 }
 
-func (fact AssignFact) GenerateHash() util.Hash {
+func (fact IssueFact) GenerateHash() util.Hash {
 	return valuehash.NewSHA256(fact.Bytes())
 }
 
-func (fact AssignFact) Bytes() []byte {
+func (fact IssueFact) Bytes() []byte {
 	is := make([][]byte, len(fact.items))
 	for i := range fact.items {
 		is[i] = fact.items[i].Bytes()
@@ -64,15 +64,15 @@ func (fact AssignFact) Bytes() []byte {
 	)
 }
 
-func (fact AssignFact) IsValid(b []byte) error {
+func (fact IssueFact) IsValid(b []byte) error {
 	if err := fact.BaseHinter.IsValid(nil); err != nil {
 		return common.ErrFactInvalid.Wrap(err)
 	}
 
 	if n := len(fact.items); n < 1 {
 		return common.ErrFactInvalid.Wrap(common.ErrArrayLen.Wrap(errors.Errorf("empty items")))
-	} else if n > int(MaxAssignItems) {
-		return common.ErrFactInvalid.Wrap(common.ErrArrayLen.Wrap(errors.Errorf("items, %d over max, %d", n, MaxAssignItems)))
+	} else if n > int(MaxIssueItems) {
+		return common.ErrFactInvalid.Wrap(common.ErrArrayLen.Wrap(errors.Errorf("items, %d over max, %d", n, MaxIssueItems)))
 	}
 
 	if err := fact.sender.IsValid(nil); err != nil {
@@ -89,10 +89,10 @@ func (fact AssignFact) IsValid(b []byte) error {
 			return common.ErrFactInvalid.Wrap(common.ErrSelfTarget.Wrap(errors.Errorf("sender %v is same with contract account", fact.sender)))
 		}
 
-		k := fmt.Sprintf("%s-%s", it.contract, it.id)
+		k := fmt.Sprintf("%s-%s", it.contract, it.credentialID)
 
 		if _, found := founds[k]; found {
-			return common.ErrFactInvalid.Wrap(common.ErrDupVal.Wrap(errors.Errorf("credential id %v for template %v in contract account %v", it.ID(), it.TemplateID(), it.Contract())))
+			return common.ErrFactInvalid.Wrap(common.ErrDupVal.Wrap(errors.Errorf("credential id %v for template %v in contract account %v", it.CredentialID(), it.TemplateID(), it.Contract())))
 		}
 
 		founds[k] = struct{}{}
@@ -105,19 +105,19 @@ func (fact AssignFact) IsValid(b []byte) error {
 	return nil
 }
 
-func (fact AssignFact) Token() base.Token {
+func (fact IssueFact) Token() base.Token {
 	return fact.BaseFact.Token()
 }
 
-func (fact AssignFact) Sender() base.Address {
+func (fact IssueFact) Sender() base.Address {
 	return fact.sender
 }
 
-func (fact AssignFact) Items() []AssignItem {
+func (fact IssueFact) Items() []IssueItem {
 	return fact.items
 }
 
-func (fact AssignFact) Addresses() ([]base.Address, error) {
+func (fact IssueFact) Addresses() ([]base.Address, error) {
 	as := []base.Address{}
 
 	adrMap := make(map[string]struct{})
@@ -134,10 +134,10 @@ func (fact AssignFact) Addresses() ([]base.Address, error) {
 	return as, nil
 }
 
-type Assign struct {
+type Issue struct {
 	common.BaseOperation
 }
 
-func NewAssign(fact AssignFact) Assign {
-	return Assign{BaseOperation: common.NewBaseOperation(AssignHint, fact)}
+func NewAssign(fact IssueFact) Issue {
+	return Issue{BaseOperation: common.NewBaseOperation(IssueHint, fact)}
 }

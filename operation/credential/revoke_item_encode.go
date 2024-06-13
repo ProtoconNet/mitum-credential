@@ -1,7 +1,7 @@
 package credential
 
 import (
-	currencytypes "github.com/ProtoconNet/mitum-currency/v3/types"
+	"github.com/ProtoconNet/mitum-currency/v3/types"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util/encoder"
 	"github.com/ProtoconNet/mitum2/util/hint"
@@ -12,8 +12,8 @@ func (it *RevokeItem) unpack(enc encoder.Encoder, ht hint.Hint,
 	id, cid string,
 ) error {
 	it.BaseHinter = hint.NewBaseHinter(ht)
-	it.id = id
-	it.currency = currencytypes.CurrencyID(cid)
+	it.credentialID = id
+	it.currency = types.CurrencyID(cid)
 
 	switch a, err := base.DecodeAddress(cAdr, enc); {
 	case err != nil:

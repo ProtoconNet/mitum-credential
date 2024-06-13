@@ -12,52 +12,52 @@ import (
 	"github.com/pkg/errors"
 )
 
-var AssignItemHint = hint.MustNewHint("mitum-credential-assign-item-v0.0.1")
+var IssueItemHint = hint.MustNewHint("mitum-credential-issue-item-v0.0.1")
 
-type AssignItem struct {
+type IssueItem struct {
 	hint.BaseHinter
-	contract   base.Address
-	holder     base.Address
-	templateID string
-	id         string
-	value      string
-	validFrom  uint64
-	validUntil uint64
-	did        string
-	currency   crcytypes.CurrencyID
+	contract     base.Address
+	holder       base.Address
+	templateID   string
+	credentialID string
+	value        string
+	validFrom    uint64
+	validUntil   uint64
+	did          string
+	currency     crcytypes.CurrencyID
 }
 
-func NewAssignItem(
+func NewIssueItem(
 	contract base.Address,
 	holder base.Address,
 	templateID string,
-	id string,
+	credentialID string,
 	value string,
 	validFrom uint64,
 	validUntil uint64,
 	did string,
 	currency crcytypes.CurrencyID,
-) AssignItem {
-	return AssignItem{
-		BaseHinter: hint.NewBaseHinter(AssignItemHint),
-		contract:   contract,
-		holder:     holder,
-		templateID: templateID,
-		id:         id,
-		value:      value,
-		validFrom:  validFrom,
-		validUntil: validUntil,
-		did:        did,
-		currency:   currency,
+) IssueItem {
+	return IssueItem{
+		BaseHinter:   hint.NewBaseHinter(IssueItemHint),
+		contract:     contract,
+		holder:       holder,
+		templateID:   templateID,
+		credentialID: credentialID,
+		value:        value,
+		validFrom:    validFrom,
+		validUntil:   validUntil,
+		did:          did,
+		currency:     currency,
 	}
 }
 
-func (it AssignItem) Bytes() []byte {
+func (it IssueItem) Bytes() []byte {
 	return util.ConcatBytesSlice(
 		it.contract.Bytes(),
 		it.holder.Bytes(),
 		[]byte(it.templateID),
-		[]byte(it.id),
+		[]byte(it.credentialID),
 		[]byte(it.value),
 		util.Uint64ToBytes(it.validFrom),
 		util.Uint64ToBytes(it.validUntil),
@@ -66,7 +66,7 @@ func (it AssignItem) Bytes() []byte {
 	)
 }
 
-func (it AssignItem) IsValid([]byte) error {
+func (it IssueItem) IsValid([]byte) error {
 	if err := util.CheckIsValiders(nil, false,
 		it.BaseHinter,
 		it.contract,
@@ -92,12 +92,12 @@ func (it AssignItem) IsValid([]byte) error {
 		return common.ErrItemInvalid.Wrap(common.ErrValueInvalid.Wrap(errors.Errorf("template ID %s, must match regex `^[^\\s:/?#\\[\\]@]*$`", it.templateID)))
 	}
 
-	if l := utf8.RuneCountInString(it.id); l < 1 || l > types.MaxLengthCredentialID {
+	if l := utf8.RuneCountInString(it.credentialID); l < 1 || l > types.MaxLengthCredentialID {
 		return common.ErrItemInvalid.Wrap(common.ErrValOOR.Wrap(errors.Errorf("0 <= length of credential ID <= %d", types.MaxLengthCredentialID)))
 	}
 
-	if !crcytypes.ReSpcecialChar.Match([]byte(it.id)) {
-		return common.ErrItemInvalid.Wrap(common.ErrValueInvalid.Wrap(errors.Errorf("credential ID %s, must match regex `^[^\\s:/?#\\[\\]@]*$`", it.id)))
+	if !crcytypes.ReSpcecialChar.Match([]byte(it.credentialID)) {
+		return common.ErrItemInvalid.Wrap(common.ErrValueInvalid.Wrap(errors.Errorf("credential ID %s, must match regex `^[^\\s:/?#\\[\\]@]*$`", it.credentialID)))
 	}
 
 	if len(it.did) == 0 {
@@ -111,43 +111,43 @@ func (it AssignItem) IsValid([]byte) error {
 	return nil
 }
 
-func (it AssignItem) Contract() base.Address {
+func (it IssueItem) Contract() base.Address {
 	return it.contract
 }
 
-func (it AssignItem) Holder() base.Address {
+func (it IssueItem) Holder() base.Address {
 	return it.holder
 }
 
-func (it AssignItem) TemplateID() string {
+func (it IssueItem) TemplateID() string {
 	return it.templateID
 }
 
-func (it AssignItem) ValidFrom() uint64 {
+func (it IssueItem) ValidFrom() uint64 {
 	return it.validFrom
 }
 
-func (it AssignItem) ValidUntil() uint64 {
+func (it IssueItem) ValidUntil() uint64 {
 	return it.validUntil
 }
 
-func (it AssignItem) ID() string {
-	return it.id
+func (it IssueItem) CredentialID() string {
+	return it.credentialID
 }
 
-func (it AssignItem) Value() string {
+func (it IssueItem) Value() string {
 	return it.value
 }
 
-func (it AssignItem) DID() string {
+func (it IssueItem) DID() string {
 	return it.did
 }
 
-func (it AssignItem) Currency() crcytypes.CurrencyID {
+func (it IssueItem) Currency() crcytypes.CurrencyID {
 	return it.currency
 }
 
-func (it AssignItem) Addresses() []base.Address {
+func (it IssueItem) Addresses() []base.Address {
 	ad := make([]base.Address, 2)
 
 	ad[0] = it.contract

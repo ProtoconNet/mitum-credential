@@ -7,7 +7,7 @@ import (
 	"github.com/ProtoconNet/mitum2/util/hint"
 )
 
-func (it *AssignItem) unpack(enc encoder.Encoder, ht hint.Hint,
+func (it *IssueItem) unpack(enc encoder.Encoder, ht hint.Hint,
 	cAdr, hAdr, tmplID string,
 	id string,
 	val string,
@@ -15,7 +15,7 @@ func (it *AssignItem) unpack(enc encoder.Encoder, ht hint.Hint,
 	did, cid string,
 ) error {
 	it.BaseHinter = hint.NewBaseHinter(ht)
-	it.id = id
+	it.credentialID = id
 	it.value = val
 	it.did = did
 	it.currency = currencytypes.CurrencyID(cid)

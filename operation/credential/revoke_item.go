@@ -16,26 +16,26 @@ var RevokeItemHint = hint.MustNewHint("mitum-credential-revoke-item-v0.0.1")
 
 type RevokeItem struct {
 	hint.BaseHinter
-	contract   base.Address
-	holder     base.Address
-	templateID string
-	id         string
-	currency   crcytypes.CurrencyID
+	contract     base.Address
+	holder       base.Address
+	templateID   string
+	credentialID string
+	currency     crcytypes.CurrencyID
 }
 
 func NewRevokeItem(
 	contract base.Address,
 	holder base.Address,
-	templateID, id string,
+	templateID, credentialID string,
 	currency crcytypes.CurrencyID,
 ) RevokeItem {
 	return RevokeItem{
-		BaseHinter: hint.NewBaseHinter(RevokeItemHint),
-		contract:   contract,
-		holder:     holder,
-		templateID: templateID,
-		id:         id,
-		currency:   currency,
+		BaseHinter:   hint.NewBaseHinter(RevokeItemHint),
+		contract:     contract,
+		holder:       holder,
+		templateID:   templateID,
+		credentialID: credentialID,
+		currency:     currency,
 	}
 }
 
@@ -44,7 +44,7 @@ func (it RevokeItem) Bytes() []byte {
 		it.contract.Bytes(),
 		it.holder.Bytes(),
 		[]byte(it.templateID),
-		[]byte(it.id),
+		[]byte(it.credentialID),
 		it.currency.Bytes(),
 	)
 }
@@ -71,12 +71,12 @@ func (it RevokeItem) IsValid([]byte) error {
 		return common.ErrItemInvalid.Wrap(common.ErrValueInvalid.Wrap(errors.Errorf("template ID %s, must match regex `^[^\\s:/?#\\[\\]@]*$`", it.templateID)))
 	}
 
-	if l := utf8.RuneCountInString(it.id); l < 1 || l > types.MaxLengthCredentialID {
+	if l := utf8.RuneCountInString(it.credentialID); l < 1 || l > types.MaxLengthCredentialID {
 		return common.ErrItemInvalid.Wrap(common.ErrValOOR.Wrap(errors.Errorf("0 <= length of credential ID <= %d", types.MaxLengthCredentialID)))
 	}
 
-	if !crcytypes.ReSpcecialChar.Match([]byte(it.id)) {
-		return common.ErrItemInvalid.Wrap(common.ErrValueInvalid.Wrap(errors.Errorf("credential ID %s, must match regex `^[^\\s:/?#\\[\\]@]*$`", it.id)))
+	if !crcytypes.ReSpcecialChar.Match([]byte(it.credentialID)) {
+		return common.ErrItemInvalid.Wrap(common.ErrValueInvalid.Wrap(errors.Errorf("credential ID %s, must match regex `^[^\\s:/?#\\[\\]@]*$`", it.credentialID)))
 	}
 
 	return nil
@@ -94,8 +94,8 @@ func (it RevokeItem) TemplateID() string {
 	return it.templateID
 }
 
-func (it RevokeItem) ID() string {
-	return it.id
+func (it RevokeItem) CredentialID() string {
+	return it.credentialID
 }
 
 func (it RevokeItem) Currency() crcytypes.CurrencyID {

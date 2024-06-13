@@ -9,7 +9,7 @@ import (
 	"github.com/ProtoconNet/mitum2/util/valuehash"
 )
 
-func (fact CreateServiceFact) MarshalBSON() ([]byte, error) {
+func (fact RegisterModelFact) MarshalBSON() ([]byte, error) {
 	return bsonenc.Marshal(
 		bson.M{
 			"_hint":    fact.Hint().String(),
@@ -29,7 +29,7 @@ type CreateServiceFactBSONUnmarshaler struct {
 	Currency string `bson:"currency"`
 }
 
-func (fact *CreateServiceFact) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
+func (fact *RegisterModelFact) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
 	var ubf common.BaseFactBSONUnmarshaler
 
 	if err := enc.Unmarshal(b, &ubf); err != nil {
@@ -57,7 +57,7 @@ func (fact *CreateServiceFact) DecodeBSON(b []byte, enc *bsonenc.Encoder) error 
 	return nil
 }
 
-func (op CreateService) MarshalBSON() ([]byte, error) {
+func (op RegisterModel) MarshalBSON() ([]byte, error) {
 	return bsonenc.Marshal(
 		bson.M{
 			"_hint": op.Hint().String(),
@@ -67,7 +67,7 @@ func (op CreateService) MarshalBSON() ([]byte, error) {
 		})
 }
 
-func (op *CreateService) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
+func (op *RegisterModel) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
 	var ubo common.BaseOperation
 	if err := ubo.DecodeBSON(b, enc); err != nil {
 		return common.DecorateError(err, common.ErrDecodeBson, *op)

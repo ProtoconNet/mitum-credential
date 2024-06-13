@@ -77,7 +77,7 @@ func (opp *AddTemplateProcessor) PreProcess(
 				Errorf("%v", err)), nil
 	}
 
-	if err := currencystate.CheckExistsState(currency.StateKeyCurrencyDesign(fact.Currency()), getStateFunc); err != nil {
+	if err := currencystate.CheckExistsState(currency.DesignStateKey(fact.Currency()), getStateFunc); err != nil {
 		return ctx, base.NewBaseOperationProcessReasonError(
 			common.ErrMPreProcess.Wrap(common.ErrMCurrencyNF).Errorf("currency id, %v", fact.Currency())), nil
 	}
@@ -125,7 +125,7 @@ func (opp *AddTemplateProcessor) PreProcess(
 		return ctx, base.NewBaseOperationProcessReasonError(
 			common.ErrMPreProcess.
 				Wrap(common.ErrMServiceNF).
-				Errorf("credential service state for contract account %v", fact.Contract())), nil
+				Errorf("credential design state for contract account %v", fact.Contract())), nil
 	}
 
 	design, err := state.StateDesignValue(st)
@@ -133,7 +133,7 @@ func (opp *AddTemplateProcessor) PreProcess(
 		return ctx, base.NewBaseOperationProcessReasonError(
 			common.ErrMPreProcess.Wrap(common.ErrMStateValInvalid).
 				Wrap(common.ErrMServiceNF).
-				Errorf("credential service state value for contract account %v", fact.Contract())), nil
+				Errorf("credential design state value for contract account %v", fact.Contract())), nil
 	}
 
 	for _, templateID := range design.Policy().TemplateIDs() {
@@ -217,7 +217,7 @@ func (opp *AddTemplateProcessor) Process(
 	}
 
 	senderBalSt, err := currencystate.ExistsState(
-		currency.StateKeyBalance(fact.Sender(), fact.Currency()),
+		currency.BalanceStateKey(fact.Sender(), fact.Currency()),
 		"sender balance",
 		getStateFunc,
 	)
@@ -233,7 +233,7 @@ func (opp *AddTemplateProcessor) Process(
 	case err != nil:
 		return nil, base.NewBaseOperationProcessReasonError(
 			"failed to get balance value, %q; %w",
-			currency.StateKeyBalance(fact.Sender(), fact.Currency()),
+			currency.BalanceStateKey(fact.Sender(), fact.Currency()),
 			err,
 		), nil
 	case senderBal.Big().Compare(fee) < 0:
@@ -248,9 +248,9 @@ func (opp *AddTemplateProcessor) Process(
 		return nil, base.NewBaseOperationProcessReasonError("expected BalanceStateValue, not %T", senderBalSt.Value()), nil
 	}
 
-	if err := currencystate.CheckExistsState(currency.StateKeyAccount(currencyPolicy.Feeer().Receiver()), getStateFunc); err != nil {
+	if err := currencystate.CheckExistsState(currency.AccountStateKey(currencyPolicy.Feeer().Receiver()), getStateFunc); err != nil {
 		return nil, nil, err
-	} else if feeRcvrSt, found, err := getStateFunc(currency.StateKeyBalance(currencyPolicy.Feeer().Receiver(), fact.currency)); err != nil {
+	} else if feeRcvrSt, found, err := getStateFunc(currency.BalanceStateKey(currencyPolicy.Feeer().Receiver(), fact.currency)); err != nil {
 		return nil, nil, err
 	} else if !found {
 		return nil, nil, errors.Errorf("feeer receiver %s not found", currencyPolicy.Feeer().Receiver())

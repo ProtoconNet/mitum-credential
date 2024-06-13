@@ -11,25 +11,25 @@ import (
 )
 
 var (
-	CreateServiceFactHint = hint.MustNewHint("mitum-credential-create-service-operation-fact-v0.0.1")
-	CreateServiceHint     = hint.MustNewHint("mitum-credential-create-service-operation-v0.0.1")
+	RegisterModelFactHint = hint.MustNewHint("mitum-credential-register-model-operation-fact-v0.0.1")
+	RegisterModelHint     = hint.MustNewHint("mitum-credential-register-model-operation-v0.0.1")
 )
 
-type CreateServiceFact struct {
+type RegisterModelFact struct {
 	base.BaseFact
 	sender   base.Address
 	contract base.Address
 	currency currencytypes.CurrencyID
 }
 
-func NewCreateServiceFact(
+func NewRegisterModelFact(
 	token []byte,
 	sender base.Address,
 	contract base.Address,
 	currency currencytypes.CurrencyID,
-) CreateServiceFact {
-	bf := base.NewBaseFact(CreateServiceFactHint, token)
-	fact := CreateServiceFact{
+) RegisterModelFact {
+	bf := base.NewBaseFact(RegisterModelFactHint, token)
+	fact := RegisterModelFact{
 		BaseFact: bf,
 		sender:   sender,
 		contract: contract,
@@ -40,15 +40,15 @@ func NewCreateServiceFact(
 	return fact
 }
 
-func (fact CreateServiceFact) Hash() util.Hash {
+func (fact RegisterModelFact) Hash() util.Hash {
 	return fact.BaseFact.Hash()
 }
 
-func (fact CreateServiceFact) GenerateHash() util.Hash {
+func (fact RegisterModelFact) GenerateHash() util.Hash {
 	return valuehash.NewSHA256(fact.Bytes())
 }
 
-func (fact CreateServiceFact) Bytes() []byte {
+func (fact RegisterModelFact) Bytes() []byte {
 	return util.ConcatBytesSlice(
 		fact.Token(),
 		fact.sender.Bytes(),
@@ -57,7 +57,7 @@ func (fact CreateServiceFact) Bytes() []byte {
 	)
 }
 
-func (fact CreateServiceFact) IsValid(b []byte) error {
+func (fact RegisterModelFact) IsValid(b []byte) error {
 	if err := fact.BaseHinter.IsValid(nil); err != nil {
 		return common.ErrFactInvalid.Wrap(err)
 	}
@@ -83,23 +83,23 @@ func (fact CreateServiceFact) IsValid(b []byte) error {
 	return nil
 }
 
-func (fact CreateServiceFact) Token() base.Token {
+func (fact RegisterModelFact) Token() base.Token {
 	return fact.BaseFact.Token()
 }
 
-func (fact CreateServiceFact) Sender() base.Address {
+func (fact RegisterModelFact) Sender() base.Address {
 	return fact.sender
 }
 
-func (fact CreateServiceFact) Contract() base.Address {
+func (fact RegisterModelFact) Contract() base.Address {
 	return fact.contract
 }
 
-func (fact CreateServiceFact) Currency() currencytypes.CurrencyID {
+func (fact RegisterModelFact) Currency() currencytypes.CurrencyID {
 	return fact.currency
 }
 
-func (fact CreateServiceFact) Addresses() ([]base.Address, error) {
+func (fact RegisterModelFact) Addresses() ([]base.Address, error) {
 	as := make([]base.Address, 2)
 
 	as[0] = fact.sender
@@ -108,10 +108,10 @@ func (fact CreateServiceFact) Addresses() ([]base.Address, error) {
 	return as, nil
 }
 
-type CreateService struct {
+type RegisterModel struct {
 	common.BaseOperation
 }
 
-func NewCreateService(fact CreateServiceFact) CreateService {
-	return CreateService{BaseOperation: common.NewBaseOperation(CreateServiceHint, fact)}
+func NewCreateService(fact RegisterModelFact) RegisterModel {
+	return RegisterModel{BaseOperation: common.NewBaseOperation(RegisterModelHint, fact)}
 }

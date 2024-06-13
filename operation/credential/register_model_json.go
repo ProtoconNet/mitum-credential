@@ -15,7 +15,7 @@ type CreateServiceFactJSONMarshaler struct {
 	Currency currencytypes.CurrencyID `json:"currency"`
 }
 
-func (fact CreateServiceFact) MarshalJSON() ([]byte, error) {
+func (fact RegisterModelFact) MarshalJSON() ([]byte, error) {
 	return util.MarshalJSON(CreateServiceFactJSONMarshaler{
 		BaseFactJSONMarshaler: fact.BaseFact.JSONMarshaler(),
 		Owner:                 fact.sender,
@@ -31,7 +31,7 @@ type CreateServiceFactJSONUnMarshaler struct {
 	Currency string `json:"currency"`
 }
 
-func (fact *CreateServiceFact) DecodeJSON(b []byte, enc encoder.Encoder) error {
+func (fact *RegisterModelFact) DecodeJSON(b []byte, enc encoder.Encoder) error {
 	var uf CreateServiceFactJSONUnMarshaler
 	if err := enc.Unmarshal(b, &uf); err != nil {
 		return common.DecorateError(err, common.ErrDecodeJson, *fact)
@@ -50,13 +50,13 @@ type CreateServiceMarshaler struct {
 	common.BaseOperationJSONMarshaler
 }
 
-func (op CreateService) MarshalJSON() ([]byte, error) {
+func (op RegisterModel) MarshalJSON() ([]byte, error) {
 	return util.MarshalJSON(CreateServiceMarshaler{
 		BaseOperationJSONMarshaler: op.BaseOperation.JSONMarshaler(),
 	})
 }
 
-func (op *CreateService) DecodeJSON(b []byte, enc encoder.Encoder) error {
+func (op *RegisterModel) DecodeJSON(b []byte, enc encoder.Encoder) error {
 	var ubo common.BaseOperation
 	if err := ubo.DecodeJSON(b, enc); err != nil {
 		return common.DecorateError(err, common.ErrDecodeJson, *op)

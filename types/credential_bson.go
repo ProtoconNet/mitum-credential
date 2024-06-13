@@ -11,27 +11,27 @@ import (
 func (c Credential) MarshalBSON() ([]byte, error) {
 	return bsonenc.Marshal(
 		bson.M{
-			"_hint":       c.Hint().String(),
-			"holder":      c.holder,
-			"template_id": c.templateID,
-			"id":          c.id,
-			"value":       c.value,
-			"valid_from":  c.validFrom,
-			"valid_until": c.validUntil,
-			"did":         c.did,
+			"_hint":         c.Hint().String(),
+			"holder":        c.holder,
+			"template_id":   c.templateID,
+			"credential_id": c.credentialID,
+			"value":         c.value,
+			"valid_from":    c.validFrom,
+			"valid_until":   c.validUntil,
+			"did":           c.did,
 		},
 	)
 }
 
 type CredentialBSONUnmarshaler struct {
-	Hint       string `bson:"_hint"`
-	Holder     string `bson:"holder"`
-	TemplateID string `bson:"template_id"`
-	ID         string `bson:"id"`
-	Value      string `bson:"value"`
-	ValidFrom  uint64 `bson:"valid_from"`
-	ValidUntil uint64 `bson:"valid_until"`
-	DID        string `bson:"did"`
+	Hint         string `bson:"_hint"`
+	Holder       string `bson:"holder"`
+	TemplateID   string `bson:"template_id"`
+	CredentialID string `bson:"credential_id"`
+	Value        string `bson:"value"`
+	ValidFrom    uint64 `bson:"valid_from"`
+	ValidUntil   uint64 `bson:"valid_until"`
+	DID          string `bson:"did"`
 }
 
 func (c *Credential) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
@@ -50,7 +50,7 @@ func (c *Credential) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
 	return c.unpack(enc, ht,
 		u.Holder,
 		u.TemplateID,
-		u.ID,
+		u.CredentialID,
 		u.Value,
 		u.ValidFrom,
 		u.ValidUntil,

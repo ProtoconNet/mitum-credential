@@ -16,7 +16,7 @@ func (c *Credential) unpack(enc encoder.Encoder, ht hint.Hint,
 	e := util.StringError("unpack Credential")
 
 	c.BaseHinter = hint.NewBaseHinter(ht)
-	c.id = id
+	c.credentialID = id
 	c.value = v
 	c.did = did
 

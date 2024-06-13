@@ -9,7 +9,7 @@ import (
 	"github.com/ProtoconNet/mitum2/util/valuehash"
 )
 
-func (fact AssignFact) MarshalBSON() ([]byte, error) {
+func (fact IssueFact) MarshalBSON() ([]byte, error) {
 	return bsonenc.Marshal(
 		bson.M{
 			"_hint":  fact.Hint().String(),
@@ -21,13 +21,13 @@ func (fact AssignFact) MarshalBSON() ([]byte, error) {
 	)
 }
 
-type AssignFactBSONUnmarshaler struct {
+type IssueFactBSONUnmarshaler struct {
 	Hint   string   `bson:"_hint"`
 	Sender string   `bson:"sender"`
 	Items  bson.Raw `bson:"items"`
 }
 
-func (fact *AssignFact) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
+func (fact *IssueFact) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
 	var ubf common.BaseFactBSONUnmarshaler
 
 	if err := enc.Unmarshal(b, &ubf); err != nil {
@@ -37,7 +37,7 @@ func (fact *AssignFact) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
 	fact.BaseFact.SetHash(valuehash.NewBytesFromString(ubf.Hash))
 	fact.BaseFact.SetToken(ubf.Token)
 
-	var uf AssignFactBSONUnmarshaler
+	var uf IssueFactBSONUnmarshaler
 	if err := bson.Unmarshal(b, &uf); err != nil {
 		return common.DecorateError(err, common.ErrDecodeBson, *fact)
 	}
@@ -55,7 +55,7 @@ func (fact *AssignFact) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
 	return nil
 }
 
-func (op Assign) MarshalBSON() ([]byte, error) {
+func (op Issue) MarshalBSON() ([]byte, error) {
 	return bsonenc.Marshal(
 		bson.M{
 			"_hint": op.Hint().String(),
@@ -65,7 +65,7 @@ func (op Assign) MarshalBSON() ([]byte, error) {
 		})
 }
 
-func (op *Assign) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
+func (op *Issue) DecodeBSON(b []byte, enc *bsonenc.Encoder) error {
 	var ubo common.BaseOperation
 	if err := ubo.DecodeBSON(b, enc); err != nil {
 		return common.DecorateError(err, common.ErrDecodeBson, *op)

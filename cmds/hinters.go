@@ -21,10 +21,10 @@ var AddedHinters = []encoder.DecodeDetail{
 	{Hint: types.PolicyHint, Instance: types.Policy{}},
 	{Hint: types.TemplateHint, Instance: types.Template{}},
 
-	{Hint: credential.CreateServiceHint, Instance: credential.CreateService{}},
+	{Hint: credential.RegisterModelHint, Instance: credential.RegisterModel{}},
 	{Hint: credential.AddTemplateHint, Instance: credential.AddTemplate{}},
-	{Hint: credential.AssignItemHint, Instance: credential.AssignItem{}},
-	{Hint: credential.AssignHint, Instance: credential.Assign{}},
+	{Hint: credential.IssueItemHint, Instance: credential.IssueItem{}},
+	{Hint: credential.IssueHint, Instance: credential.Issue{}},
 	{Hint: credential.RevokeItemHint, Instance: credential.RevokeItem{}},
 	{Hint: credential.RevokeHint, Instance: credential.Revoke{}},
 
@@ -36,8 +36,8 @@ var AddedHinters = []encoder.DecodeDetail{
 
 var AddedSupportedHinters = []encoder.DecodeDetail{
 	{Hint: credential.AddTemplateFactHint, Instance: credential.AddTemplateFact{}},
-	{Hint: credential.AssignFactHint, Instance: credential.AssignFact{}},
-	{Hint: credential.CreateServiceFactHint, Instance: credential.CreateServiceFact{}},
+	{Hint: credential.IssueFactHint, Instance: credential.IssueFact{}},
+	{Hint: credential.RegisterModelFactHint, Instance: credential.RegisterModelFact{}},
 	{Hint: credential.RevokeFactHint, Instance: credential.RevokeFact{}},
 }
 

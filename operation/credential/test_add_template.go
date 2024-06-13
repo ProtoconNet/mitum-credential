@@ -2,11 +2,11 @@ package credential
 
 import (
 	"github.com/ProtoconNet/mitum-credential/state"
-	credentialtypes "github.com/ProtoconNet/mitum-credential/types"
+	"github.com/ProtoconNet/mitum-credential/types"
 	"github.com/ProtoconNet/mitum-currency/v3/common"
 	"github.com/ProtoconNet/mitum-currency/v3/operation/test"
 	"github.com/ProtoconNet/mitum-currency/v3/state/extension"
-	"github.com/ProtoconNet/mitum-currency/v3/types"
+	ctypes "github.com/ProtoconNet/mitum-currency/v3/types"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 )
@@ -15,10 +15,10 @@ type TestAddTemplateProcessor struct {
 	*test.BaseTestOperationProcessorNoItem[AddTemplate]
 	templateID     string
 	templateName   string
-	serviceDate    credentialtypes.Date
-	expirationDate credentialtypes.Date
-	templateShare  credentialtypes.Bool
-	multiAudit     credentialtypes.Bool
+	serviceDate    types.Date
+	expirationDate types.Date
+	templateShare  types.Bool
+	multiAudit     types.Bool
 	displayName    string
 	subjectKey     string
 	description    string
@@ -39,7 +39,7 @@ func (t *TestAddTemplateProcessor) Create() *TestAddTemplateProcessor {
 }
 
 func (t *TestAddTemplateProcessor) SetCurrency(
-	cid string, am int64, addr base.Address, target []types.CurrencyID, instate bool,
+	cid string, am int64, addr base.Address, target []ctypes.CurrencyID, instate bool,
 ) *TestAddTemplateProcessor {
 	t.BaseTestOperationProcessorNoItem.SetCurrency(cid, am, addr, target, instate)
 
@@ -47,7 +47,7 @@ func (t *TestAddTemplateProcessor) SetCurrency(
 }
 
 func (t *TestAddTemplateProcessor) SetAmount(
-	am int64, cid types.CurrencyID, target []types.Amount,
+	am int64, cid ctypes.CurrencyID, target []ctypes.Amount,
 ) *TestAddTemplateProcessor {
 	t.BaseTestOperationProcessorNoItem.SetAmount(am, cid, target)
 
@@ -55,7 +55,7 @@ func (t *TestAddTemplateProcessor) SetAmount(
 }
 
 func (t *TestAddTemplateProcessor) SetContractAccount(
-	owner base.Address, priv string, amount int64, cid types.CurrencyID, target []test.Account, inState bool,
+	owner base.Address, priv string, amount int64, cid ctypes.CurrencyID, target []test.Account, inState bool,
 ) *TestAddTemplateProcessor {
 	t.BaseTestOperationProcessorNoItem.SetContractAccount(owner, priv, amount, cid, target, inState)
 
@@ -63,7 +63,7 @@ func (t *TestAddTemplateProcessor) SetContractAccount(
 }
 
 func (t *TestAddTemplateProcessor) SetAccount(
-	priv string, amount int64, cid types.CurrencyID, target []test.Account, inState bool,
+	priv string, amount int64, cid ctypes.CurrencyID, target []test.Account, inState bool,
 ) *TestAddTemplateProcessor {
 	t.BaseTestOperationProcessorNoItem.SetAccount(priv, amount, cid, target, inState)
 
@@ -74,10 +74,10 @@ func (t *TestAddTemplateProcessor) SetService(
 	contract base.Address,
 ) *TestAddTemplateProcessor {
 	var templates []string
-	var holders []credentialtypes.Holder
+	var holders []types.Holder
 
-	policy := credentialtypes.NewPolicy(templates, holders, 0)
-	design := credentialtypes.NewDesign(policy)
+	policy := types.NewPolicy(templates, holders, 0)
+	design := types.NewDesign(policy)
 
 	st := common.NewBaseState(base.Height(1), state.StateKeyDesign(contract), state.NewDesignStateValue(design), nil, []util.Hash{})
 	t.SetState(st, true)
@@ -113,8 +113,8 @@ func (t *TestAddTemplateProcessor) Print(fileName string,
 }
 
 func (t *TestAddTemplateProcessor) SetTemplate(
-	templateID, templateName string, serviceDate, expirationDate credentialtypes.Date,
-	templateShare, multiAudit credentialtypes.Bool, displayName, subjectKey, description string,
+	templateID, templateName string, serviceDate, expirationDate types.Date,
+	templateShare, multiAudit types.Bool, displayName, subjectKey, description string,
 ) *TestAddTemplateProcessor {
 	t.templateID = templateID
 	t.templateName = templateName
@@ -130,7 +130,7 @@ func (t *TestAddTemplateProcessor) SetTemplate(
 }
 
 func (t *TestAddTemplateProcessor) MakeOperation(
-	sender base.Address, privatekey base.Privatekey, contract, creator base.Address, currency types.CurrencyID,
+	sender base.Address, privatekey base.Privatekey, contract, creator base.Address, currency ctypes.CurrencyID,
 ) *TestAddTemplateProcessor {
 	op := NewAddTemplate(
 		NewAddTemplateFact(

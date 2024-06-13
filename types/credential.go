@@ -14,33 +14,33 @@ var CredentialHint = hint.MustNewHint("mitum-credential-credential-v0.0.1")
 
 type Credential struct {
 	hint.BaseHinter
-	holder     base.Address
-	templateID string
-	id         string
-	value      string
-	validFrom  uint64
-	validUntil uint64
-	did        string
+	holder       base.Address
+	templateID   string
+	credentialID string
+	value        string
+	validFrom    uint64
+	validUntil   uint64
+	did          string
 }
 
 func NewCredential(
 	holder base.Address,
 	templateID string,
-	id string,
+	credentialID string,
 	value string,
 	validFrom uint64,
 	validUntil uint64,
 	did string,
 ) Credential {
 	return Credential{
-		BaseHinter: hint.NewBaseHinter(CredentialHint),
-		holder:     holder,
-		templateID: templateID,
-		id:         id,
-		value:      value,
-		validFrom:  validFrom,
-		validUntil: validUntil,
-		did:        did,
+		BaseHinter:   hint.NewBaseHinter(CredentialHint),
+		holder:       holder,
+		templateID:   templateID,
+		credentialID: credentialID,
+		value:        value,
+		validFrom:    validFrom,
+		validUntil:   validUntil,
+		did:          did,
 	}
 }
 
@@ -48,7 +48,7 @@ func (c Credential) Bytes() []byte {
 	if c.holder == nil {
 		return util.ConcatBytesSlice(
 			[]byte(c.templateID),
-			[]byte(c.id),
+			[]byte(c.credentialID),
 			[]byte(c.value),
 			util.Uint64ToBytes(c.validFrom),
 			util.Uint64ToBytes(c.validUntil),
@@ -59,7 +59,7 @@ func (c Credential) Bytes() []byte {
 	return util.ConcatBytesSlice(
 		c.holder.Bytes(),
 		[]byte(c.templateID),
-		[]byte(c.id),
+		[]byte(c.credentialID),
 		[]byte(c.value),
 		util.Uint64ToBytes(c.validFrom),
 		util.Uint64ToBytes(c.validUntil),
@@ -91,12 +91,12 @@ func (c Credential) IsValid([]byte) error {
 		return common.ErrValueInvalid.Wrap(errors.Errorf("template ID %s, must match regex `^[^\\s:/?#\\[\\]@]*$`", c.templateID))
 	}
 
-	if l := utf8.RuneCountInString(c.id); l < 1 || l > MaxLengthCredentialID {
+	if l := utf8.RuneCountInString(c.credentialID); l < 1 || l > MaxLengthCredentialID {
 		return common.ErrValOOR.Wrap(errors.Errorf("0 <= length of credential ID <= %d", MaxLengthCredentialID))
 	}
 
-	if !crcytypes.ReSpcecialChar.Match([]byte(c.id)) {
-		return common.ErrValueInvalid.Wrap(errors.Errorf("credential ID %s, must match regex `^[^\\s:/?#\\[\\]@]*$`", c.id))
+	if !crcytypes.ReSpcecialChar.Match([]byte(c.credentialID)) {
+		return common.ErrValueInvalid.Wrap(errors.Errorf("credential ID %s, must match regex `^[^\\s:/?#\\[\\]@]*$`", c.credentialID))
 	}
 
 	if len(c.did) == 0 {
@@ -126,8 +126,8 @@ func (c Credential) ValidUntil() uint64 {
 	return c.validUntil
 }
 
-func (c Credential) ID() string {
-	return c.id
+func (c Credential) CredentialID() string {
+	return c.credentialID
 }
 
 func (c Credential) Value() string {
