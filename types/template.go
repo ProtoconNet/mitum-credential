@@ -77,8 +77,8 @@ func (t Template) IsValid([]byte) error {
 		return common.ErrValOOR.Errorf("0 <= length of credential ID <= %d", MaxLengthTemplateID)
 	}
 
-	if !crcytypes.ReSpcecialChar.Match([]byte(t.templateID)) {
-		return common.ErrValueInvalid.Wrap(errors.Errorf("template ID %s, must match regex `^[^\\s:/?#\\[\\]@]*$`", t.templateID))
+	if !crcytypes.ReValidSpcecialCh.Match([]byte(t.templateID)) {
+		return common.ErrValueInvalid.Wrap(errors.Errorf("template ID %s, must match regex `^[^\\s:/?#\\[\\]$@]*$`", t.templateID))
 	}
 
 	if len(t.templateName) == 0 {

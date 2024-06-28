@@ -24,9 +24,9 @@ import (
 
 var (
 	HandlerPathDIDService     = `/did/{contract:(?i)` + types.REStringAddressString + `}`
-	HandlerPathDIDCredential  = `/did/{contract:(?i)` + types.REStringAddressString + `}/template/{template_id:.+}/credential/{credential_id:.+}`
-	HandlerPathDIDTemplate    = `/did/{contract:(?i)` + types.REStringAddressString + `}/template/{template_id:.+}`
-	HandlerPathDIDCredentials = `/did/{contract:(?i)` + types.REStringAddressString + `}/template/{template_id:.+}/credentials`
+	HandlerPathDIDCredential  = `/did/{contract:(?i)` + types.REStringAddressString + `}/template/{template_id:` + types.ReSpecialCh + `}/credential/{credential_id:` + types.ReSpecialCh + `}`
+	HandlerPathDIDTemplate    = `/did/{contract:(?i)` + types.REStringAddressString + `}/template/{template_id:` + types.ReSpecialCh + `}`
+	HandlerPathDIDCredentials = `/did/{contract:(?i)` + types.REStringAddressString + `}/template/{template_id:` + types.ReSpecialCh + `}/credentials`
 	HandlerPathDIDHolder      = `/did/{contract:(?i)` + types.REStringAddressString + `}/holder/{holder:(?i)` + types.REStringAddressString + `}` // revive:disable-line:line-length-limit
 )
 

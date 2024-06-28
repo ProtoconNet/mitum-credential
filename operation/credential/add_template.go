@@ -116,8 +116,8 @@ func (fact AddTemplateFact) IsValid(b []byte) error {
 		return common.ErrFactInvalid.Wrap(common.ErrValOOR.Wrap(errors.Errorf("0 <= length of template ID <= %d, but %d", types.MaxLengthTemplateID, l)))
 	}
 
-	if !crcytypes.ReSpcecialChar.Match([]byte(fact.templateID)) {
-		return common.ErrFactInvalid.Wrap(common.ErrValueInvalid.Wrap(errors.Errorf("template ID %s, must match regex `^[^\\s:/?#\\[\\]@]*$`", fact.TemplateID())))
+	if !crcytypes.ReValidSpcecialCh.Match([]byte(fact.templateID)) {
+		return common.ErrFactInvalid.Wrap(common.ErrValueInvalid.Wrap(errors.Errorf("template ID %s, must match regex `^[^\\s:/?#\\[\\]$@]*$`", fact.TemplateID())))
 	}
 
 	if l := utf8.RuneCountInString(fact.templateName); l < 1 || l > types.MaxLengthTemplateName {

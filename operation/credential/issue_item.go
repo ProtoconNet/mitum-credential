@@ -88,16 +88,16 @@ func (it IssueItem) IsValid([]byte) error {
 		return common.ErrItemInvalid.Wrap(common.ErrValOOR.Wrap(errors.Errorf("0 <= length of template ID <= %d", types.MaxLengthTemplateID)))
 	}
 
-	if !crcytypes.ReSpcecialChar.Match([]byte(it.templateID)) {
-		return common.ErrItemInvalid.Wrap(common.ErrValueInvalid.Wrap(errors.Errorf("template ID %s, must match regex `^[^\\s:/?#\\[\\]@]*$`", it.templateID)))
+	if !crcytypes.ReValidSpcecialCh.Match([]byte(it.templateID)) {
+		return common.ErrItemInvalid.Wrap(common.ErrValueInvalid.Wrap(errors.Errorf("template ID %s, must match regex `^[^\\s:/?#\\[\\]$@]*$`", it.templateID)))
 	}
 
 	if l := utf8.RuneCountInString(it.credentialID); l < 1 || l > types.MaxLengthCredentialID {
 		return common.ErrItemInvalid.Wrap(common.ErrValOOR.Wrap(errors.Errorf("0 <= length of credential ID <= %d", types.MaxLengthCredentialID)))
 	}
 
-	if !crcytypes.ReSpcecialChar.Match([]byte(it.credentialID)) {
-		return common.ErrItemInvalid.Wrap(common.ErrValueInvalid.Wrap(errors.Errorf("credential ID %s, must match regex `^[^\\s:/?#\\[\\]@]*$`", it.credentialID)))
+	if !crcytypes.ReValidSpcecialCh.Match([]byte(it.credentialID)) {
+		return common.ErrItemInvalid.Wrap(common.ErrValueInvalid.Wrap(errors.Errorf("credential ID %s, must match regex `^[^\\s:/?#\\[\\]$@]*$`", it.credentialID)))
 	}
 
 	if len(it.did) == 0 {

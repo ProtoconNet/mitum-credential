@@ -87,16 +87,16 @@ func (c Credential) IsValid([]byte) error {
 		return common.ErrValOOR.Wrap(errors.Errorf("0 <= credential ID length <= %d", MaxLengthTemplateID))
 	}
 
-	if !crcytypes.ReSpcecialChar.Match([]byte(c.templateID)) {
-		return common.ErrValueInvalid.Wrap(errors.Errorf("template ID %s, must match regex `^[^\\s:/?#\\[\\]@]*$`", c.templateID))
+	if !crcytypes.ReValidSpcecialCh.Match([]byte(c.templateID)) {
+		return common.ErrValueInvalid.Wrap(errors.Errorf("template ID %s, must match regex `^[^\\s:/?#\\[\\]$@]*$`", c.templateID))
 	}
 
 	if l := utf8.RuneCountInString(c.credentialID); l < 1 || l > MaxLengthCredentialID {
 		return common.ErrValOOR.Wrap(errors.Errorf("0 <= length of credential ID <= %d", MaxLengthCredentialID))
 	}
 
-	if !crcytypes.ReSpcecialChar.Match([]byte(c.credentialID)) {
-		return common.ErrValueInvalid.Wrap(errors.Errorf("credential ID %s, must match regex `^[^\\s:/?#\\[\\]@]*$`", c.credentialID))
+	if !crcytypes.ReValidSpcecialCh.Match([]byte(c.credentialID)) {
+		return common.ErrValueInvalid.Wrap(errors.Errorf("credential ID %s, must match regex `^[^\\s:/?#\\[\\]$@]*$`", c.credentialID))
 	}
 
 	if len(c.did) == 0 {
