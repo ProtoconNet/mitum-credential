@@ -16,7 +16,7 @@ var (
 	RevokeHint     = hint.MustNewHint("mitum-credential-revoke-operation-v0.0.1")
 )
 
-var MaxRevokeItems uint = 10
+var MaxRevokeItems uint = 1000
 
 type RevokeFact struct {
 	base.BaseFact

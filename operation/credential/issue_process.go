@@ -58,10 +58,9 @@ func (ipp *IssueItemProcessor) PreProcess(
 		return e.Wrap(common.ErrCurrencyNF.Wrap(errors.Errorf("currency id %v", it.Currency())))
 	}
 
-	if _, _, aErr, cErr := currencystate.ExistsCAccount(it.Holder(), "holder", true, false, getStateFunc); aErr != nil {
-		return e.Wrap(aErr)
-	} else if cErr != nil {
-		return e.Wrap(common.ErrCAccountNA.Wrap(cErr))
+	if _, _, _, cErr := currencystate.ExistsCAccount(
+		it.Holder(), "holder", true, false, getStateFunc); cErr != nil {
+		return e.Wrap(common.ErrCAccountNA.Wrap(errors.Errorf("%v: holder %v is contract account", cErr, it.Holder())))
 	}
 
 	_, cSt, aErr, cErr := currencystate.ExistsCAccount(it.Contract(), "contract", true, true, getStateFunc)
@@ -123,28 +122,35 @@ func (ipp *IssueItemProcessor) PreProcess(
 }
 
 func (ipp *IssueItemProcessor) Process(
-	_ context.Context, _ base.Operation, _ base.GetStateFunc,
+	_ context.Context, _ base.Operation, getStateFunc base.GetStateFunc,
 ) ([]base.StateMergeValue, error) {
 	it := ipp.item
 
 	*ipp.credentialCount++
 
-	sts := make([]base.StateMergeValue, 2)
+	var sts []base.StateMergeValue
+
+	smv, err := currencystate.CreateNotExistAccount(it.Holder(), getStateFunc)
+	if err != nil {
+		return nil, err
+	} else if smv != nil {
+		sts = append(sts, smv)
+	}
 
 	credential := types.NewCredential(it.Holder(), it.TemplateID(), it.CredentialID(), it.Value(), it.ValidFrom(), it.ValidUntil(), it.DID())
 	if err := credential.IsValid(nil); err != nil {
 		return nil, err
 	}
 
-	sts[0] = currencystate.NewStateMergeValue(
+	sts = append(sts, currencystate.NewStateMergeValue(
 		state.StateKeyCredential(it.Contract(), it.TemplateID(), it.CredentialID()),
 		state.NewCredentialStateValue(credential, true),
-	)
+	))
 
-	sts[1] = currencystate.NewStateMergeValue(
+	sts = append(sts, currencystate.NewStateMergeValue(
 		state.StateKeyHolderDID(it.Contract(), it.Holder()),
 		state.NewHolderDIDStateValue(it.DID()),
-	)
+	))
 
 	if len(*ipp.holders) == 0 {
 		*ipp.holders = append(*ipp.holders, types.NewHolder(it.Holder(), 1))

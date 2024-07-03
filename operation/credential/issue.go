@@ -23,7 +23,7 @@ var (
 	IssueHint     = hint.MustNewHint("mitum-credential-issue-operation-v0.0.1")
 )
 
-var MaxIssueItems uint = 5000
+var MaxIssueItems uint = 1000
 
 type IssueFact struct {
 	base.BaseFact

@@ -89,17 +89,13 @@ func (opp *AddTemplateProcessor) PreProcess(
 	} else if cErr != nil {
 		return ctx, base.NewBaseOperationProcessReasonError(
 			common.ErrMPreProcess.Wrap(common.ErrMCAccountNA).
-				Errorf("%v", cErr)), nil
+				Errorf("%v: sender %v is contract account", cErr, fact.Sender())), nil
 	}
 
-	if _, _, aErr, cErr := currencystate.ExistsCAccount(fact.Creator(), "creator", true, false, getStateFunc); aErr != nil {
-		return ctx, base.NewBaseOperationProcessReasonError(
-			common.ErrMPreProcess.
-				Errorf("%v", aErr)), nil
-	} else if cErr != nil {
+	if _, _, _, cErr := currencystate.ExistsCAccount(fact.Creator(), "creator", true, false, getStateFunc); cErr != nil {
 		return ctx, base.NewBaseOperationProcessReasonError(
 			common.ErrMPreProcess.Wrap(common.ErrMCAccountNA).
-				Errorf("%v", cErr)), nil
+				Errorf("%v: creator %v is contract account", cErr, fact.Contract())), nil
 	}
 
 	_, cSt, aErr, cErr := currencystate.ExistsCAccount(fact.Contract(), "contract", true, true, getStateFunc)
@@ -187,6 +183,13 @@ func (opp *AddTemplateProcessor) Process(
 	}
 
 	var sts []base.StateMergeValue
+
+	smv, err := currencystate.CreateNotExistAccount(fact.creator, getStateFunc)
+	if err != nil {
+		return nil, base.NewBaseOperationProcessReasonError("%w", err), nil
+	} else if smv != nil {
+		sts = append(sts, smv)
+	}
 
 	sts = append(sts, currencystate.NewStateMergeValue(
 		state.StateKeyDesign(fact.Contract()),
