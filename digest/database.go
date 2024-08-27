@@ -204,7 +204,7 @@ func CredentialsByServiceTemplate(
 func buildCredentialFilterByServiceTemplate(contract, templateID string, offset string, reverse bool) (bson.D, error) {
 	filterA := bson.A{}
 
-	// filter fot matching collection
+	// filter for matching template
 	filterContract := bson.D{{"contract", bson.D{{"$in", []string{contract}}}}}
 	filterTemplate := bson.D{{"template", bson.D{{"$in", []string{templateID}}}}}
 	filterA = append(filterA, filterContract)
