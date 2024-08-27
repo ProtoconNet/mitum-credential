@@ -4,9 +4,7 @@ import (
 	"github.com/ProtoconNet/mitum-credential/types"
 	currencydigest "github.com/ProtoconNet/mitum-currency/v3/digest"
 	mitumutil "github.com/ProtoconNet/mitum2/util"
-	"github.com/gorilla/mux"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/ProtoconNet/mitum2/base"
@@ -19,7 +17,7 @@ func (hd *Handlers) handleCredentialService(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	contract, err, status := parseRequest(w, r, "contract")
+	contract, err, status := currencydigest.ParseRequest(w, r, "contract")
 	if err != nil {
 		currencydigest.HTTP2ProblemWithError(w, err, status)
 
@@ -70,19 +68,19 @@ func (hd *Handlers) handleCredential(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	contract, err, status := parseRequest(w, r, "contract")
+	contract, err, status := currencydigest.ParseRequest(w, r, "contract")
 	if err != nil {
 		currencydigest.HTTP2ProblemWithError(w, err, status)
 		return
 	}
 
-	templateID, err, status := parseRequest(w, r, "template_id")
+	templateID, err, status := currencydigest.ParseRequest(w, r, "template_id")
 	if err != nil {
 		currencydigest.HTTP2ProblemWithError(w, err, status)
 		return
 	}
 
-	credentialID, err, status := parseRequest(w, r, "credential_id")
+	credentialID, err, status := currencydigest.ParseRequest(w, r, "credential_id")
 	if err != nil {
 		currencydigest.HTTP2ProblemWithError(w, err, status)
 		return
@@ -151,14 +149,14 @@ func (hd *Handlers) handleCredentials(w http.ResponseWriter, r *http.Request) {
 		currencydigest.StringBoolQuery("reverse", reverse),
 	)
 
-	contract, err, status := parseRequest(w, r, "contract")
+	contract, err, status := currencydigest.ParseRequest(w, r, "contract")
 	if err != nil {
 		currencydigest.HTTP2ProblemWithError(w, err, status)
 
 		return
 	}
 
-	templateID, err, status := parseRequest(w, r, "template_id")
+	templateID, err, status := currencydigest.ParseRequest(w, r, "template_id")
 	if err != nil {
 		currencydigest.HTTP2ProblemWithError(w, err, status)
 		return
@@ -304,13 +302,13 @@ func (hd *Handlers) handleHolderCredential(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	contract, err, status := parseRequest(w, r, "contract")
+	contract, err, status := currencydigest.ParseRequest(w, r, "contract")
 	if err != nil {
 		currencydigest.HTTP2ProblemWithError(w, err, status)
 		return
 	}
 
-	holder, err, status := parseRequest(w, r, "holder")
+	holder, err, status := currencydigest.ParseRequest(w, r, "holder")
 	if err != nil {
 		currencydigest.HTTP2ProblemWithError(w, err, status)
 		return
@@ -390,13 +388,13 @@ func (hd *Handlers) handleTemplate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	contract, err, status := parseRequest(w, r, "contract")
+	contract, err, status := currencydigest.ParseRequest(w, r, "contract")
 	if err != nil {
 		currencydigest.HTTP2ProblemWithError(w, err, status)
 		return
 	}
 
-	templateID, err, status := parseRequest(w, r, "template_id")
+	templateID, err, status := currencydigest.ParseRequest(w, r, "template_id")
 	if err != nil {
 		currencydigest.HTTP2ProblemWithError(w, err, status)
 		return
@@ -445,17 +443,4 @@ func (hd *Handlers) buildTemplateHal(
 	hal := currencydigest.NewBaseHal(template, currencydigest.NewHalLink(h, nil))
 
 	return hal, nil
-}
-
-func parseRequest(_ http.ResponseWriter, r *http.Request, v string) (string, error, int) {
-	s, found := mux.Vars(r)[v]
-	if !found {
-		return "", errors.Errorf("empty %s", v), http.StatusNotFound
-	}
-
-	s = strings.TrimSpace(s)
-	if len(s) < 1 {
-		return "", errors.Errorf("empty %s", v), http.StatusBadRequest
-	}
-	return s, nil, http.StatusOK
 }
