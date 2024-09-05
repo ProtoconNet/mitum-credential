@@ -138,6 +138,6 @@ type Issue struct {
 	common.BaseOperation
 }
 
-func NewAssign(fact IssueFact) Issue {
+func NewIssue(fact IssueFact) Issue {
 	return Issue{BaseOperation: common.NewBaseOperation(IssueHint, fact)}
 }

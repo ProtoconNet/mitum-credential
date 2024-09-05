@@ -11,7 +11,7 @@ import (
 	"github.com/ProtoconNet/mitum2/util"
 )
 
-type TestAssignProcessor struct {
+type TestIssueProcessor struct {
 	*test.BaseTestOperationProcessorWithItem[Issue, IssueItem]
 	templateID string
 	id         string
@@ -21,12 +21,12 @@ type TestAssignProcessor struct {
 	did        string
 }
 
-func NewTestAssignProcessor(tp *test.TestProcessor) TestAssignProcessor {
+func NewTestIssueProcessor(tp *test.TestProcessor) TestIssueProcessor {
 	t := test.NewBaseTestOperationProcessorWithItem[Issue, IssueItem](tp)
-	return TestAssignProcessor{BaseTestOperationProcessorWithItem: &t}
+	return TestIssueProcessor{BaseTestOperationProcessorWithItem: &t}
 }
 
-func (t *TestAssignProcessor) Create() *TestAssignProcessor {
+func (t *TestIssueProcessor) Create() *TestIssueProcessor {
 	t.Opr, _ = NewIssueProcessor()(
 		base.GenesisHeight,
 		t.GetStateFunc,
@@ -35,41 +35,41 @@ func (t *TestAssignProcessor) Create() *TestAssignProcessor {
 	return t
 }
 
-func (t *TestAssignProcessor) SetCurrency(
+func (t *TestIssueProcessor) SetCurrency(
 	cid string, am int64, addr base.Address, target []types.CurrencyID, instate bool,
-) *TestAssignProcessor {
+) *TestIssueProcessor {
 	t.BaseTestOperationProcessorWithItem.SetCurrency(cid, am, addr, target, instate)
 
 	return t
 }
 
-func (t *TestAssignProcessor) SetAmount(
+func (t *TestIssueProcessor) SetAmount(
 	am int64, cid types.CurrencyID, target []types.Amount,
-) *TestAssignProcessor {
+) *TestIssueProcessor {
 	t.BaseTestOperationProcessorWithItem.SetAmount(am, cid, target)
 
 	return t
 }
 
-func (t *TestAssignProcessor) SetContractAccount(
+func (t *TestIssueProcessor) SetContractAccount(
 	owner base.Address, priv string, amount int64, cid types.CurrencyID, target []test.Account, inState bool,
-) *TestAssignProcessor {
+) *TestIssueProcessor {
 	t.BaseTestOperationProcessorWithItem.SetContractAccount(owner, priv, amount, cid, target, inState)
 
 	return t
 }
 
-func (t *TestAssignProcessor) SetAccount(
+func (t *TestIssueProcessor) SetAccount(
 	priv string, amount int64, cid types.CurrencyID, target []test.Account, inState bool,
-) *TestAssignProcessor {
+) *TestIssueProcessor {
 	t.BaseTestOperationProcessorWithItem.SetAccount(priv, amount, cid, target, inState)
 
 	return t
 }
 
-func (t *TestAssignProcessor) SetService(
+func (t *TestIssueProcessor) SetService(
 	contract base.Address,
-) *TestAssignProcessor {
+) *TestIssueProcessor {
 	var templates []string
 	var holders []credentialtypes.Holder
 
@@ -95,28 +95,28 @@ func (t *TestAssignProcessor) SetService(
 	return t
 }
 
-func (t *TestAssignProcessor) LoadOperation(fileName string,
-) *TestAssignProcessor {
+func (t *TestIssueProcessor) LoadOperation(fileName string,
+) *TestIssueProcessor {
 	t.BaseTestOperationProcessorWithItem.LoadOperation(fileName)
 
 	return t
 }
 
-func (t *TestAssignProcessor) Print(fileName string,
-) *TestAssignProcessor {
+func (t *TestIssueProcessor) Print(fileName string,
+) *TestIssueProcessor {
 	t.BaseTestOperationProcessorWithItem.Print(fileName)
 
 	return t
 }
 
-func (t *TestAssignProcessor) SetTemplate(
+func (t *TestIssueProcessor) SetTemplate(
 	templateID,
 	id,
 	value string,
 	validFrom,
 	validUntil uint64,
 	did string,
-) *TestAssignProcessor {
+) *TestIssueProcessor {
 	t.templateID = templateID
 	t.id = id
 	t.value = value
@@ -127,9 +127,9 @@ func (t *TestAssignProcessor) SetTemplate(
 	return t
 }
 
-func (t *TestAssignProcessor) MakeItem(
+func (t *TestIssueProcessor) MakeItem(
 	contract, holder test.Account, currency types.CurrencyID, targetItems []IssueItem,
-) *TestAssignProcessor {
+) *TestIssueProcessor {
 	item := NewIssueItem(
 		contract.Address(),
 		holder.Address(),
@@ -146,40 +146,39 @@ func (t *TestAssignProcessor) MakeItem(
 	return t
 }
 
-func (t *TestAssignProcessor) MakeOperation(
+func (t *TestIssueProcessor) MakeOperation(
 	sender base.Address, privatekey base.Privatekey, items []IssueItem,
-) *TestAssignProcessor {
-	op := NewAssign(
-		NewIssueFact(
-			[]byte("token"),
-			sender,
-			items,
-		))
+) *TestIssueProcessor {
+	op := NewIssue(NewIssueFact(
+		[]byte("token"),
+		sender,
+		items,
+	))
 	_ = op.Sign(privatekey, t.NetworkID)
 	t.Op = op
 
 	return t
 }
 
-func (t *TestAssignProcessor) RunPreProcess() *TestAssignProcessor {
+func (t *TestIssueProcessor) RunPreProcess() *TestIssueProcessor {
 	t.BaseTestOperationProcessorWithItem.RunPreProcess()
 
 	return t
 }
 
-func (t *TestAssignProcessor) RunProcess() *TestAssignProcessor {
+func (t *TestIssueProcessor) RunProcess() *TestIssueProcessor {
 	t.BaseTestOperationProcessorWithItem.RunProcess()
 
 	return t
 }
 
-func (t *TestAssignProcessor) IsValid() *TestAssignProcessor {
+func (t *TestIssueProcessor) IsValid() *TestIssueProcessor {
 	t.BaseTestOperationProcessorWithItem.IsValid()
 
 	return t
 }
 
-func (t *TestAssignProcessor) Decode(fileName string) *TestAssignProcessor {
+func (t *TestIssueProcessor) Decode(fileName string) *TestIssueProcessor {
 	t.BaseTestOperationProcessorWithItem.Decode(fileName)
 
 	return t

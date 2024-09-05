@@ -69,7 +69,7 @@ func (cmd *RegisterModelCommand) createOperation() (base.Operation, error) { // 
 		cmd.Currency.CID,
 	)
 
-	op := credential.NewCreateService(fact)
+	op := credential.NewRegisterModel(fact)
 	err := op.Sign(cmd.Privatekey, cmd.NetworkID.NetworkID())
 	if err != nil {
 		return nil, e.Wrap(err)

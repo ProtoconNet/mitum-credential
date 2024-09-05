@@ -99,7 +99,7 @@ func CheckDuplication(opr *currencyprocessor.OperationProcessor, op base.Operati
 	case credential.Issue:
 		fact, ok := t.Fact().(credential.IssueFact)
 		if !ok {
-			return errors.Errorf("expected AssignFact, not %T", t.Fact())
+			return errors.Errorf("expected IssueFact, not %T", t.Fact())
 		}
 		duplicationTypeSenderID = currencyprocessor.DuplicationKey(fact.Sender().String(), DuplicationTypeSender)
 		var credentials []string

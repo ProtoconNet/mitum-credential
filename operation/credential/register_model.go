@@ -112,6 +112,6 @@ type RegisterModel struct {
 	common.BaseOperation
 }
 
-func NewCreateService(fact RegisterModelFact) RegisterModel {
+func NewRegisterModel(fact RegisterModelFact) RegisterModel {
 	return RegisterModel{BaseOperation: common.NewBaseOperation(RegisterModelHint, fact)}
 }

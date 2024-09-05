@@ -74,7 +74,7 @@ func (cmd *IssueCommand) parseFlags() error {
 }
 
 func (cmd *IssueCommand) createOperation() (base.Operation, error) { // nolint:dupl
-	e := util.StringError("failed to create assign operation")
+	e := util.StringError("failed to create issue operation")
 
 	var items []credential.IssueItem
 	item := credential.NewIssueItem(
@@ -95,7 +95,7 @@ func (cmd *IssueCommand) createOperation() (base.Operation, error) { // nolint:d
 
 	fact := credential.NewIssueFact([]byte(cmd.Token), cmd.sender, items)
 
-	op := credential.NewAssign(fact)
+	op := credential.NewIssue(fact)
 
 	err := op.Sign(cmd.Privatekey, cmd.NetworkID.NetworkID())
 	if err != nil {

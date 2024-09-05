@@ -11,16 +11,16 @@ import (
 	"github.com/ProtoconNet/mitum2/util"
 )
 
-type TestCreateServiceProcessor struct {
+type TestRegisterModelProcessor struct {
 	*test.BaseTestOperationProcessorNoItem[RegisterModel]
 }
 
-func NewTestCreateServiceProcessor(tp *test.TestProcessor) TestCreateServiceProcessor {
+func NewTestRegisterModelProcessor(tp *test.TestProcessor) TestRegisterModelProcessor {
 	t := test.NewBaseTestOperationProcessorNoItem[RegisterModel](tp)
-	return TestCreateServiceProcessor{&t}
+	return TestRegisterModelProcessor{&t}
 }
 
-func (t *TestCreateServiceProcessor) Create() *TestCreateServiceProcessor {
+func (t *TestRegisterModelProcessor) Create() *TestRegisterModelProcessor {
 	t.Opr, _ = NewRegisterModelProcessor()(
 		base.GenesisHeight,
 		t.GetStateFunc,
@@ -29,41 +29,41 @@ func (t *TestCreateServiceProcessor) Create() *TestCreateServiceProcessor {
 	return t
 }
 
-func (t *TestCreateServiceProcessor) SetCurrency(
+func (t *TestRegisterModelProcessor) SetCurrency(
 	cid string, am int64, addr base.Address, target []types.CurrencyID, instate bool,
-) *TestCreateServiceProcessor {
+) *TestRegisterModelProcessor {
 	t.BaseTestOperationProcessorNoItem.SetCurrency(cid, am, addr, target, instate)
 
 	return t
 }
 
-func (t *TestCreateServiceProcessor) SetAmount(
+func (t *TestRegisterModelProcessor) SetAmount(
 	am int64, cid types.CurrencyID, target []types.Amount,
-) *TestCreateServiceProcessor {
+) *TestRegisterModelProcessor {
 	t.BaseTestOperationProcessorNoItem.SetAmount(am, cid, target)
 
 	return t
 }
 
-func (t *TestCreateServiceProcessor) SetContractAccount(
+func (t *TestRegisterModelProcessor) SetContractAccount(
 	owner base.Address, priv string, amount int64, cid types.CurrencyID, target []test.Account, inState bool,
-) *TestCreateServiceProcessor {
+) *TestRegisterModelProcessor {
 	t.BaseTestOperationProcessorNoItem.SetContractAccount(owner, priv, amount, cid, target, inState)
 
 	return t
 }
 
-func (t *TestCreateServiceProcessor) SetAccount(
+func (t *TestRegisterModelProcessor) SetAccount(
 	priv string, amount int64, cid types.CurrencyID, target []test.Account, inState bool,
-) *TestCreateServiceProcessor {
+) *TestRegisterModelProcessor {
 	t.BaseTestOperationProcessorNoItem.SetAccount(priv, amount, cid, target, inState)
 
 	return t
 }
 
-func (t *TestCreateServiceProcessor) SetService(
+func (t *TestRegisterModelProcessor) SetService(
 	contract base.Address,
-) *TestCreateServiceProcessor {
+) *TestRegisterModelProcessor {
 	var templates []string
 	var holders []credentialtypes.Holder
 
@@ -89,24 +89,24 @@ func (t *TestCreateServiceProcessor) SetService(
 	return t
 }
 
-func (t *TestCreateServiceProcessor) LoadOperation(fileName string,
-) *TestCreateServiceProcessor {
+func (t *TestRegisterModelProcessor) LoadOperation(fileName string,
+) *TestRegisterModelProcessor {
 	t.BaseTestOperationProcessorNoItem.LoadOperation(fileName)
 
 	return t
 }
 
-func (t *TestCreateServiceProcessor) Print(fileName string,
-) *TestCreateServiceProcessor {
+func (t *TestRegisterModelProcessor) Print(fileName string,
+) *TestRegisterModelProcessor {
 	t.BaseTestOperationProcessorNoItem.Print(fileName)
 
 	return t
 }
 
-func (t *TestCreateServiceProcessor) MakeOperation(
+func (t *TestRegisterModelProcessor) MakeOperation(
 	sender base.Address, privatekey base.Privatekey, contract base.Address, currency types.CurrencyID,
-) *TestCreateServiceProcessor {
-	op := NewCreateService(
+) *TestRegisterModelProcessor {
+	op := NewRegisterModel(
 		NewRegisterModelFact(
 			[]byte("token"),
 			sender,
@@ -119,25 +119,25 @@ func (t *TestCreateServiceProcessor) MakeOperation(
 	return t
 }
 
-func (t *TestCreateServiceProcessor) RunPreProcess() *TestCreateServiceProcessor {
+func (t *TestRegisterModelProcessor) RunPreProcess() *TestRegisterModelProcessor {
 	t.BaseTestOperationProcessorNoItem.RunPreProcess()
 
 	return t
 }
 
-func (t *TestCreateServiceProcessor) RunProcess() *TestCreateServiceProcessor {
+func (t *TestRegisterModelProcessor) RunProcess() *TestRegisterModelProcessor {
 	t.BaseTestOperationProcessorNoItem.RunProcess()
 
 	return t
 }
 
-func (t *TestCreateServiceProcessor) IsValid() *TestCreateServiceProcessor {
+func (t *TestRegisterModelProcessor) IsValid() *TestRegisterModelProcessor {
 	t.BaseTestOperationProcessorNoItem.IsValid()
 
 	return t
 }
 
-func (t *TestCreateServiceProcessor) Decode(fileName string) *TestCreateServiceProcessor {
+func (t *TestRegisterModelProcessor) Decode(fileName string) *TestRegisterModelProcessor {
 	t.BaseTestOperationProcessorNoItem.Decode(fileName)
 
 	return t

@@ -24,7 +24,7 @@ func (fact *IssueFact) unpack(enc encoder.Encoder, sa string, bit []byte) error 
 	for i := range hit {
 		j, ok := hit[i].(IssueItem)
 		if !ok {
-			return common.ErrTypeMismatch.Wrap(errors.Errorf("expected AssignItem, not %T", hit[i]))
+			return common.ErrTypeMismatch.Wrap(errors.Errorf("expected %T, not %T", IssueItem{}, hit[i]))
 		}
 
 		items[i] = j

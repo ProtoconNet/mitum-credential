@@ -113,7 +113,7 @@ func (ipp *IssueItemProcessor) PreProcess(
 		} else if isActive {
 			return e.Wrap(
 				common.ErrValueInvalid.Errorf(
-					"credential %v for template %v is already assigned to holder %v in contract account %v",
+					"credential %v for template %v is already issued to holder %v in contract account %v",
 					it.CredentialID(), it.TemplateID(), credential.Holder(), it.Contract()))
 		}
 	}
@@ -191,12 +191,12 @@ func NewIssueProcessor() currencytypes.GetNewProcessor {
 		newPreProcessConstraintFunc base.NewOperationProcessorProcessFunc,
 		newProcessConstraintFunc base.NewOperationProcessorProcessFunc,
 	) (base.OperationProcessor, error) {
-		e := util.StringError("failed to create new AssignProcessor")
+		e := util.StringError("failed to create new IssueProcessor")
 
 		nopp := issueProcessorPool.Get()
 		opp, ok := nopp.(*IssueProcessor)
 		if !ok {
-			return nil, e.Errorf("expected AssignProcessor, not %T", nopp)
+			return nil, e.Errorf("expected IssueProcessor, not %T", nopp)
 		}
 
 		b, err := base.NewBaseOperationProcessor(
@@ -251,7 +251,7 @@ func (opp *IssueProcessor) PreProcess(
 		ipc, ok := ip.(*IssueItemProcessor)
 		if !ok {
 			return nil, base.NewBaseOperationProcessReasonError(
-				common.ErrMTypeMismatch.Errorf("expected AssignItemProcessor, not %T", ip)), nil
+				common.ErrMTypeMismatch.Errorf("expected IssueItemProcessor, not %T", ip)), nil
 		}
 
 		ipc.h = op.Hash()
@@ -276,7 +276,7 @@ func (opp *IssueProcessor) Process( // nolint:dupl
 	ctx context.Context, op base.Operation, getStateFunc base.GetStateFunc) (
 	[]base.StateMergeValue, base.OperationProcessReasonError, error,
 ) {
-	e := util.StringError("failed to process Assign")
+	e := util.StringError("failed to process Issue")
 
 	fact, _ := op.Fact().(IssueFact)
 	designs := map[string]types.Design{}
@@ -317,7 +317,7 @@ func (opp *IssueProcessor) Process( // nolint:dupl
 
 		st, err := ipc.Process(ctx, op, getStateFunc)
 		if err != nil {
-			return nil, base.NewBaseOperationProcessReasonError("failed to process AssignItem; %w", err), nil
+			return nil, base.NewBaseOperationProcessReasonError("failed to process IssueItem; %w", err), nil
 		}
 
 		sts = append(sts, st...)
