@@ -94,7 +94,7 @@ func (bs *BlockSession) Prepare() error {
 	if err := bs.prepareCurrencies(); err != nil {
 		return err
 	}
-	if err := bs.prepareDID(); err != nil {
+	if err := bs.prepareDIDCredential(); err != nil {
 		return err
 	}
 

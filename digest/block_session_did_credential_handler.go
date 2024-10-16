@@ -6,7 +6,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func (bs *BlockSession) prepareDID() error {
+func (bs *BlockSession) prepareDIDCredential() error {
 	if len(bs.sts) < 1 {
 		return nil
 	}
@@ -20,7 +20,7 @@ func (bs *BlockSession) prepareDID() error {
 		st := bs.sts[i]
 		switch {
 		case state.IsStateDesignKey(st.Key()):
-			j, err := bs.handleDIDServiceState(st)
+			j, err := bs.handleDIDCredentialDesignState(st)
 			if err != nil {
 				return err
 			}
@@ -58,8 +58,8 @@ func (bs *BlockSession) prepareDID() error {
 	return nil
 }
 
-func (bs *BlockSession) handleDIDServiceState(st mitumbase.State) ([]mongo.WriteModel, error) {
-	if issuerDoc, err := NewServiceDoc(st, bs.st.Encoder()); err != nil {
+func (bs *BlockSession) handleDIDCredentialDesignState(st mitumbase.State) ([]mongo.WriteModel, error) {
+	if issuerDoc, err := NewDIDCredentialDesignDoc(st, bs.st.Encoder()); err != nil {
 		return nil, err
 	} else {
 		return []mongo.WriteModel{
