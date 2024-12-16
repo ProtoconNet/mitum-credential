@@ -2,11 +2,11 @@ package credential
 
 import (
 	"github.com/ProtoconNet/mitum-credential/state"
-	credentialtypes "github.com/ProtoconNet/mitum-credential/types"
+	"github.com/ProtoconNet/mitum-credential/types"
 	"github.com/ProtoconNet/mitum-currency/v3/common"
 	"github.com/ProtoconNet/mitum-currency/v3/operation/test"
 	"github.com/ProtoconNet/mitum-currency/v3/state/extension"
-	"github.com/ProtoconNet/mitum-currency/v3/types"
+	ctypes "github.com/ProtoconNet/mitum-currency/v3/types"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 )
@@ -32,7 +32,7 @@ func (t *TestRevokeProcessor) Create() *TestRevokeProcessor {
 }
 
 func (t *TestRevokeProcessor) SetCurrency(
-	cid string, am int64, addr base.Address, target []types.CurrencyID, instate bool,
+	cid string, am int64, addr base.Address, target []ctypes.CurrencyID, instate bool,
 ) *TestRevokeProcessor {
 	t.BaseTestOperationProcessorWithItem.SetCurrency(cid, am, addr, target, instate)
 
@@ -40,7 +40,7 @@ func (t *TestRevokeProcessor) SetCurrency(
 }
 
 func (t *TestRevokeProcessor) SetAmount(
-	am int64, cid types.CurrencyID, target []types.Amount,
+	am int64, cid ctypes.CurrencyID, target []ctypes.Amount,
 ) *TestRevokeProcessor {
 	t.BaseTestOperationProcessorWithItem.SetAmount(am, cid, target)
 
@@ -48,7 +48,7 @@ func (t *TestRevokeProcessor) SetAmount(
 }
 
 func (t *TestRevokeProcessor) SetContractAccount(
-	owner base.Address, priv string, amount int64, cid types.CurrencyID, target []test.Account, inState bool,
+	owner base.Address, priv string, amount int64, cid ctypes.CurrencyID, target []test.Account, inState bool,
 ) *TestRevokeProcessor {
 	t.BaseTestOperationProcessorWithItem.SetContractAccount(owner, priv, amount, cid, target, inState)
 
@@ -56,7 +56,7 @@ func (t *TestRevokeProcessor) SetContractAccount(
 }
 
 func (t *TestRevokeProcessor) SetAccount(
-	priv string, amount int64, cid types.CurrencyID, target []test.Account, inState bool,
+	priv string, amount int64, cid ctypes.CurrencyID, target []test.Account, inState bool,
 ) *TestRevokeProcessor {
 	t.BaseTestOperationProcessorWithItem.SetAccount(priv, amount, cid, target, inState)
 
@@ -91,10 +91,10 @@ func (t *TestRevokeProcessor) SetService(
 	contract base.Address,
 ) *TestRevokeProcessor {
 	var templates []string
-	var holders []credentialtypes.Holder
+	var holders []types.Holder
 
-	policy := credentialtypes.NewPolicy(templates, holders, 0)
-	design := credentialtypes.NewDesign(policy)
+	policy := types.NewPolicy(templates, holders, 0)
+	design := types.NewDesign(policy)
 
 	st := common.NewBaseState(base.Height(1), state.StateKeyDesign(contract), state.NewDesignStateValue(design), nil, []util.Hash{})
 	t.SetState(st, true)
@@ -116,7 +116,7 @@ func (t *TestRevokeProcessor) SetService(
 }
 
 func (t *TestRevokeProcessor) MakeItem(
-	contract, holder test.Account, currency types.CurrencyID, targetItems []RevokeItem,
+	contract, holder test.Account, currency ctypes.CurrencyID, targetItems []RevokeItem,
 ) *TestRevokeProcessor {
 	item := NewRevokeItem(
 		contract.Address(),

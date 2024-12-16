@@ -4,7 +4,7 @@ import (
 	"github.com/ProtoconNet/mitum-credential/operation/credential"
 	"github.com/ProtoconNet/mitum-credential/state"
 	"github.com/ProtoconNet/mitum-credential/types"
-	currencycmds "github.com/ProtoconNet/mitum-currency/v3/cmds"
+	ccmds "github.com/ProtoconNet/mitum-currency/v3/cmds"
 	"github.com/ProtoconNet/mitum2/launch"
 	"github.com/ProtoconNet/mitum2/util/encoder"
 	"github.com/pkg/errors"
@@ -43,23 +43,23 @@ var AddedSupportedHinters = []encoder.DecodeDetail{
 
 func init() {
 	defaultLen := len(launch.Hinters)
-	currencyExtendedLen := defaultLen + len(currencycmds.AddedHinters)
+	currencyExtendedLen := defaultLen + len(ccmds.AddedHinters)
 	allExtendedLen := currencyExtendedLen + len(AddedHinters)
 
 	Hinters = make([]encoder.DecodeDetail, allExtendedLen)
 	copy(Hinters, launch.Hinters)
-	copy(Hinters[defaultLen:currencyExtendedLen], currencycmds.AddedHinters)
+	copy(Hinters[defaultLen:currencyExtendedLen], ccmds.AddedHinters)
 	copy(Hinters[currencyExtendedLen:], AddedHinters)
 
 	defaultSupportedLen := len(launch.SupportedProposalOperationFactHinters)
-	currencySupportedExtendedLen := defaultSupportedLen + len(currencycmds.AddedSupportedHinters)
+	currencySupportedExtendedLen := defaultSupportedLen + len(ccmds.AddedSupportedHinters)
 	allSupportedExtendedLen := currencySupportedExtendedLen + len(AddedSupportedHinters)
 
 	SupportedProposalOperationFactHinters = make(
 		[]encoder.DecodeDetail,
 		allSupportedExtendedLen)
 	copy(SupportedProposalOperationFactHinters, launch.SupportedProposalOperationFactHinters)
-	copy(SupportedProposalOperationFactHinters[defaultSupportedLen:currencySupportedExtendedLen], currencycmds.AddedSupportedHinters)
+	copy(SupportedProposalOperationFactHinters[defaultSupportedLen:currencySupportedExtendedLen], ccmds.AddedSupportedHinters)
 	copy(SupportedProposalOperationFactHinters[currencySupportedExtendedLen:], AddedSupportedHinters)
 }
 

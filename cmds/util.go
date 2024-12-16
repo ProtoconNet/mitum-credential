@@ -2,8 +2,9 @@ package cmds
 
 import (
 	"fmt"
-	"github.com/ProtoconNet/mitum2/util/hint"
 	"io"
+
+	"github.com/ProtoconNet/mitum2/util/hint"
 )
 
 func IsSupportedProposalOperationFactHintFunc() func(hint.Hint) bool {

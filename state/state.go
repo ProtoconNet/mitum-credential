@@ -2,6 +2,7 @@ package state
 
 import (
 	"fmt"
+
 	"github.com/ProtoconNet/mitum-credential/types"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"

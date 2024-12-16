@@ -3,15 +3,15 @@ package digest
 import (
 	"github.com/ProtoconNet/mitum-credential/state"
 	"github.com/ProtoconNet/mitum-credential/types"
-	mongodbstorage "github.com/ProtoconNet/mitum-currency/v3/digest/mongodb"
+	mongodbst "github.com/ProtoconNet/mitum-currency/v3/digest/mongodb"
 	bsonenc "github.com/ProtoconNet/mitum-currency/v3/digest/util/bson"
-	crcystate "github.com/ProtoconNet/mitum-currency/v3/state"
+	cstate "github.com/ProtoconNet/mitum-currency/v3/state"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util/encoder"
 )
 
 type DIDCredentialDesignDoc struct {
-	mongodbstorage.BaseDoc
+	mongodbst.BaseDoc
 	st base.State
 	de types.Design
 }
@@ -21,7 +21,7 @@ func NewDIDCredentialDesignDoc(st base.State, enc encoder.Encoder) (DIDCredentia
 	if err != nil {
 		return DIDCredentialDesignDoc{}, err
 	}
-	b, err := mongodbstorage.NewBaseDoc(nil, st, enc)
+	b, err := mongodbst.NewBaseDoc(nil, st, enc)
 	if err != nil {
 		return DIDCredentialDesignDoc{}, err
 	}
@@ -39,7 +39,7 @@ func (doc DIDCredentialDesignDoc) MarshalBSON() ([]byte, error) {
 		return nil, err
 	}
 
-	parsedKey, err := crcystate.ParseStateKey(doc.st.Key(), state.CredentialPrefix, 3)
+	parsedKey, err := cstate.ParseStateKey(doc.st.Key(), state.CredentialPrefix, 3)
 	m["contract"] = parsedKey[1]
 	m["height"] = doc.st.Height()
 	m["design"] = doc.de
@@ -48,7 +48,7 @@ func (doc DIDCredentialDesignDoc) MarshalBSON() ([]byte, error) {
 }
 
 type TemplateDoc struct {
-	mongodbstorage.BaseDoc
+	mongodbst.BaseDoc
 	st       base.State
 	template types.Template
 }
@@ -58,7 +58,7 @@ func NewTemplateDoc(st base.State, enc encoder.Encoder) (*TemplateDoc, error) {
 	if err != nil {
 		return nil, err
 	}
-	b, err := mongodbstorage.NewBaseDoc(nil, st, enc)
+	b, err := mongodbst.NewBaseDoc(nil, st, enc)
 	if err != nil {
 		return nil, err
 	}
@@ -76,7 +76,7 @@ func (doc TemplateDoc) MarshalBSON() ([]byte, error) {
 		return nil, err
 	}
 
-	parsedKey, err := crcystate.ParseStateKey(doc.st.Key(), state.CredentialPrefix, 4)
+	parsedKey, err := cstate.ParseStateKey(doc.st.Key(), state.CredentialPrefix, 4)
 	if err != nil {
 		return nil, err
 	}
@@ -89,7 +89,7 @@ func (doc TemplateDoc) MarshalBSON() ([]byte, error) {
 }
 
 type CredentialDoc struct {
-	mongodbstorage.BaseDoc
+	mongodbst.BaseDoc
 	st         base.State
 	credential types.Credential
 	isActive   bool
@@ -100,7 +100,7 @@ func NewCredentialDoc(st base.State, enc encoder.Encoder) (*CredentialDoc, error
 	if err != nil {
 		return nil, err
 	}
-	b, err := mongodbstorage.NewBaseDoc(nil, st, enc)
+	b, err := mongodbst.NewBaseDoc(nil, st, enc)
 	if err != nil {
 		return nil, err
 	}
@@ -118,7 +118,7 @@ func (doc CredentialDoc) MarshalBSON() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	parsedKey, err := crcystate.ParseStateKey(doc.st.Key(), state.CredentialPrefix, 5)
+	parsedKey, err := cstate.ParseStateKey(doc.st.Key(), state.CredentialPrefix, 5)
 	if err != nil {
 		return nil, err
 	}
@@ -133,7 +133,7 @@ func (doc CredentialDoc) MarshalBSON() ([]byte, error) {
 }
 
 type HolderDIDDoc struct {
-	mongodbstorage.BaseDoc
+	mongodbst.BaseDoc
 	st  base.State
 	did string
 }
@@ -144,7 +144,7 @@ func NewHolderDIDDoc(st base.State, enc encoder.Encoder) (*HolderDIDDoc, error) 
 		return nil, err
 	}
 
-	b, err := mongodbstorage.NewBaseDoc(nil, st, enc)
+	b, err := mongodbst.NewBaseDoc(nil, st, enc)
 	if err != nil {
 		return nil, err
 	}
@@ -162,7 +162,7 @@ func (doc HolderDIDDoc) MarshalBSON() ([]byte, error) {
 		return nil, err
 	}
 
-	parsedKey, err := crcystate.ParseStateKey(doc.st.Key(), state.CredentialPrefix, 4)
+	parsedKey, err := cstate.ParseStateKey(doc.st.Key(), state.CredentialPrefix, 4)
 	if err != nil {
 		return nil, err
 	}

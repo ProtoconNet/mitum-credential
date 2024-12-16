@@ -3,7 +3,8 @@ package credential
 import (
 	"github.com/ProtoconNet/mitum-credential/types"
 	"github.com/ProtoconNet/mitum-currency/v3/common"
-	currencytypes "github.com/ProtoconNet/mitum-currency/v3/types"
+	"github.com/ProtoconNet/mitum-currency/v3/operation/extras"
+	ctypes "github.com/ProtoconNet/mitum-currency/v3/types"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/encoder"
@@ -11,19 +12,19 @@ import (
 
 type AddTemplateFactJSONMarshaler struct {
 	base.BaseFactJSONMarshaler
-	Owner          base.Address             `json:"sender"`
-	Contract       base.Address             `json:"contract"`
-	TemplateID     string                   `json:"template_id"`
-	TemplateName   string                   `json:"template_name"`
-	ServiceDate    types.Date               `json:"service_date"`
-	ExpirationDate types.Date               `json:"expiration_date"`
-	TemplateShare  types.Bool               `json:"template_share"`
-	MultiAudit     types.Bool               `json:"multi_audit"`
-	DisplayName    string                   `json:"display_name"`
-	SubjectKey     string                   `json:"subject_key"`
-	Description    string                   `json:"description"`
-	Creator        base.Address             `json:"creator"`
-	Currency       currencytypes.CurrencyID `json:"currency"`
+	Owner          base.Address      `json:"sender"`
+	Contract       base.Address      `json:"contract"`
+	TemplateID     string            `json:"template_id"`
+	TemplateName   string            `json:"template_name"`
+	ServiceDate    types.Date        `json:"service_date"`
+	ExpirationDate types.Date        `json:"expiration_date"`
+	TemplateShare  types.Bool        `json:"template_share"`
+	MultiAudit     types.Bool        `json:"multi_audit"`
+	DisplayName    string            `json:"display_name"`
+	SubjectKey     string            `json:"subject_key"`
+	Description    string            `json:"description"`
+	Creator        base.Address      `json:"creator"`
+	Currency       ctypes.CurrencyID `json:"currency"`
 }
 
 func (fact AddTemplateFact) MarshalJSON() ([]byte, error) {
@@ -91,13 +92,15 @@ func (fact *AddTemplateFact) DecodeJSON(b []byte, enc encoder.Encoder) error {
 	return nil
 }
 
-type AddTemplateMarshaler struct {
+type OperationMarshaler struct {
 	common.BaseOperationJSONMarshaler
+	extras.BaseOperationExtensionsJSONMarshaler
 }
 
 func (op AddTemplate) MarshalJSON() ([]byte, error) {
-	return util.MarshalJSON(AddTemplateMarshaler{
-		BaseOperationJSONMarshaler: op.BaseOperation.JSONMarshaler(),
+	return util.MarshalJSON(OperationMarshaler{
+		BaseOperationJSONMarshaler:           op.BaseOperation.JSONMarshaler(),
+		BaseOperationExtensionsJSONMarshaler: op.BaseOperationExtensions.JSONMarshaler(),
 	})
 }
 
@@ -108,6 +111,13 @@ func (op *AddTemplate) DecodeJSON(b []byte, enc encoder.Encoder) error {
 	}
 
 	op.BaseOperation = ubo
+
+	var ueo extras.BaseOperationExtensions
+	if err := ueo.DecodeJSON(b, enc); err != nil {
+		return common.DecorateError(err, common.ErrDecodeJson, *op)
+	}
+
+	op.BaseOperationExtensions = &ueo
 
 	return nil
 }

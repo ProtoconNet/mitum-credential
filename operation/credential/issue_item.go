@@ -5,7 +5,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/ProtoconNet/mitum-credential/types"
-	crcytypes "github.com/ProtoconNet/mitum-currency/v3/types"
+	ctypes "github.com/ProtoconNet/mitum-currency/v3/types"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
@@ -24,7 +24,7 @@ type IssueItem struct {
 	validFrom    uint64
 	validUntil   uint64
 	did          string
-	currency     crcytypes.CurrencyID
+	currency     ctypes.CurrencyID
 }
 
 func NewIssueItem(
@@ -36,7 +36,7 @@ func NewIssueItem(
 	validFrom uint64,
 	validUntil uint64,
 	did string,
-	currency crcytypes.CurrencyID,
+	currency ctypes.CurrencyID,
 ) IssueItem {
 	return IssueItem{
 		BaseHinter:   hint.NewBaseHinter(IssueItemHint),
@@ -88,7 +88,7 @@ func (it IssueItem) IsValid([]byte) error {
 		return common.ErrItemInvalid.Wrap(common.ErrValOOR.Wrap(errors.Errorf("0 <= length of template ID <= %d", types.MaxLengthTemplateID)))
 	}
 
-	if !crcytypes.ReValidSpcecialCh.Match([]byte(it.templateID)) {
+	if !ctypes.ReValidSpcecialCh.Match([]byte(it.templateID)) {
 		return common.ErrItemInvalid.Wrap(common.ErrValueInvalid.Wrap(errors.Errorf("template ID %s, must match regex `^[^\\s:/?#\\[\\]$@]*$`", it.templateID)))
 	}
 
@@ -96,7 +96,7 @@ func (it IssueItem) IsValid([]byte) error {
 		return common.ErrItemInvalid.Wrap(common.ErrValOOR.Wrap(errors.Errorf("0 <= length of credential ID <= %d", types.MaxLengthCredentialID)))
 	}
 
-	if !crcytypes.ReValidSpcecialCh.Match([]byte(it.credentialID)) {
+	if !ctypes.ReValidSpcecialCh.Match([]byte(it.credentialID)) {
 		return common.ErrItemInvalid.Wrap(common.ErrValueInvalid.Wrap(errors.Errorf("credential ID %s, must match regex `^[^\\s:/?#\\[\\]$@]*$`", it.credentialID)))
 	}
 
@@ -143,7 +143,7 @@ func (it IssueItem) DID() string {
 	return it.did
 }
 
-func (it IssueItem) Currency() crcytypes.CurrencyID {
+func (it IssueItem) Currency() ctypes.CurrencyID {
 	return it.currency
 }
 

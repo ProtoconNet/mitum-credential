@@ -2,7 +2,7 @@ package credential
 
 import (
 	"github.com/ProtoconNet/mitum-currency/v3/common"
-	currencytypes "github.com/ProtoconNet/mitum-currency/v3/types"
+	ctypes "github.com/ProtoconNet/mitum-currency/v3/types"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/encoder"
@@ -11,15 +11,15 @@ import (
 
 type IssueItemJSONMarshaler struct {
 	hint.BaseHinter
-	Contract     base.Address             `json:"contract"`
-	Holder       base.Address             `json:"holder"`
-	TemplateID   string                   `json:"template_id"`
-	CredentialID string                   `json:"credential_id"`
-	Value        string                   `json:"value"`
-	ValidFrom    uint64                   `json:"valid_from"`
-	ValidUntil   uint64                   `json:"valid_until"`
-	DID          string                   `json:"did"`
-	Currency     currencytypes.CurrencyID `json:"currency"`
+	Contract     base.Address      `json:"contract"`
+	Holder       base.Address      `json:"holder"`
+	TemplateID   string            `json:"template_id"`
+	CredentialID string            `json:"credential_id"`
+	Value        string            `json:"value"`
+	ValidFrom    uint64            `json:"valid_from"`
+	ValidUntil   uint64            `json:"valid_until"`
+	DID          string            `json:"did"`
+	Currency     ctypes.CurrencyID `json:"currency"`
 }
 
 func (it IssueItem) MarshalJSON() ([]byte, error) {

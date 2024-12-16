@@ -1,10 +1,11 @@
 package types
 
 import (
-	"github.com/ProtoconNet/mitum-currency/v3/common"
-	"github.com/pkg/errors"
 	"regexp"
 	"unicode/utf8"
+
+	"github.com/ProtoconNet/mitum-currency/v3/common"
+	"github.com/pkg/errors"
 )
 
 var (

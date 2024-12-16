@@ -2,7 +2,7 @@ package types
 
 import (
 	"github.com/ProtoconNet/mitum-currency/v3/common"
-	crcytypes "github.com/ProtoconNet/mitum-currency/v3/types"
+	ctypes "github.com/ProtoconNet/mitum-currency/v3/types"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
@@ -87,7 +87,7 @@ func (c Credential) IsValid([]byte) error {
 		return common.ErrValOOR.Wrap(errors.Errorf("0 <= credential ID length <= %d", MaxLengthTemplateID))
 	}
 
-	if !crcytypes.ReValidSpcecialCh.Match([]byte(c.templateID)) {
+	if !ctypes.ReValidSpcecialCh.Match([]byte(c.templateID)) {
 		return common.ErrValueInvalid.Wrap(errors.Errorf("template ID %s, must match regex `^[^\\s:/?#\\[\\]$@]*$`", c.templateID))
 	}
 
@@ -95,7 +95,7 @@ func (c Credential) IsValid([]byte) error {
 		return common.ErrValOOR.Wrap(errors.Errorf("0 <= length of credential ID <= %d", MaxLengthCredentialID))
 	}
 
-	if !crcytypes.ReValidSpcecialCh.Match([]byte(c.credentialID)) {
+	if !ctypes.ReValidSpcecialCh.Match([]byte(c.credentialID)) {
 		return common.ErrValueInvalid.Wrap(errors.Errorf("credential ID %s, must match regex `^[^\\s:/?#\\[\\]$@]*$`", c.credentialID))
 	}
 
