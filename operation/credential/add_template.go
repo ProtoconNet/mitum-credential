@@ -5,7 +5,8 @@ import (
 
 	"github.com/ProtoconNet/mitum-credential/types"
 	"github.com/ProtoconNet/mitum-currency/v3/common"
-	crcytypes "github.com/ProtoconNet/mitum-currency/v3/types"
+	"github.com/ProtoconNet/mitum-currency/v3/operation/extras"
+	ctypes "github.com/ProtoconNet/mitum-currency/v3/types"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
@@ -32,7 +33,7 @@ type AddTemplateFact struct {
 	subjectKey     string
 	description    string
 	creator        base.Address
-	currency       crcytypes.CurrencyID
+	currency       ctypes.CurrencyID
 }
 
 func NewAddTemplateFact(
@@ -49,7 +50,7 @@ func NewAddTemplateFact(
 	subjectKey string,
 	description string,
 	creator base.Address,
-	currency crcytypes.CurrencyID,
+	currency ctypes.CurrencyID,
 ) AddTemplateFact {
 	bf := base.NewBaseFact(AddTemplateFactHint, token)
 	fact := AddTemplateFact{
@@ -116,7 +117,7 @@ func (fact AddTemplateFact) IsValid(b []byte) error {
 		return common.ErrFactInvalid.Wrap(common.ErrValOOR.Wrap(errors.Errorf("0 <= length of template ID <= %d, but %d", types.MaxLengthTemplateID, l)))
 	}
 
-	if !crcytypes.ReValidSpcecialCh.Match([]byte(fact.templateID)) {
+	if !ctypes.ReValidSpcecialCh.Match([]byte(fact.templateID)) {
 		return common.ErrFactInvalid.Wrap(common.ErrValueInvalid.Wrap(errors.Errorf("template ID %s, must match regex `^[^\\s:/?#\\[\\]$@]*$`", fact.TemplateID())))
 	}
 
@@ -217,7 +218,7 @@ func (fact AddTemplateFact) Creator() base.Address {
 	return fact.creator
 }
 
-func (fact AddTemplateFact) Currency() crcytypes.CurrencyID {
+func (fact AddTemplateFact) Currency() ctypes.CurrencyID {
 	return fact.currency
 }
 
@@ -229,10 +230,35 @@ func (fact AddTemplateFact) Addresses() ([]base.Address, error) {
 	return as, nil
 }
 
+func (fact AddTemplateFact) FeeBase() map[ctypes.CurrencyID][]common.Big {
+	required := make(map[ctypes.CurrencyID][]common.Big)
+	required[fact.Currency()] = []common.Big{common.ZeroBig}
+
+	return required
+}
+
+func (fact AddTemplateFact) FeePayer() base.Address {
+	return fact.sender
+}
+
+func (fact AddTemplateFact) FactUser() base.Address {
+	return fact.sender
+}
+
+func (fact AddTemplateFact) Signer() base.Address {
+	return fact.sender
+}
+
+func (fact AddTemplateFact) ActiveContractOwnerHandlerOnly() [][2]base.Address {
+	return [][2]base.Address{{fact.contract, fact.sender}}
+}
+
 type AddTemplate struct {
-	common.BaseOperation
+	extras.ExtendedOperation
 }
 
 func NewAddTemplate(fact AddTemplateFact) AddTemplate {
-	return AddTemplate{BaseOperation: common.NewBaseOperation(AddTemplateHint, fact)}
+	return AddTemplate{
+		ExtendedOperation: extras.NewExtendedOperation(AddTemplateHint, fact),
+	}
 }

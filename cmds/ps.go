@@ -5,8 +5,8 @@ import (
 
 	"github.com/ProtoconNet/mitum-credential/operation/credential"
 	"github.com/ProtoconNet/mitum-credential/operation/processor"
-	currencycmds "github.com/ProtoconNet/mitum-currency/v3/cmds"
-	currencyprocessor "github.com/ProtoconNet/mitum-currency/v3/operation/processor"
+	ccmds "github.com/ProtoconNet/mitum-currency/v3/cmds"
+	cprocessor "github.com/ProtoconNet/mitum-currency/v3/operation/processor"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/isaac"
 	"github.com/ProtoconNet/mitum2/launch"
@@ -20,13 +20,13 @@ var PNameOperationProcessorsMap = ps.Name("mitum-credential-operation-processors
 func POperationProcessorsMap(pctx context.Context) (context.Context, error) {
 	var isaacParams *isaac.Params
 	var db isaac.Database
-	var opr *currencyprocessor.OperationProcessor
+	var opr *cprocessor.OperationProcessor
 	var set *hint.CompatibleSet[isaac.NewOperationProcessorInternalFunc]
 
 	if err := util.LoadFromContextOK(pctx,
 		launch.ISAACParamsContextKey, &isaacParams,
 		launch.CenterDatabaseContextKey, &db,
-		currencycmds.OperationProcessorContextKey, &opr,
+		ccmds.OperationProcessorContextKey, &opr,
 		launch.OperationProcessorsMapContextKey, &set,
 	); err != nil {
 		return pctx, err
@@ -102,7 +102,7 @@ func POperationProcessorsMap(pctx context.Context) (context.Context, error) {
 			)
 		})
 
-	pctx = context.WithValue(pctx, currencycmds.OperationProcessorContextKey, opr)
+	pctx = context.WithValue(pctx, ccmds.OperationProcessorContextKey, opr)
 	pctx = context.WithValue(pctx, launch.OperationProcessorsMapContextKey, set) //revive:disable-line:modifies-parameter
 
 	return pctx, nil

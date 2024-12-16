@@ -2,7 +2,7 @@ package credential
 
 import (
 	"github.com/ProtoconNet/mitum-credential/types"
-	currencytypes "github.com/ProtoconNet/mitum-currency/v3/types"
+	ctypes "github.com/ProtoconNet/mitum-currency/v3/types"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util/encoder"
 )
@@ -21,7 +21,7 @@ func (fact *AddTemplateFact) unpack(enc encoder.Encoder,
 	fact.displayName = dpName
 	fact.subjectKey = subjKey
 	fact.description = desc
-	fact.currency = currencytypes.CurrencyID(cid)
+	fact.currency = ctypes.CurrencyID(cid)
 	fact.templateID = tmplID
 
 	switch a, err := base.DecodeAddress(sAdr, enc); {

@@ -5,7 +5,7 @@ import (
 
 	"github.com/ProtoconNet/mitum-credential/operation/credential"
 	"github.com/ProtoconNet/mitum-credential/types"
-	currencycmds "github.com/ProtoconNet/mitum-currency/v3/cmds"
+	ccmds "github.com/ProtoconNet/mitum-currency/v3/cmds"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/pkg/errors"
@@ -13,20 +13,20 @@ import (
 
 type AddTemplateCommand struct {
 	BaseCommand
-	currencycmds.OperationFlags
-	Sender         currencycmds.AddressFlag    `arg:"" name:"sender" help:"sender address" required:"true"`
-	Contract       currencycmds.AddressFlag    `arg:"" name:"contract" help:"contract address of credential" required:"true"`
-	TemplateID     string                      `arg:"" name:"template-id" help:"template id" required:"true"`
-	TemplateName   string                      `arg:"" name:"template-name" help:"template name"  required:"true"`
-	ServiceDate    string                      `arg:"" name:"service-date" help:"service date; yyyy-MM-dd" required:"true"`
-	ExpirationDate string                      `arg:"" name:"expiration-date" help:"expiration date; yyyy-MM-dd" required:"true"`
-	TemplateShare  bool                        `name:"template-share" help:"template share; true | false" required:"true"`
-	MultiAudit     bool                        `name:"multi-audit" help:"multi audit; true | false" required:"true"`
-	DisplayName    string                      `arg:"" name:"display-name" help:"display name" required:"true"`
-	SubjectKey     string                      `arg:"" name:"subject-key" help:"subject key" required:"true"`
-	Description    string                      `arg:"" name:"description" help:"description"  required:"true"`
-	Creator        currencycmds.AddressFlag    `arg:"" name:"creator" help:"creator address"  required:"true"`
-	Currency       currencycmds.CurrencyIDFlag `arg:"" name:"currency-id" help:"currency id" required:"true"`
+	ccmds.OperationFlags
+	Sender         ccmds.AddressFlag    `arg:"" name:"sender" help:"sender address" required:"true"`
+	Contract       ccmds.AddressFlag    `arg:"" name:"contract" help:"contract address of credential" required:"true"`
+	TemplateID     string               `arg:"" name:"template-id" help:"template id" required:"true"`
+	TemplateName   string               `arg:"" name:"template-name" help:"template name"  required:"true"`
+	ServiceDate    string               `arg:"" name:"service-date" help:"service date; yyyy-MM-dd" required:"true"`
+	ExpirationDate string               `arg:"" name:"expiration-date" help:"expiration date; yyyy-MM-dd" required:"true"`
+	TemplateShare  bool                 `name:"template-share" help:"template share; true | false" required:"true"`
+	MultiAudit     bool                 `name:"multi-audit" help:"multi audit; true | false" required:"true"`
+	DisplayName    string               `arg:"" name:"display-name" help:"display name" required:"true"`
+	SubjectKey     string               `arg:"" name:"subject-key" help:"subject key" required:"true"`
+	Description    string               `arg:"" name:"description" help:"description"  required:"true"`
+	Creator        ccmds.AddressFlag    `arg:"" name:"creator" help:"creator address"  required:"true"`
+	Currency       ccmds.CurrencyIDFlag `arg:"" name:"currency-id" help:"currency id" required:"true"`
 	sender         base.Address
 	contract       base.Address
 	serviceDate    types.Date

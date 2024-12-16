@@ -5,7 +5,7 @@ import (
 
 	"github.com/ProtoconNet/mitum-credential/types"
 	"github.com/ProtoconNet/mitum-currency/v3/common"
-	crcytypes "github.com/ProtoconNet/mitum-currency/v3/types"
+	ctypes "github.com/ProtoconNet/mitum-currency/v3/types"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
@@ -20,14 +20,14 @@ type RevokeItem struct {
 	holder       base.Address
 	templateID   string
 	credentialID string
-	currency     crcytypes.CurrencyID
+	currency     ctypes.CurrencyID
 }
 
 func NewRevokeItem(
 	contract base.Address,
 	holder base.Address,
 	templateID, credentialID string,
-	currency crcytypes.CurrencyID,
+	currency ctypes.CurrencyID,
 ) RevokeItem {
 	return RevokeItem{
 		BaseHinter:   hint.NewBaseHinter(RevokeItemHint),
@@ -67,7 +67,7 @@ func (it RevokeItem) IsValid([]byte) error {
 		return common.ErrItemInvalid.Wrap(common.ErrValOOR.Wrap(errors.Errorf("0 <= length of template ID <= %d", types.MaxLengthTemplateID)))
 	}
 
-	if !crcytypes.ReValidSpcecialCh.Match([]byte(it.templateID)) {
+	if !ctypes.ReValidSpcecialCh.Match([]byte(it.templateID)) {
 		return common.ErrItemInvalid.Wrap(common.ErrValueInvalid.Wrap(errors.Errorf("template ID %s, must match regex `^[^\\s:/?#\\[\\]$@]*$`", it.templateID)))
 	}
 
@@ -75,7 +75,7 @@ func (it RevokeItem) IsValid([]byte) error {
 		return common.ErrItemInvalid.Wrap(common.ErrValOOR.Wrap(errors.Errorf("0 <= length of credential ID <= %d", types.MaxLengthCredentialID)))
 	}
 
-	if !crcytypes.ReValidSpcecialCh.Match([]byte(it.credentialID)) {
+	if !ctypes.ReValidSpcecialCh.Match([]byte(it.credentialID)) {
 		return common.ErrItemInvalid.Wrap(common.ErrValueInvalid.Wrap(errors.Errorf("credential ID %s, must match regex `^[^\\s:/?#\\[\\]$@]*$`", it.credentialID)))
 	}
 
@@ -98,7 +98,7 @@ func (it RevokeItem) CredentialID() string {
 	return it.credentialID
 }
 
-func (it RevokeItem) Currency() crcytypes.CurrencyID {
+func (it RevokeItem) Currency() ctypes.CurrencyID {
 	return it.currency
 }
 

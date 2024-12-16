@@ -2,7 +2,7 @@ package types
 
 import (
 	"github.com/ProtoconNet/mitum-currency/v3/common"
-	crcytypes "github.com/ProtoconNet/mitum-currency/v3/types"
+	ctypes "github.com/ProtoconNet/mitum-currency/v3/types"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
@@ -77,7 +77,7 @@ func (t Template) IsValid([]byte) error {
 		return common.ErrValOOR.Errorf("0 <= length of credential ID <= %d", MaxLengthTemplateID)
 	}
 
-	if !crcytypes.ReValidSpcecialCh.Match([]byte(t.templateID)) {
+	if !ctypes.ReValidSpcecialCh.Match([]byte(t.templateID)) {
 		return common.ErrValueInvalid.Wrap(errors.Errorf("template ID %s, must match regex `^[^\\s:/?#\\[\\]$@]*$`", t.templateID))
 	}
 

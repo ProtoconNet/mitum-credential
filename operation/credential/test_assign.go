@@ -2,11 +2,11 @@ package credential
 
 import (
 	"github.com/ProtoconNet/mitum-credential/state"
-	credentialtypes "github.com/ProtoconNet/mitum-credential/types"
+	"github.com/ProtoconNet/mitum-credential/types"
 	"github.com/ProtoconNet/mitum-currency/v3/common"
 	"github.com/ProtoconNet/mitum-currency/v3/operation/test"
 	"github.com/ProtoconNet/mitum-currency/v3/state/extension"
-	"github.com/ProtoconNet/mitum-currency/v3/types"
+	ctypes "github.com/ProtoconNet/mitum-currency/v3/types"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 )
@@ -36,7 +36,7 @@ func (t *TestIssueProcessor) Create() *TestIssueProcessor {
 }
 
 func (t *TestIssueProcessor) SetCurrency(
-	cid string, am int64, addr base.Address, target []types.CurrencyID, instate bool,
+	cid string, am int64, addr base.Address, target []ctypes.CurrencyID, instate bool,
 ) *TestIssueProcessor {
 	t.BaseTestOperationProcessorWithItem.SetCurrency(cid, am, addr, target, instate)
 
@@ -44,7 +44,7 @@ func (t *TestIssueProcessor) SetCurrency(
 }
 
 func (t *TestIssueProcessor) SetAmount(
-	am int64, cid types.CurrencyID, target []types.Amount,
+	am int64, cid ctypes.CurrencyID, target []ctypes.Amount,
 ) *TestIssueProcessor {
 	t.BaseTestOperationProcessorWithItem.SetAmount(am, cid, target)
 
@@ -52,7 +52,7 @@ func (t *TestIssueProcessor) SetAmount(
 }
 
 func (t *TestIssueProcessor) SetContractAccount(
-	owner base.Address, priv string, amount int64, cid types.CurrencyID, target []test.Account, inState bool,
+	owner base.Address, priv string, amount int64, cid ctypes.CurrencyID, target []test.Account, inState bool,
 ) *TestIssueProcessor {
 	t.BaseTestOperationProcessorWithItem.SetContractAccount(owner, priv, amount, cid, target, inState)
 
@@ -60,7 +60,7 @@ func (t *TestIssueProcessor) SetContractAccount(
 }
 
 func (t *TestIssueProcessor) SetAccount(
-	priv string, amount int64, cid types.CurrencyID, target []test.Account, inState bool,
+	priv string, amount int64, cid ctypes.CurrencyID, target []test.Account, inState bool,
 ) *TestIssueProcessor {
 	t.BaseTestOperationProcessorWithItem.SetAccount(priv, amount, cid, target, inState)
 
@@ -71,10 +71,10 @@ func (t *TestIssueProcessor) SetService(
 	contract base.Address,
 ) *TestIssueProcessor {
 	var templates []string
-	var holders []credentialtypes.Holder
+	var holders []types.Holder
 
-	policy := credentialtypes.NewPolicy(templates, holders, 0)
-	design := credentialtypes.NewDesign(policy)
+	policy := types.NewPolicy(templates, holders, 0)
+	design := types.NewDesign(policy)
 
 	st := common.NewBaseState(base.Height(1), state.StateKeyDesign(contract), state.NewDesignStateValue(design), nil, []util.Hash{})
 	t.SetState(st, true)
@@ -128,7 +128,7 @@ func (t *TestIssueProcessor) SetTemplate(
 }
 
 func (t *TestIssueProcessor) MakeItem(
-	contract, holder test.Account, currency types.CurrencyID, targetItems []IssueItem,
+	contract, holder test.Account, currency ctypes.CurrencyID, targetItems []IssueItem,
 ) *TestIssueProcessor {
 	item := NewIssueItem(
 		contract.Address(),

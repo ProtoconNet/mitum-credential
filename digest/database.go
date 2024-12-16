@@ -4,9 +4,9 @@ import (
 	"context"
 	"github.com/ProtoconNet/mitum-credential/state"
 	"github.com/ProtoconNet/mitum-credential/types"
-	currencydigest "github.com/ProtoconNet/mitum-currency/v3/digest"
+	cdigest "github.com/ProtoconNet/mitum-currency/v3/digest"
 	"github.com/ProtoconNet/mitum-currency/v3/digest/util"
-	mitumbase "github.com/ProtoconNet/mitum2/base"
+	"github.com/ProtoconNet/mitum2/base"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -27,17 +27,17 @@ var (
 
 var maxLimit int64 = 50
 
-func CredentialService(st *currencydigest.Database, contract string) (*types.Design, error) {
+func CredentialService(st *cdigest.Database, contract string) (*types.Design, error) {
 	filter := util.NewBSONFilter("contract", contract)
 
 	var design *types.Design
-	var sta mitumbase.State
+	var sta base.State
 	var err error
 	if err := st.MongoClient().GetByFilter(
 		defaultColNameDIDCredentialService,
 		filter.D(),
 		func(res *mongo.SingleResult) error {
-			sta, err = currencydigest.LoadState(res.Decode, st.Encoders())
+			sta, err = cdigest.LoadState(res.Decode, st.Encoders())
 			if err != nil {
 				return err
 			}
@@ -58,20 +58,20 @@ func CredentialService(st *currencydigest.Database, contract string) (*types.Des
 	return design, nil
 }
 
-func Credential(st *currencydigest.Database, contract, templateID, credentialID string) (*types.Credential, bool, error) {
+func Credential(st *cdigest.Database, contract, templateID, credentialID string) (*types.Credential, bool, error) {
 	filter := util.NewBSONFilter("contract", contract)
 	filter = filter.Add("template", templateID)
 	filter = filter.Add("credential_id", credentialID)
 
 	var credential *types.Credential
 	var isActive bool
-	var sta mitumbase.State
+	var sta base.State
 	var err error
 	if err = st.MongoClient().GetByFilter(
 		defaultColNameDIDCredential,
 		filter.D(),
 		func(res *mongo.SingleResult) error {
-			sta, err = currencydigest.LoadState(res.Decode, st.Encoders())
+			sta, err = cdigest.LoadState(res.Decode, st.Encoders())
 			if err != nil {
 				return err
 			}
@@ -91,18 +91,18 @@ func Credential(st *currencydigest.Database, contract, templateID, credentialID 
 	return credential, isActive, nil
 }
 
-func Template(st *currencydigest.Database, contract, templateID string) (*types.Template, error) {
+func Template(st *cdigest.Database, contract, templateID string) (*types.Template, error) {
 	filter := util.NewBSONFilter("contract", contract)
 	filter = filter.Add("template", templateID)
 
 	var template *types.Template
-	var sta mitumbase.State
+	var sta base.State
 	var err error
 	if err = st.MongoClient().GetByFilter(
 		defaultColNameTemplate,
 		filter.D(),
 		func(res *mongo.SingleResult) error {
-			sta, err = currencydigest.LoadState(res.Decode, st.Encoders())
+			sta, err = cdigest.LoadState(res.Decode, st.Encoders())
 			if err != nil {
 				return err
 			}
@@ -121,18 +121,18 @@ func Template(st *currencydigest.Database, contract, templateID string) (*types.
 	return template, nil
 }
 
-func HolderDID(st *currencydigest.Database, contract, holder string) (string, error) {
+func HolderDID(st *cdigest.Database, contract, holder string) (string, error) {
 	filter := util.NewBSONFilter("contract", contract)
 	filter = filter.Add("holder", holder)
 
 	var did string
-	var sta mitumbase.State
+	var sta base.State
 	var err error
 	if err = st.MongoClient().GetByFilter(
 		defaultColNameHolder,
 		filter.D(),
 		func(res *mongo.SingleResult) error {
-			sta, err = currencydigest.LoadState(res.Decode, st.Encoders())
+			sta, err = cdigest.LoadState(res.Decode, st.Encoders())
 			if err != nil {
 				return err
 			}
@@ -152,13 +152,13 @@ func HolderDID(st *currencydigest.Database, contract, holder string) (string, er
 }
 
 func CredentialsByServiceTemplate(
-	st *currencydigest.Database,
+	st *cdigest.Database,
 	contract,
 	templateID string,
 	reverse bool,
 	offset string,
 	limit int64,
-	callback func(types.Credential, bool, mitumbase.State) (bool, error),
+	callback func(types.Credential, bool, base.State) (bool, error),
 ) error {
 	filter, err := buildCredentialFilterByServiceTemplate(contract, templateID, offset, reverse)
 	if err != nil {
@@ -187,7 +187,7 @@ func CredentialsByServiceTemplate(
 		defaultColNameDIDCredential,
 		filter,
 		func(cursor *mongo.Cursor) (bool, error) {
-			st, err := currencydigest.LoadState(cursor.Decode, st.Encoders())
+			st, err := cdigest.LoadState(cursor.Decode, st.Encoders())
 			if err != nil {
 				return false, err
 			}
@@ -236,9 +236,9 @@ func buildCredentialFilterByServiceTemplate(contract, templateID string, offset 
 }
 
 func CredentialsByServiceHolder(
-	st *currencydigest.Database,
+	st *cdigest.Database,
 	contract, holder string,
-	callback func(types.Credential, bool, mitumbase.State) (bool, error),
+	callback func(types.Credential, bool, base.State) (bool, error),
 ) error {
 	filter, err := buildCredentialFilterByServiceHolder(contract, holder)
 	if err != nil {
@@ -256,7 +256,7 @@ func CredentialsByServiceHolder(
 		defaultColNameDIDCredential,
 		filter,
 		func(cursor *mongo.Cursor) (bool, error) {
-			st, err := currencydigest.LoadState(cursor.Decode, st.Encoders())
+			st, err := cdigest.LoadState(cursor.Decode, st.Encoders())
 			if err != nil {
 				return false, err
 			}

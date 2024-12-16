@@ -2,7 +2,8 @@ package credential
 
 import (
 	"github.com/ProtoconNet/mitum-currency/v3/common"
-	currencytypes "github.com/ProtoconNet/mitum-currency/v3/types"
+	"github.com/ProtoconNet/mitum-currency/v3/operation/extras"
+	ctypes "github.com/ProtoconNet/mitum-currency/v3/types"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/encoder"
@@ -10,9 +11,9 @@ import (
 
 type CreateServiceFactJSONMarshaler struct {
 	base.BaseFactJSONMarshaler
-	Owner    base.Address             `json:"sender"`
-	Contract base.Address             `json:"contract"`
-	Currency currencytypes.CurrencyID `json:"currency"`
+	Owner    base.Address      `json:"sender"`
+	Contract base.Address      `json:"contract"`
+	Currency ctypes.CurrencyID `json:"currency"`
 }
 
 func (fact RegisterModelFact) MarshalJSON() ([]byte, error) {
@@ -46,13 +47,10 @@ func (fact *RegisterModelFact) DecodeJSON(b []byte, enc encoder.Encoder) error {
 	return nil
 }
 
-type CreateServiceMarshaler struct {
-	common.BaseOperationJSONMarshaler
-}
-
 func (op RegisterModel) MarshalJSON() ([]byte, error) {
-	return util.MarshalJSON(CreateServiceMarshaler{
-		BaseOperationJSONMarshaler: op.BaseOperation.JSONMarshaler(),
+	return util.MarshalJSON(OperationMarshaler{
+		BaseOperationJSONMarshaler:           op.BaseOperation.JSONMarshaler(),
+		BaseOperationExtensionsJSONMarshaler: op.BaseOperationExtensions.JSONMarshaler(),
 	})
 }
 
@@ -63,6 +61,13 @@ func (op *RegisterModel) DecodeJSON(b []byte, enc encoder.Encoder) error {
 	}
 
 	op.BaseOperation = ubo
+
+	var ueo extras.BaseOperationExtensions
+	if err := ueo.DecodeJSON(b, enc); err != nil {
+		return common.DecorateError(err, common.ErrDecodeJson, *op)
+	}
+
+	op.BaseOperationExtensions = &ueo
 
 	return nil
 }

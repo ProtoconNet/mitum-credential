@@ -4,6 +4,8 @@ import (
 	"fmt"
 
 	"github.com/ProtoconNet/mitum-currency/v3/common"
+	"github.com/ProtoconNet/mitum-currency/v3/operation/extras"
+	"github.com/ProtoconNet/mitum-currency/v3/types"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
@@ -127,10 +129,51 @@ func (fact RevokeFact) Addresses() ([]base.Address, error) {
 	return as, nil
 }
 
+func (fact RevokeFact) FeeBase() map[types.CurrencyID][]common.Big {
+	required := make(map[types.CurrencyID][]common.Big)
+
+	for i := range fact.items {
+		zeroBig := common.ZeroBig
+		cid := fact.items[i].Currency()
+		var amsTemp []common.Big
+		if ams, found := required[cid]; found {
+			ams = append(ams, zeroBig)
+			required[cid] = ams
+		} else {
+			amsTemp = append(amsTemp, zeroBig)
+			required[cid] = amsTemp
+		}
+	}
+
+	return required
+}
+
+func (fact RevokeFact) FeePayer() base.Address {
+	return fact.sender
+}
+
+func (fact RevokeFact) FactUser() base.Address {
+	return fact.sender
+}
+
+func (fact RevokeFact) Signer() base.Address {
+	return fact.sender
+}
+
+func (fact RevokeFact) ActiveContractOwnerHandlerOnly() [][2]base.Address {
+	var arr [][2]base.Address
+	for i := range fact.items {
+		arr = append(arr, [2]base.Address{fact.items[i].contract, fact.sender})
+	}
+	return arr
+}
+
 type Revoke struct {
-	common.BaseOperation
+	extras.ExtendedOperation
 }
 
 func NewRevoke(fact RevokeFact) Revoke {
-	return Revoke{BaseOperation: common.NewBaseOperation(RevokeHint, fact)}
+	return Revoke{
+		ExtendedOperation: extras.NewExtendedOperation(RevokeHint, fact),
+	}
 }

@@ -5,24 +5,24 @@ import (
 	"github.com/ProtoconNet/mitum2/util"
 
 	"github.com/ProtoconNet/mitum-credential/operation/credential"
-	currencycmds "github.com/ProtoconNet/mitum-currency/v3/cmds"
+	ccmds "github.com/ProtoconNet/mitum-currency/v3/cmds"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/pkg/errors"
 )
 
 type IssueCommand struct {
 	BaseCommand
-	currencycmds.OperationFlags
-	Sender     currencycmds.AddressFlag    `arg:"" name:"sender" help:"sender address" required:"true"`
-	Contract   currencycmds.AddressFlag    `arg:"" name:"contract" help:"contract account address" required:"true"`
-	Holder     currencycmds.AddressFlag    `arg:"" name:"holder" help:"credential holder" required:"true"`
-	TemplateID string                      `arg:"" name:"template-id" help:"template id" required:"true"`
-	ID         string                      `arg:"" name:"id" help:"credential id" required:"true"`
-	Value      string                      `arg:"" name:"value" help:"credential value" required:"true"`
-	ValidFrom  uint64                      `arg:"" name:"valid-from" help:"valid from" required:"true"`
-	ValidUntil uint64                      `arg:"" name:"valid-until" help:"valid until" required:"true"`
-	DID        string                      `arg:"" name:"did" help:"did" required:"true"`
-	Currency   currencycmds.CurrencyIDFlag `arg:"" name:"currency-id" help:"currency id" required:"true"`
+	ccmds.OperationFlags
+	Sender     ccmds.AddressFlag    `arg:"" name:"sender" help:"sender address" required:"true"`
+	Contract   ccmds.AddressFlag    `arg:"" name:"contract" help:"contract account address" required:"true"`
+	Holder     ccmds.AddressFlag    `arg:"" name:"holder" help:"credential holder" required:"true"`
+	TemplateID string               `arg:"" name:"template-id" help:"template id" required:"true"`
+	ID         string               `arg:"" name:"id" help:"credential id" required:"true"`
+	Value      string               `arg:"" name:"value" help:"credential value" required:"true"`
+	ValidFrom  uint64               `arg:"" name:"valid-from" help:"valid from" required:"true"`
+	ValidUntil uint64               `arg:"" name:"valid-until" help:"valid until" required:"true"`
+	DID        string               `arg:"" name:"did" help:"did" required:"true"`
+	Currency   ccmds.CurrencyIDFlag `arg:"" name:"currency-id" help:"currency id" required:"true"`
 	sender     base.Address
 	contract   base.Address
 	holder     base.Address

@@ -4,7 +4,8 @@ import (
 	"fmt"
 
 	"github.com/ProtoconNet/mitum-currency/v3/common"
-	currencytypes "github.com/ProtoconNet/mitum-currency/v3/types"
+	"github.com/ProtoconNet/mitum-currency/v3/operation/extras"
+	"github.com/ProtoconNet/mitum-currency/v3/types"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/ProtoconNet/mitum2/util"
 	"github.com/ProtoconNet/mitum2/util/hint"
@@ -15,7 +16,7 @@ import (
 type CredentialItem interface {
 	util.Byter
 	util.IsValider
-	Currency() currencytypes.CurrencyID
+	Currency() types.CurrencyID
 }
 
 var (
@@ -134,10 +135,51 @@ func (fact IssueFact) Addresses() ([]base.Address, error) {
 	return as, nil
 }
 
+func (fact IssueFact) FeeBase() map[types.CurrencyID][]common.Big {
+	required := make(map[types.CurrencyID][]common.Big)
+
+	for i := range fact.items {
+		zeroBig := common.ZeroBig
+		cid := fact.items[i].Currency()
+		var amsTemp []common.Big
+		if ams, found := required[cid]; found {
+			ams = append(ams, zeroBig)
+			required[cid] = ams
+		} else {
+			amsTemp = append(amsTemp, zeroBig)
+			required[cid] = amsTemp
+		}
+	}
+
+	return required
+}
+
+func (fact IssueFact) FeePayer() base.Address {
+	return fact.sender
+}
+
+func (fact IssueFact) FactUser() base.Address {
+	return fact.sender
+}
+
+func (fact IssueFact) Signer() base.Address {
+	return fact.sender
+}
+
+func (fact IssueFact) ActiveContractOwnerHandlerOnly() [][2]base.Address {
+	var arr [][2]base.Address
+	for i := range fact.items {
+		arr = append(arr, [2]base.Address{fact.items[i].contract, fact.sender})
+	}
+	return arr
+}
+
 type Issue struct {
-	common.BaseOperation
+	extras.ExtendedOperation
 }
 
 func NewIssue(fact IssueFact) Issue {
-	return Issue{BaseOperation: common.NewBaseOperation(IssueHint, fact)}
+	return Issue{
+		ExtendedOperation: extras.NewExtendedOperation(IssueHint, fact),
+	}
 }

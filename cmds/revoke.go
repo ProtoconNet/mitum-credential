@@ -4,20 +4,20 @@ import (
 	"context"
 
 	"github.com/ProtoconNet/mitum-credential/operation/credential"
-	currencycmds "github.com/ProtoconNet/mitum-currency/v3/cmds"
+	ccmds "github.com/ProtoconNet/mitum-currency/v3/cmds"
 	"github.com/ProtoconNet/mitum2/base"
 	"github.com/pkg/errors"
 )
 
 type RevokeCredentialsCommand struct {
 	BaseCommand
-	currencycmds.OperationFlags
-	Sender     currencycmds.AddressFlag    `arg:"" name:"sender" help:"sender address" required:"true"`
-	Contract   currencycmds.AddressFlag    `arg:"" name:"contract" help:"contract account address" required:"true"`
-	Holder     currencycmds.AddressFlag    `arg:"" name:"holder" help:"credential holder" required:"true"`
-	TemplateID string                      `arg:"" name:"template-id" help:"template id" required:"true"`
-	ID         string                      `arg:"" name:"id" help:"credential id" required:"true"`
-	Currency   currencycmds.CurrencyIDFlag `arg:"" name:"currency-id" help:"currency id" required:"true"`
+	ccmds.OperationFlags
+	Sender     ccmds.AddressFlag    `arg:"" name:"sender" help:"sender address" required:"true"`
+	Contract   ccmds.AddressFlag    `arg:"" name:"contract" help:"contract account address" required:"true"`
+	Holder     ccmds.AddressFlag    `arg:"" name:"holder" help:"credential holder" required:"true"`
+	TemplateID string               `arg:"" name:"template-id" help:"template id" required:"true"`
+	ID         string               `arg:"" name:"id" help:"credential id" required:"true"`
+	Currency   ccmds.CurrencyIDFlag `arg:"" name:"currency-id" help:"currency id" required:"true"`
 	sender     base.Address
 	contract   base.Address
 	holder     base.Address
