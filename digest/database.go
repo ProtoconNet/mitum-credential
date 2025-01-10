@@ -13,16 +13,10 @@ import (
 )
 
 var (
-	defaultColNameAccount              = "digest_ac"
-	defaultColNameContractAccount      = "digest_ca"
-	defaultColNameBalance              = "digest_bl"
-	defaultColNameCurrency             = "digest_cr"
-	defaultColNameOperation            = "digest_op"
-	defaultColNameBlock                = "digest_bm"
-	defaultColNameDIDCredentialService = "digest_did_issuer"
-	defaultColNameDIDCredential        = "digest_did_credential"
-	defaultColNameHolder               = "digest_did_holder_did"
-	defaultColNameTemplate             = "digest_did_template"
+	DefaultColNameDIDCredentialService = "digest_did_issuer"
+	DefaultColNameDIDCredential        = "digest_did_credential"
+	DefaultColNameHolder               = "digest_did_holder_did"
+	DefaultColNameTemplate             = "digest_did_template"
 )
 
 var maxLimit int64 = 50
@@ -34,7 +28,7 @@ func CredentialService(st *cdigest.Database, contract string) (*types.Design, er
 	var sta base.State
 	var err error
 	if err := st.MongoClient().GetByFilter(
-		defaultColNameDIDCredentialService,
+		DefaultColNameDIDCredentialService,
 		filter.D(),
 		func(res *mongo.SingleResult) error {
 			sta, err = cdigest.LoadState(res.Decode, st.Encoders())
@@ -68,7 +62,7 @@ func Credential(st *cdigest.Database, contract, templateID, credentialID string)
 	var sta base.State
 	var err error
 	if err = st.MongoClient().GetByFilter(
-		defaultColNameDIDCredential,
+		DefaultColNameDIDCredential,
 		filter.D(),
 		func(res *mongo.SingleResult) error {
 			sta, err = cdigest.LoadState(res.Decode, st.Encoders())
@@ -99,7 +93,7 @@ func Template(st *cdigest.Database, contract, templateID string) (*types.Templat
 	var sta base.State
 	var err error
 	if err = st.MongoClient().GetByFilter(
-		defaultColNameTemplate,
+		DefaultColNameTemplate,
 		filter.D(),
 		func(res *mongo.SingleResult) error {
 			sta, err = cdigest.LoadState(res.Decode, st.Encoders())
@@ -129,7 +123,7 @@ func HolderDID(st *cdigest.Database, contract, holder string) (string, error) {
 	var sta base.State
 	var err error
 	if err = st.MongoClient().GetByFilter(
-		defaultColNameHolder,
+		DefaultColNameHolder,
 		filter.D(),
 		func(res *mongo.SingleResult) error {
 			sta, err = cdigest.LoadState(res.Decode, st.Encoders())
@@ -184,7 +178,7 @@ func CredentialsByServiceTemplate(
 
 	return st.MongoClient().Find(
 		context.Background(),
-		defaultColNameDIDCredential,
+		DefaultColNameDIDCredential,
 		filter,
 		func(cursor *mongo.Cursor) (bool, error) {
 			st, err := cdigest.LoadState(cursor.Decode, st.Encoders())
@@ -253,7 +247,7 @@ func CredentialsByServiceHolder(
 
 	return st.MongoClient().Find(
 		context.Background(),
-		defaultColNameDIDCredential,
+		DefaultColNameDIDCredential,
 		filter,
 		func(cursor *mongo.Cursor) (bool, error) {
 			st, err := cdigest.LoadState(cursor.Decode, st.Encoders())

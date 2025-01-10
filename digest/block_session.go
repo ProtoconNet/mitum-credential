@@ -122,7 +122,7 @@ func (bs *BlockSession) Commit(_ context.Context) error {
 				err = bs.st.CleanByHeightColName(
 					txnCtx,
 					bs.block.Manifest().Height(),
-					defaultColNameDIDCredential,
+					DefaultColNameDIDCredential,
 					bson.D{{"contract", parsedKey[1]}},
 					bson.D{{"template", parsedKey[2]}},
 					bson.D{{"credential_id", parsedKey[3]}},
@@ -132,59 +132,59 @@ func (bs *BlockSession) Commit(_ context.Context) error {
 				}
 			}
 
-			if err := bs.writeModels(txnCtx, defaultColNameDIDCredential, bs.didCredentialModels); err != nil {
+			if err := bs.writeModels(txnCtx, DefaultColNameDIDCredential, bs.didCredentialModels); err != nil {
 				return nil, err
 			}
 		}
 
-		if err := bs.writeModels(txnCtx, defaultColNameBlock, bs.blockModels); err != nil {
+		if err := bs.writeModels(txnCtx, cdigest.DefaultColNameBlock, bs.blockModels); err != nil {
 			return nil, err
 		}
 
 		if len(bs.operationModels) > 0 {
-			if err := bs.writeModels(txnCtx, defaultColNameOperation, bs.operationModels); err != nil {
+			if err := bs.writeModels(txnCtx, cdigest.DefaultColNameOperation, bs.operationModels); err != nil {
 				return nil, err
 			}
 		}
 
 		if len(bs.currencyModels) > 0 {
-			if err := bs.writeModels(txnCtx, defaultColNameCurrency, bs.currencyModels); err != nil {
+			if err := bs.writeModels(txnCtx, cdigest.DefaultColNameCurrency, bs.currencyModels); err != nil {
 				return nil, err
 			}
 		}
 
 		if len(bs.accountModels) > 0 {
-			if err := bs.writeModels(txnCtx, defaultColNameAccount, bs.accountModels); err != nil {
+			if err := bs.writeModels(txnCtx, cdigest.DefaultColNameAccount, bs.accountModels); err != nil {
 				return nil, err
 			}
 		}
 
 		if len(bs.contractAccountModels) > 0 {
-			if err := bs.writeModels(txnCtx, defaultColNameContractAccount, bs.contractAccountModels); err != nil {
+			if err := bs.writeModels(txnCtx, cdigest.DefaultColNameContractAccount, bs.contractAccountModels); err != nil {
 				return nil, err
 			}
 		}
 
 		if len(bs.balanceModels) > 0 {
-			if err := bs.writeModels(txnCtx, defaultColNameBalance, bs.balanceModels); err != nil {
+			if err := bs.writeModels(txnCtx, cdigest.DefaultColNameBalance, bs.balanceModels); err != nil {
 				return nil, err
 			}
 		}
 
 		if len(bs.didIssuerModels) > 0 {
-			if err := bs.writeModels(txnCtx, defaultColNameDIDCredentialService, bs.didIssuerModels); err != nil {
+			if err := bs.writeModels(txnCtx, DefaultColNameDIDCredentialService, bs.didIssuerModels); err != nil {
 				return nil, err
 			}
 		}
 
 		if len(bs.didHolderDIDModels) > 0 {
-			if err := bs.writeModels(txnCtx, defaultColNameHolder, bs.didHolderDIDModels); err != nil {
+			if err := bs.writeModels(txnCtx, DefaultColNameHolder, bs.didHolderDIDModels); err != nil {
 				return nil, err
 			}
 		}
 
 		if len(bs.didTemplateModels) > 0 {
-			if err := bs.writeModels(txnCtx, defaultColNameTemplate, bs.didTemplateModels); err != nil {
+			if err := bs.writeModels(txnCtx, DefaultColNameTemplate, bs.didTemplateModels); err != nil {
 				return nil, err
 			}
 		}
