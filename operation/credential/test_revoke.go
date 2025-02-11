@@ -108,7 +108,7 @@ func (t *TestRevokeProcessor) SetService(
 		panic(err)
 	}
 
-	nstatus := status.SetIsActive(true)
+	nstatus := status.SetActive(true)
 	cState := common.NewBaseState(base.Height(1), extension.StateKeyContractAccount(contract), extension.NewContractAccountStateValue(nstatus), nil, []util.Hash{})
 	t.SetState(cState, true)
 

@@ -31,7 +31,7 @@ func (hd *Handlers) handleCredentialService(w http.ResponseWriter, r *http.Reque
 	} else {
 		cdigest.HTTP2WriteHalBytes(hd.encoder, w, v.([]byte), http.StatusOK)
 		if !shared {
-			cdigest.HTTP2WriteCache(w, cacheKey, time.Second*3)
+			cdigest.HTTP2WriteCache(w, cacheKey, time.Millisecond*100)
 		}
 	}
 }
@@ -93,7 +93,7 @@ func (hd *Handlers) handleCredential(w http.ResponseWriter, r *http.Request) {
 	} else {
 		cdigest.HTTP2WriteHalBytes(hd.encoder, w, v.([]byte), http.StatusOK)
 		if !shared {
-			cdigest.HTTP2WriteCache(w, cacheKey, time.Second*3)
+			cdigest.HTTP2WriteCache(w, cacheKey, time.Millisecond*100)
 		}
 	}
 }
@@ -321,7 +321,7 @@ func (hd *Handlers) handleHolderCredential(w http.ResponseWriter, r *http.Reques
 	} else {
 		cdigest.HTTP2WriteHalBytes(hd.encoder, w, v.([]byte), http.StatusOK)
 		if !shared {
-			cdigest.HTTP2WriteCache(w, cacheKey, time.Second*3)
+			cdigest.HTTP2WriteCache(w, cacheKey, time.Millisecond*100)
 		}
 	}
 }
@@ -407,7 +407,7 @@ func (hd *Handlers) handleTemplate(w http.ResponseWriter, r *http.Request) {
 	} else {
 		cdigest.HTTP2WriteHalBytes(hd.encoder, w, v.([]byte), http.StatusOK)
 		if !shared {
-			cdigest.HTTP2WriteCache(w, cacheKey, time.Second*3)
+			cdigest.HTTP2WriteCache(w, cacheKey, time.Hour*3000)
 		}
 	}
 }
