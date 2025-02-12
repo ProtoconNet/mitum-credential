@@ -86,7 +86,7 @@ func (opp *AddTemplateProcessor) PreProcess(
 		return ctx, base.NewBaseOperationProcessReasonError(
 			common.ErrMPreProcess.
 				Wrap(common.ErrMServiceNF).
-				Errorf("credential design state for contract account %v", fact.Contract())), nil
+				Errorf("credential service state for contract account %v", fact.Contract())), nil
 	}
 
 	design, err := state.StateDesignValue(st)
@@ -94,7 +94,7 @@ func (opp *AddTemplateProcessor) PreProcess(
 		return ctx, base.NewBaseOperationProcessReasonError(
 			common.ErrMPreProcess.Wrap(common.ErrMStateValInvalid).
 				Wrap(common.ErrMServiceNF).
-				Errorf("credential design state value for contract account %v", fact.Contract())), nil
+				Errorf("credential service state value for contract account %v", fact.Contract())), nil
 	}
 
 	for _, templateID := range design.Policy().TemplateIDs() {

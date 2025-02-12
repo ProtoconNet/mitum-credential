@@ -58,10 +58,10 @@ func (ipp *RevokeItemProcessor) PreProcess(
 
 	if st, err := cstate.ExistsState(state.StateKeyDesign(it.Contract()), "design", getStateFunc); err != nil {
 		return e.Wrap(
-			common.ErrServiceNF.Errorf("credential design state for contract account %v", it.Contract()))
+			common.ErrServiceNF.Errorf("credential service state for contract account %v", it.Contract()))
 	} else if de, err := state.StateDesignValue(st); err != nil {
 		return e.Wrap(
-			common.ErrServiceNF.Errorf("credential design state value for contract account %v", it.Contract()))
+			common.ErrServiceNF.Errorf("credential service state value for contract account %v", it.Contract()))
 	} else {
 		if err := de.IsValid(nil); err != nil {
 			return e.Wrap(err)
